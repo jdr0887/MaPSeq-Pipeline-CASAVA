@@ -1,0 +1,20 @@
+
+            == MaPSeq ==
+
+Build prerequisites
+
+  1. JAVA_HOME must be set
+
+     For example, 'export JAVA_HOME=~/jdk-1.6.0_02'
+
+  2. maven2 (or maven3) must be installed and M2_HOME must be set 
+
+     For example, 'export M2_HOME=~/m2'
+
+How to build
+
+    Run 'mvn clean install'
+
+To build for Eclipse:
+
+   Run 'mvn eclipse:eclipse'

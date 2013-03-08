@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" default-activation="lazy">
+
+  <cm:property-placeholder persistent-id="edu.unc.mapseq.pipeline.casava" update-strategy="reload">
+    <cm:default-properties>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <reference id="mapseqConfigurationService" interface="edu.unc.mapseq.config.MaPSeqConfigurationService" />
+  <reference id="accountDAO" interface="edu.unc.mapseq.dao.AccountDAO" />
+  <reference id="accountGroupDAO" interface="edu.unc.mapseq.dao.AccountGroupDAO" />
+  <reference id="fileDataDAO" interface="edu.unc.mapseq.dao.FileDataDAO" />
+  <reference id="HTSFSampleDAO" interface="edu.unc.mapseq.dao.HTSFSampleDAO" />
+  <reference id="platformDAO" interface="edu.unc.mapseq.dao.PlatformDAO" />
+  <reference id="jobDAO" interface="edu.unc.mapseq.dao.JobDAO" />
+  <reference id="studyDAO" interface="edu.unc.mapseq.dao.StudyDAO" />
+  <reference id="sequencerRunDAO" interface="edu.unc.mapseq.dao.SequencerRunDAO" />
+  <reference id="workflowDAO" interface="edu.unc.mapseq.dao.WorkflowDAO" />
+  <reference id="workflowPlanDAO" interface="edu.unc.mapseq.dao.WorkflowPlanDAO" />
+  <reference id="workflowRunDAO" interface="edu.unc.mapseq.dao.WorkflowRunDAO" />
+
+  <bean id="maPSeqDAOBean" class="edu.unc.mapseq.dao.MaPSeqDAOBean">
+    <property name="accountDAO" ref="accountDAO" />
+    <property name="accountGroupDAO" ref="accountGroupDAO" />
+    <property name="fileDataDAO" ref="fileDataDAO" />
+    <property name="HTSFSampleDAO" ref="HTSFSampleDAO" />
+    <property name="platformDAO" ref="platformDAO" />
+    <property name="jobDAO" ref="jobDAO" />
+    <property name="studyDAO" ref="studyDAO" />
+    <property name="sequencerRunDAO" ref="sequencerRunDAO" />
+    <property name="workflowDAO" ref="workflowDAO" />
+    <property name="workflowPlanDAO" ref="workflowPlanDAO" />
+    <property name="workflowRunDAO" ref="workflowRunDAO" />
+  </bean>
+
+  <bean id="casavaPipelineBeanService" class="edu.unc.mapseq.pipeline.casava.CasavaPipelineBeanService">
+    <property name="mapseqConfigurationService" ref="mapseqConfigurationService" />
+    <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
+    <cm:managed-properties persistent-id="edu.unc.mapseq.pipeline.casava" update-strategy="container-managed" />
+  </bean>
+
+  <service ref="casavaPipelineBeanService" interface="edu.unc.mapseq.pipeline.PipelineBeanService" />
+
+</blueprint>
