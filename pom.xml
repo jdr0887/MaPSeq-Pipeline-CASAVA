@@ -67,6 +67,21 @@
     <developerConnection>scm:git:ssh://${user.name}@code.renci.org/gitroot/casava</developerConnection>
     <connection>scm:git:ssh://developername@code.renci.org/gitroot/casava</connection>
   </scm>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>renci.plugin.repository</id>
+      <name>RENCI Plugin Repository</name>
+      <url>http://ci-dev.renci.org/nexus/content/repositories/public</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+    </pluginRepository>
+  </pluginRepositories>
   <repositories>
     <repository> 
       <id>com.springsource.repository.bundles.external</id> 
