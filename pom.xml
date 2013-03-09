@@ -409,10 +409,10 @@
     </plugins>
   </build>
   <modules>
+    <module>casava-workflow</module>
     <module>casava-commands</module>
     <module>casava-main</module>
     <module>casava-features</module>
     <module>casava-messaging</module>
-    <module>casava-workflow</module>
   </modules>
 </project>
