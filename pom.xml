@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines</groupId>
   <artifactId>casava</artifactId>
-  <version>0.0.4-SNAPSHOT</version>
+  <version>0.0.4</version>
   <packaging>pom</packaging>
   <url>https://ci-dev.renci.org/site/mapseq</url>
   <properties>
@@ -247,7 +247,7 @@
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-workflow</artifactId>
-      	<version>0.0.4-SNAPSHOT</version>
+      	<version>0.0.4</version>
       </dependency>
       <dependency>
 	<groupId>edu.unc.mapseq.mapseq-messaging</groupId>
