@@ -6,7 +6,7 @@
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA :: Features</name>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>edu.unc.mapseq.pipelines</groupId>
+  <groupId>edu.unc.mapseq.pipelines.casava</groupId>
   <artifactId>casava-features</artifactId>
   <version>0.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
