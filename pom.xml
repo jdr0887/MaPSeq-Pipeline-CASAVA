@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <name>MaPSeq :: Pipelines :: CASAVA</name>
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines</groupId>
   <artifactId>casava</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <packaging>pom</packaging>
   <url>https://ci-dev.renci.org/site/mapseq</url>
   <properties>
@@ -233,7 +232,7 @@
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-workflow</artifactId>
-      	<version>0.0.1-SNAPSHOT</version>
+      	<version>0.0.1</version>
       </dependency>
       <dependency>
 	<groupId>edu.unc.mapseq.mapseq-messaging</groupId>
