@@ -238,7 +238,7 @@
       <dependency>
 	<groupId>edu.unc.mapseq.mapseq-messaging</groupId>
 	<artifactId>mapseq-messaging-common</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
       </dependency>
       <dependency>
       	<groupId>junit</groupId>
