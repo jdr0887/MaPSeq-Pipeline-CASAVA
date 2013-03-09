@@ -1,2 +1,2 @@
 target
-./casava-workflow/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties
+casava-workflow/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties
