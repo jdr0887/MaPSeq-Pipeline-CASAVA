@@ -87,7 +87,7 @@
       <plugin>
         <groupId>edu.unc.mapseq.mapseq-maven-plugins</groupId>
         <artifactId>mapseq-maven-plugin-create-scripts</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.1</version>
         <configuration>
           <outputDir>${project.basedir}/src/main/distribution/bin</outputDir>
         </configuration>
