@@ -13,9 +13,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -71,13 +72,9 @@ public class CasavaPipeline extends AbstractPipeline<CasavaPipelineBeanService> 
 
     @Override
     public String getVersion() {
-        Properties props = new Properties();
-        try {
-            props.load(this.getClass().getResourceAsStream("pipeline.properties"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return props.getProperty("version", "0.0.1-SNAPSHOT");
+      ResourceBundle ncgenesBundle = ResourceBundle.getBundle("edu/unc/mapseq/pipeline/casava/pipeline");
+      String version = ncgenesBundle.getString("version");
+      return StringUtils.isNotEmpty(version) ? version : "0.0.1-SNAPSHOT";
     }
 
     @Override
@@ -506,15 +503,15 @@ public class CasavaPipeline extends AbstractPipeline<CasavaPipelineBeanService> 
 
                         if (StringUtils.isNotEmpty(q30YeildPassingFilteringElement.text())) {
                             String value = q30YeildPassingFilteringElement.text();
-                            if (synchSet.contains("q30YeildPassingFiltering")) {
+                            if (synchSet.contains("q30YieldPassingFiltering")) {
                                 for (EntityAttribute attribute : attributeSet) {
-                                    if (attribute.getName().equals("q30YeildPassingFiltering")) {
+                                    if (attribute.getName().equals("q30YieldPassingFiltering")) {
                                         attribute.setValue(value);
                                         break;
                                     }
                                 }
                             } else {
-                                attributeSet.add(new EntityAttribute("q30YeildPassingFiltering", value));
+                                attributeSet.add(new EntityAttribute("q30YieldPassingFiltering", value));
                             }
                         }
 

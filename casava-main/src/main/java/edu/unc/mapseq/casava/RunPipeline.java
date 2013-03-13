@@ -117,14 +117,14 @@ public class RunPipeline implements Runnable {
         }
 
         CasavaPipeline pipeline = new CasavaPipeline();
-        List<Workflow> workflowList = null;
+        Workflow workflow = null;
         try {
-            workflowList = daoMgr.getWSDAOBean().getWorkflowDAO().findByName(pipeline.getName());
+            workflow = daoMgr.getWSDAOBean().getWorkflowDAO().findByName(pipeline.getName());
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
         }
 
-        if (workflowList == null) {
+        if (workflow == null) {
             System.err.println("Workflow doesn't exist");
             return;
         }
@@ -136,7 +136,7 @@ public class RunPipeline implements Runnable {
         workflowRun.setCreationDate(creationDate);
         workflowRun.setModificationDate(creationDate);
         workflowRun.setName(this.workflowRunName);
-        workflowRun.setWorkflow(workflowList.get(0));
+        workflowRun.setWorkflow(workflow);
         workflowRun.setVersion(pipeline.getVersion());
 
         try {
