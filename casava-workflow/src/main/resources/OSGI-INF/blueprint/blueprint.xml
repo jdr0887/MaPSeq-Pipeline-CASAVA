@@ -42,4 +42,9 @@
 
   <service ref="casavaPipelineBeanService" interface="edu.unc.mapseq.pipeline.PipelineBeanService" />
 
+  <bean id="CASAVAPipelineExecutorService" class="edu.unc.mapseq.pipeline.casava.CasavaPipelineExecutorService"
+    init-method="start" destroy-method="stop" activation="eager">
+    <property name="pipelineBeanService" ref="casavaPipelineBeanService" />
+  </bean>
+
 </blueprint>
