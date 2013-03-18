@@ -67,6 +67,7 @@ public class CasavaPipeline extends AbstractPipeline<CasavaPipelineBeanService> 
 
     @Override
     public String getName() {
+
       return CasavaPipeline.class.getSimpleName().replace("Pipeline", "").toUpperCase();
     }
 
