@@ -16,6 +16,10 @@
       <artifactId>mapseq-pipeline-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.openjpa</groupId>
+      <artifactId>openjpa</artifactId>
+    </dependency>
+    <dependency>
       <groupId>edu.unc.mapseq.mapseq-modules</groupId>
       <artifactId>mapseq-module-casava</artifactId>
     </dependency>
