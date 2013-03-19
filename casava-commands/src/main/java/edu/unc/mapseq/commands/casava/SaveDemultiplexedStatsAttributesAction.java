@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -148,38 +149,127 @@ public class SaveDemultiplexedStatsAttributesAction extends AbstractAction {
                                         attributeSet = new HashSet<EntityAttribute>();
                                     }
 
+                                    Set<String> entityAttributeNameSet = new HashSet<String>();
+
+                                    for (EntityAttribute attribute : attributeSet) {
+                                        entityAttributeNameSet.add(attribute.getName());
+                                    }
+
+                                    Set<String> synchSet = Collections.synchronizedSet(entityAttributeNameSet);
+
                                     if (StringUtils.isNotEmpty(yeildElement.text())) {
-                                        attributeSet.add(new EntityAttribute("yeild", yeildElement.text().replace(",",
-                                                "")));
+                                        String value = yeildElement.text().replace(",", "");
+                                        if (synchSet.contains("yield")) {
+                                            for (EntityAttribute attribute : attributeSet) {
+                                                if (attribute.getName().equals("yield")) {
+                                                    attribute.setValue(value);
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            attributeSet.add(new EntityAttribute("yield", value));
+                                        }
                                     }
+
                                     if (StringUtils.isNotEmpty(passingFilteringElement.text())) {
-                                        attributeSet.add(new EntityAttribute("passedFiltering", passingFilteringElement
-                                                .text()));
+                                        String value = passingFilteringElement.text();
+                                        if (synchSet.contains("passedFiltering")) {
+                                            for (EntityAttribute attribute : attributeSet) {
+                                                if (attribute.getName().equals("passedFiltering")) {
+                                                    attribute.setValue(value);
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            attributeSet.add(new EntityAttribute("passedFiltering", value));
+                                        }
                                     }
+
                                     if (StringUtils.isNotEmpty(numberOfReadsElement.text())) {
-                                        attributeSet.add(new EntityAttribute("numberOfReads", numberOfReadsElement
-                                                .text().replace(",", "")));
+                                        String value = numberOfReadsElement.text().replace(",", "");
+                                        if (synchSet.contains("numberOfReads")) {
+                                            for (EntityAttribute attribute : attributeSet) {
+                                                if (attribute.getName().equals("numberOfReads")) {
+                                                    attribute.setValue(value);
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            attributeSet.add(new EntityAttribute("numberOfReads", value));
+                                        }
                                     }
+
                                     if (StringUtils.isNotEmpty(rawClustersPerLaneElement.text())) {
-                                        attributeSet.add(new EntityAttribute("rawClustersPerLane",
-                                                rawClustersPerLaneElement.text()));
+                                        String value = rawClustersPerLaneElement.text();
+                                        if (synchSet.contains("rawClustersPerLane")) {
+                                            for (EntityAttribute attribute : attributeSet) {
+                                                if (attribute.getName().equals("rawClustersPerLane")) {
+                                                    attribute.setValue(value);
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            attributeSet.add(new EntityAttribute("rawClustersPerLane", value));
+                                        }
                                     }
+
                                     if (StringUtils.isNotEmpty(perfectIndexReadsElement.text())) {
-                                        attributeSet.add(new EntityAttribute("perfectIndexReads",
-                                                perfectIndexReadsElement.text()));
+                                        String value = perfectIndexReadsElement.text();
+                                        if (synchSet.contains("perfectIndexReads")) {
+                                            for (EntityAttribute attribute : attributeSet) {
+                                                if (attribute.getName().equals("perfectIndexReads")) {
+                                                    attribute.setValue(value);
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            attributeSet.add(new EntityAttribute("perfectIndexReads", value));
+                                        }
                                     }
+
                                     if (StringUtils.isNotEmpty(oneMismatchReadsIndexElement.text())) {
-                                        attributeSet.add(new EntityAttribute("oneMismatchReadsIndex",
-                                                oneMismatchReadsIndexElement.text()));
+                                        String value = oneMismatchReadsIndexElement.text();
+                                        if (synchSet.contains("oneMismatchReadsIndex")) {
+                                            for (EntityAttribute attribute : attributeSet) {
+                                                if (attribute.getName().equals("oneMismatchReadsIndex")) {
+                                                    attribute.setValue(value);
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            attributeSet.add(new EntityAttribute("oneMismatchReadsIndex", value));
+                                        }
                                     }
+
                                     if (StringUtils.isNotEmpty(q30YeildPassingFilteringElement.text())) {
-                                        attributeSet.add(new EntityAttribute("q30YeildPassingFiltering",
-                                                q30YeildPassingFilteringElement.text()));
+                                        String value = q30YeildPassingFilteringElement.text();
+                                        if (synchSet.contains("q30YieldPassingFiltering")) {
+                                            for (EntityAttribute attribute : attributeSet) {
+                                                if (attribute.getName().equals("q30YieldPassingFiltering")) {
+                                                    attribute.setValue(value);
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            attributeSet.add(new EntityAttribute("q30YieldPassingFiltering", value));
+                                        }
                                     }
+
                                     if (StringUtils.isNotEmpty(meanQualityScorePassingFilteringElement.text())) {
-                                        attributeSet.add(new EntityAttribute("meanQualityScorePassingFiltering",
-                                                meanQualityScorePassingFilteringElement.text()));
+                                        String value = meanQualityScorePassingFilteringElement.text();
+                                        if (synchSet.contains("meanQualityScorePassingFiltering")) {
+                                            for (EntityAttribute attribute : attributeSet) {
+                                                if (attribute.getName().equals("meanQualityScorePassingFiltering")) {
+                                                    attribute.setValue(value);
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            attributeSet.add(new EntityAttribute("meanQualityScorePassingFiltering",
+                                                    value));
+                                        }
                                     }
+
                                     sample.setAttributes(attributeSet);
                                     mapseqDAOBean.getHTSFSampleDAO().save(sample);
                                     System.out.println(String.format("Successfully saved sample: %s", sample.getId()));
