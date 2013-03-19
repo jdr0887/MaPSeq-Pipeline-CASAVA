@@ -34,7 +34,7 @@
     <property name="workflowRunDAO" ref="workflowRunDAO" />
   </bean>
 
-  <bean id="casavaPipelineBeanService" class="edu.unc.mapseq.pipeline.casava.CasavaPipelineBeanService">
+  <bean id="casavaPipelineBeanService" class="edu.unc.mapseq.pipeline.casava.CASAVAPipelineBeanService">
     <property name="mapseqConfigurationService" ref="mapseqConfigurationService" />
     <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
     <cm:managed-properties persistent-id="edu.unc.mapseq.pipeline.casava" update-strategy="container-managed" />
@@ -42,7 +42,7 @@
 
   <service ref="casavaPipelineBeanService" interface="edu.unc.mapseq.pipeline.PipelineBeanService" />
 
-  <bean id="CASAVAPipelineExecutorService" class="edu.unc.mapseq.pipeline.casava.CasavaPipelineExecutorService"
+  <bean id="CASAVAPipelineExecutorService" class="edu.unc.mapseq.pipeline.casava.CASAVAPipelineExecutorService"
     init-method="start" destroy-method="stop" activation="eager">
     <property name="pipelineBeanService" ref="casavaPipelineBeanService" />
   </bean>
