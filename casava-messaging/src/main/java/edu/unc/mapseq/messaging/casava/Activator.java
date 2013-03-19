@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.unc.mapseq.pipeline.PipelineBeanService;
-import edu.unc.mapseq.pipeline.casava.CasavaPipelineBeanService;
+import edu.unc.mapseq.pipeline.casava.CASAVAPipelineBeanService;
 
 public class Activator implements BundleActivator {
 
@@ -36,14 +36,14 @@ public class Activator implements BundleActivator {
         ServiceReference reference = context.getServiceReference(ConnectionFactory.class.getName());
         ConnectionFactory connectionFactory = (ConnectionFactory) context.getService(reference);
 
-        CasavaPipelineBeanService pipelineBeanService = null;
+        CASAVAPipelineBeanService pipelineBeanService = null;
 
         ServiceReference[] references = context.getServiceReferences(PipelineBeanService.class.getName(), null);
         if (references != null) {
             for (ServiceReference ref : references) {
                 Object o = context.getService(ref);
-                if (o instanceof CasavaPipelineBeanService) {
-                    pipelineBeanService = (CasavaPipelineBeanService) o;
+                if (o instanceof CASAVAPipelineBeanService) {
+                    pipelineBeanService = (CASAVAPipelineBeanService) o;
                     break;
                 }
             }
