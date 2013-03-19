@@ -53,8 +53,8 @@ import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
 import edu.unc.mapseq.dao.ws.WebServiceDAOManager;
 import edu.unc.mapseq.pipeline.PipelineExecutor;
-import edu.unc.mapseq.pipeline.casava.CasavaPipeline;
-import edu.unc.mapseq.pipeline.casava.CasavaPipelineBeanService;
+import edu.unc.mapseq.pipeline.casava.CASAVAPipeline;
+import edu.unc.mapseq.pipeline.casava.CASAVAPipelineBeanService;
 
 public class RunPipeline implements Runnable {
 
@@ -116,7 +116,7 @@ public class RunPipeline implements Runnable {
             return;
         }
 
-        CasavaPipeline pipeline = new CasavaPipeline();
+        CASAVAPipeline pipeline = new CASAVAPipeline();
         Workflow workflow = null;
         try {
             workflow = daoMgr.getWSDAOBean().getWorkflowDAO().findByName(pipeline.getName());
@@ -162,7 +162,7 @@ public class RunPipeline implements Runnable {
             MaPSeqConfigurationService configService = new MaPSeqConfigurationServiceImpl();
             System.out.println("Please watch " + System.getenv("MAPSEQ_HOME")
                     + "/logs/mapseq.log for state changes and/or progress");
-            CasavaPipelineBeanService casavaPipelineBeanService = new CasavaPipelineBeanService();
+            CASAVAPipelineBeanService casavaPipelineBeanService = new CASAVAPipelineBeanService();
             casavaPipelineBeanService.setMapseqConfigurationService(configService);
             casavaPipelineBeanService.setMaPSeqDAOBean(daoMgr.getWSDAOBean());
 
