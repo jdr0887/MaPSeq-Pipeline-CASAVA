@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -58,19 +57,19 @@ import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
 import edu.unc.mapseq.messaging.common.EntityUtil;
-import edu.unc.mapseq.pipeline.casava.CasavaPipelineBeanService;
+import edu.unc.mapseq.pipeline.casava.CASAVAPipelineBeanService;
 
 public class CASAVAMessageListener implements MessageListener {
 
     private final Logger logger = LoggerFactory.getLogger(CASAVAMessageListener.class);
 
-    private CasavaPipelineBeanService pipelineBeanService;
+    private CASAVAPipelineBeanService pipelineBeanService;
 
     public CASAVAMessageListener() {
         super();
     }
 
-    public CASAVAMessageListener(CasavaPipelineBeanService pipelineBeanService) {
+    public CASAVAMessageListener(CASAVAPipelineBeanService pipelineBeanService) {
         super();
         this.pipelineBeanService = pipelineBeanService;
     }
@@ -375,6 +374,7 @@ public class CASAVAMessageListener implements MessageListener {
         if (sequencerRun == null) {
             logger.warn("sequencerRun is null, not running anything");
             workflowRun.setStatus(WorkflowRunStatusType.FAILED);
+            return;
         }
 
         File baseDir = new File(sequencerRun.getBaseDirectory());
@@ -444,11 +444,11 @@ public class CASAVAMessageListener implements MessageListener {
         }
     }
 
-    public CasavaPipelineBeanService getPipelineBeanService() {
+    public CASAVAPipelineBeanService getPipelineBeanService() {
         return pipelineBeanService;
     }
 
-    public void setPipelineBeanService(CasavaPipelineBeanService pipelineBeanService) {
+    public void setPipelineBeanService(CASAVAPipelineBeanService pipelineBeanService) {
         this.pipelineBeanService = pipelineBeanService;
     }
 
