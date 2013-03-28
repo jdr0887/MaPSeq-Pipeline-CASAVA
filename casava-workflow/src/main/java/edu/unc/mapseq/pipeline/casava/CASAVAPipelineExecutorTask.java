@@ -31,6 +31,10 @@ public class CASAVAPipelineExecutorTask extends TimerTask {
     @Override
     public void run() {
         logger.info("ENTERING run()");
+
+        logger.info(String.format("ActiveCount: %d, TaskCount: %d, CompletedTaskCount: %d", tpe.getActiveCount(),
+                tpe.getTaskCount(), tpe.getCompletedTaskCount()));
+
         WorkflowDAO workflowDAO = this.pipelineBeanService.getMaPSeqDAOBean().getWorkflowDAO();
         WorkflowRunDAO workflowRunDAO = this.pipelineBeanService.getMaPSeqDAOBean().getWorkflowRunDAO();
         WorkflowPlanDAO workflowPlanDAO = this.pipelineBeanService.getMaPSeqDAOBean().getWorkflowPlanDAO();
@@ -50,9 +54,6 @@ public class CASAVAPipelineExecutorTask extends TimerTask {
                     workflowRun.setVersion(pipeline.getVersion());
                     workflowRun.setDequeuedDate(new Date());
                     workflowRunDAO.save(workflowRun);
-
-                    // not sure if this is really necessary
-                    workflowPlan.setWorkflowRun(workflowRun);
 
                     pipeline.setPipelineBeanService(pipelineBeanService);
                     pipeline.setWorkflowPlan(workflowPlan);
