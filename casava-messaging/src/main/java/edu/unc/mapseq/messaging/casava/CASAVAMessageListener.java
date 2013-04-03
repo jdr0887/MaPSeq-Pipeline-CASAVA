@@ -56,7 +56,7 @@ import edu.unc.mapseq.dao.model.Study;
 import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
-import edu.unc.mapseq.messaging.common.EntityUtil;
+import edu.unc.mapseq.pipeline.EntityUtil;
 import edu.unc.mapseq.pipeline.casava.CASAVAPipelineBeanService;
 
 public class CASAVAMessageListener implements MessageListener {
