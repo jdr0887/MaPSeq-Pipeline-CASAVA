@@ -39,10 +39,6 @@
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
     </dependency>
-    <dependency>
-      <groupId>edu.unc.mapseq.mapseq-messaging</groupId>
-      <artifactId>mapseq-messaging-common</artifactId>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
