@@ -16,8 +16,8 @@
       <artifactId>mapseq-pipeline-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>edu.unc.mapseq.mapseq-modules</groupId>
-      <artifactId>mapseq-module-casava</artifactId>
+      <groupId>edu.unc.mapseq</groupId>
+      <artifactId>mapseq-modules</artifactId>
     </dependency>
     <dependency> 
       <groupId>org.jsoup</groupId> 
