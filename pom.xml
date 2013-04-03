@@ -8,10 +8,6 @@
   <url>https://ci-dev.renci.org/site/mapseq</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cxf.version>2.7.0</cxf.version>
-    <karaf.version>2.2.9</karaf.version>
-    <activemq.version>5.7.0</activemq.version>
-    <spring.version>3.0.7.RELEASE</spring.version>
     <maven.project.info.reports.plugin>2.4</maven.project.info.reports.plugin>
     <maven.javadoc.plugin>2.8</maven.javadoc.plugin>
     <maven.jxr.plugin>2.3</maven.jxr.plugin>
@@ -22,19 +18,16 @@
     <maven.eclipse.plugin.version>2.8</maven.eclipse.plugin.version>
     <maven.surefire.plugin.version>2.9</maven.surefire.plugin.version>
     <maven.site.plugin.version>3.2</maven.site.plugin.version>
-    <renci.jlrm.version>0.2.9</renci.jlrm.version>
-    <renci.commons.version>0.2.0</renci.commons.version>
-    <openjpa.version>2.2.1</openjpa.version>
-    <commons.discovery.version>0.5</commons.discovery.version>
-    <commons.dbcp.version>1.4</commons.dbcp.version>
-    <commons.beanutils.version>1.8.3</commons.beanutils.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang.version>2.4</commons.lang.version>
-    <commons.collections.version>3.2.1</commons.collections.version>
     <commons.cli.version>1.2</commons.cli.version>
-    <commons.pool.version>1.5.6</commons.pool.version>
+    <karaf.version>2.3.1</karaf.version>
     <openjpa.version>2.2.1</openjpa.version>
-    <mapseq.version>0.0.6</mapseq.version>
+    <activemq.version>5.7.0</activemq.version>
+    <slf4j.version>1.7.2</slf4j.version>
+    <spring.version>3.1.4.RELEASE</spring.version>    
+    <renci.commons.version>0.2.0</renci.commons.version>
+    <mapseq.version>0.0.8</mapseq.version>
   </properties>
   <organization>
     <name>UNC</name>
@@ -42,7 +35,7 @@
   </organization>
   <issueManagement>
     <system>gForge</system>
-    <url>https://code.renci.org/gf/project/mapseq-pipeline-casava/tracker/</url>
+    <url>https://code.renci.org/gf/project/casava/tracker/</url>
   </issueManagement>
   <ciManagement>
     <system>hudson</system>
@@ -89,31 +82,6 @@
       <id>com.springsource.repository.bundles.external</id> 
       <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle External</name> 
       <url>http://repository.springsource.com/maven/bundles/external</url> 
-    </repository>
-    <repository>
-      <id>ibiblio.repository</id>
-      <name>ibiblio.repository</name>
-      <url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>
-      <releases>
-	<enabled>true</enabled>
-      </releases>
-      <snapshots>
-	<enabled>true</enabled>
-	<updatePolicy>never</updatePolicy>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>biojava-maven-repo</id>
-      <name>BioJava repository</name>
-      <url>http://www.biojava.org/download/maven</url>			
-      <releases>
-    	<enabled>true</enabled>
-    	<updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-    	<enabled>true</enabled>
-    	<updatePolicy>never</updatePolicy>
-      </snapshots>
     </repository>
     <repository>
       <id>renci.repository</id>
@@ -174,12 +142,12 @@
       <dependency>
 	<groupId>org.slf4j</groupId>
 	<artifactId>slf4j-api</artifactId>
-	<version>1.6.4</version>
+	<version>${slf4j.version}</version>
       </dependency>
       <dependency>
 	<groupId>org.slf4j</groupId>
 	<artifactId>slf4j-log4j12</artifactId>
-	<version>1.6.4</version>
+	<version>${slf4j.version}</version>
       </dependency>
       <dependency>
 	<groupId>log4j</groupId>
@@ -189,7 +157,7 @@
       <dependency>
 	<groupId>org.slf4j</groupId>
 	<artifactId>slf4j-simple</artifactId>
-	<version>1.6.4</version>
+	<version>${slf4j.version}</version>
       </dependency>
       <dependency>
 	<groupId>commons-io</groupId>
@@ -227,13 +195,8 @@
       	<version>${mapseq.version}</version>
       </dependency>
       <dependency>
-      	<groupId>edu.unc.mapseq.mapseq-modules</groupId>
-      	<artifactId>mapseq-module-core</artifactId>
-      	<version>${mapseq.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>edu.unc.mapseq.mapseq-modules</groupId>
-      	<artifactId>mapseq-module-casava</artifactId>
+      	<groupId>edu.unc.mapseq</groupId>
+      	<artifactId>mapseq-modules</artifactId>
       	<version>${mapseq.version}</version>
       </dependency>
       <dependency>
@@ -252,24 +215,9 @@
       	<version>0.0.10-SNAPSHOT</version>
       </dependency>
       <dependency>
-	<groupId>edu.unc.mapseq.mapseq-messaging</groupId>
-	<artifactId>mapseq-messaging-common</artifactId>
-	<version>${mapseq.version}</version>
-      </dependency>
-      <dependency>
       	<groupId>junit</groupId>
       	<artifactId>junit</artifactId>
       	<version>4.8.2</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.ops4j.pax.logging</groupId>
-      	<artifactId>pax-logging-service</artifactId>
-      	<version>1.6.3</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.ops4j.pax.logging</groupId>
-      	<artifactId>pax-logging-api</artifactId>
-      	<version>1.6.3</version>
       </dependency>
       <dependency>
 	<groupId>org.apache.felix</groupId>
@@ -323,16 +271,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.logging</groupId>
-      <artifactId>pax-logging-service</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.logging</groupId>
-      <artifactId>pax-logging-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
