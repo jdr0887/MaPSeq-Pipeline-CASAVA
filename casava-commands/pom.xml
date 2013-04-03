@@ -88,7 +88,7 @@
 	  <instructions>
 	    <Private-Package />
 	    <Export-Package>edu.unc.mapseq.commands*</Export-Package>
-	    <Import-Package>*</Import-Package>
+	    <Import-Package>org.apache.felix.service.command,org.apache.felix.gogo.commands,org.apache.karaf.shell.console,*</Import-Package>
 	  </instructions>
 	</configuration>
       </plugin>
