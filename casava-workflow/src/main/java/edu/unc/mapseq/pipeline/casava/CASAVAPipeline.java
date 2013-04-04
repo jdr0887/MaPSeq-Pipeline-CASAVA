@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,6 +42,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import edu.unc.mapseq.commons.casava.SaveDemultiplexedStatsAttributesRunnable;
+import edu.unc.mapseq.commons.casava.SaveObservedClusterDensityAttributesRunnable;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.model.EntityAttribute;
 import edu.unc.mapseq.dao.model.HTSFSample;
@@ -270,10 +273,6 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
     @Override
     public void postRun() throws PipelineException {
 
-        File baseDir = new File(getWorkflowPlan().getSequencerRun().getBaseDirectory());
-        File sequencerRunDir = new File(baseDir, getWorkflowPlan().getSequencerRun().getName());
-        String flowcell = lookupFlowcell(sequencerRunDir);
-
         List<HTSFSample> htsfSampleList = null;
         try {
             htsfSampleList = pipelineBeanService.getMaPSeqDAOBean().getHTSFSampleDAO()
@@ -287,291 +286,21 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
             return;
         }
 
-        for (HTSFSample sample : htsfSampleList) {
-            try {
-                saveDemulitplexStatsAttributes(sequencerRunDir, flowcell, sample);
-            } catch (Exception e) {
-                logger.error("saveDemulitplexStatsAttributes error", e);
-            }
-            try {
-                saveObservedDensityAttributes(sequencerRunDir, flowcell, sample);
-            } catch (Exception e) {
-                logger.error("saveObservedDensityAttributes error", e);
-            }
-        }
-    }
+        List<Long> sequencerRunIdList = new ArrayList<Long>();
+        sequencerRunIdList.add(getWorkflowPlan().getSequencerRun().getId());
 
-    private void saveObservedDensityAttributes(File sequencerRunDir, String flowcell, HTSFSample sample) {
-        File dataDir = new File(sequencerRunDir, "Data");
-        File reportsDir = new File(dataDir, "reports");
-        File numClustersByLaneFile = new File(reportsDir, "NumClusters By Lane.txt");
-        if (!numClustersByLaneFile.exists()) {
-            logger.warn("numClustersByLaneFile does not exist: {}", numClustersByLaneFile.getAbsolutePath());
-            return;
-        }
+        SaveDemultiplexedStatsAttributesRunnable saveDemultiplexedStatsAttributesRunnable = new SaveDemultiplexedStatsAttributesRunnable();
+        saveDemultiplexedStatsAttributesRunnable.setMapseqDAOBean(pipelineBeanService.getMaPSeqDAOBean());
+        saveDemultiplexedStatsAttributesRunnable.setSequencerRunIdList(sequencerRunIdList);
+        Executors.newSingleThreadExecutor().execute(saveDemultiplexedStatsAttributesRunnable);
 
-        try {
-            long clusterDensityTotal = 0;
-            int tileCount = 0;
-            BufferedReader br = new BufferedReader(new FileReader(numClustersByLaneFile));
-            // skip the first 11 lines
-            for (int i = 0; i < 11; ++i) {
-                br.readLine();
-            }
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (sample.getLaneIndex().equals(Integer.valueOf(StringUtils.split(line)[0]))) {
-                    clusterDensityTotal += Long.valueOf(StringUtils.split(line)[2]);
-                    ++tileCount;
-                }
-            }
+        SaveObservedClusterDensityAttributesRunnable saveObservedClusterDensityAttributesRunnable = new SaveObservedClusterDensityAttributesRunnable();
+        saveObservedClusterDensityAttributesRunnable.setMapseqDAOBean(pipelineBeanService.getMaPSeqDAOBean());
+        saveObservedClusterDensityAttributesRunnable.setMapseqConfigurationService(pipelineBeanService
+                .getMapseqConfigurationService());
+        saveObservedClusterDensityAttributesRunnable.setSequencerRunIdList(sequencerRunIdList);
+        Executors.newSingleThreadExecutor().execute(saveObservedClusterDensityAttributesRunnable);
 
-            br.close();
-
-            String value = (double) (clusterDensityTotal / tileCount) / 1000 + "";
-
-            Set<EntityAttribute> attributeSet = sample.getAttributes();
-
-            if (attributeSet == null) {
-                attributeSet = new HashSet<EntityAttribute>();
-            }
-
-            Set<String> entityAttributeNameSet = new HashSet<String>();
-
-            for (EntityAttribute attribute : attributeSet) {
-                entityAttributeNameSet.add(attribute.getName());
-            }
-
-            Set<String> synchSet = Collections.synchronizedSet(entityAttributeNameSet);
-
-            if (StringUtils.isNotEmpty(value)) {
-                if (synchSet.contains("observedClusterDensity")) {
-                    for (EntityAttribute attribute : attributeSet) {
-                        if (attribute.getName().equals("observedClusterDensity")) {
-                            attribute.setValue(value);
-                            break;
-                        }
-                    }
-                } else {
-                    attributeSet.add(new EntityAttribute("observedClusterDensity", value));
-                }
-            }
-
-            sample.setAttributes(attributeSet);
-            pipelineBeanService.getMaPSeqDAOBean().getHTSFSampleDAO().save(sample);
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (MaPSeqDAOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void saveDemulitplexStatsAttributes(File sequencerRunDir, String flowcell, HTSFSample sample) {
-
-        File unalignedDir = new File(sequencerRunDir, String.format("Unaligned.%d", sample.getLaneIndex()));
-        File baseCallStatsDir = new File(unalignedDir, String.format("Basecall_Stats_%s", flowcell));
-        File statsFile = new File(baseCallStatsDir, "Demultiplex_Stats.htm");
-        if (statsFile.exists()) {
-
-            try {
-                org.jsoup.nodes.Document doc = Jsoup.parse(FileUtils.readFileToString(statsFile));
-                Iterator<Element> tableIter = doc.select("table").iterator();
-                tableIter.next();
-
-                for (Element row : tableIter.next().select("tr")) {
-
-                    Iterator<Element> tdIter = row.select("td").iterator();
-
-                    Element laneElement = tdIter.next();
-                    Element sampleIdElement = tdIter.next();
-                    Element sampleRefElement = tdIter.next();
-                    Element indexElement = tdIter.next();
-                    Element descriptionElement = tdIter.next();
-                    Element controlElement = tdIter.next();
-                    Element projectElement = tdIter.next();
-                    Element yeildElement = tdIter.next();
-                    Element passingFilteringElement = tdIter.next();
-                    Element numberOfReadsElement = tdIter.next();
-                    Element rawClustersPerLaneElement = tdIter.next();
-                    Element perfectIndexReadsElement = tdIter.next();
-                    Element oneMismatchReadsIndexElement = tdIter.next();
-                    Element q30YeildPassingFilteringElement = tdIter.next();
-                    Element meanQualityScorePassingFilteringElement = tdIter.next();
-
-                    if (sample.getName().equals(sampleIdElement.text())
-                            && sample.getLaneIndex().toString().equals(laneElement.text())
-                            && sample.getBarcode().equals(indexElement.text())) {
-
-                        Set<EntityAttribute> attributeSet = sample.getAttributes();
-
-                        if (attributeSet == null) {
-                            attributeSet = new HashSet<EntityAttribute>();
-                        }
-
-                        Set<String> entityAttributeNameSet = new HashSet<String>();
-
-                        for (EntityAttribute attribute : attributeSet) {
-                            entityAttributeNameSet.add(attribute.getName());
-                        }
-
-                        Set<String> synchSet = Collections.synchronizedSet(entityAttributeNameSet);
-
-                        if (StringUtils.isNotEmpty(yeildElement.text())) {
-                            String value = yeildElement.text().replace(",", "");
-                            if (synchSet.contains("yield")) {
-                                for (EntityAttribute attribute : attributeSet) {
-                                    if (attribute.getName().equals("yield")) {
-                                        attribute.setValue(value);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                attributeSet.add(new EntityAttribute("yield", value));
-                            }
-                        }
-
-                        if (StringUtils.isNotEmpty(passingFilteringElement.text())) {
-                            String value = passingFilteringElement.text();
-                            if (synchSet.contains("passedFiltering")) {
-                                for (EntityAttribute attribute : attributeSet) {
-                                    if (attribute.getName().equals("passedFiltering")) {
-                                        attribute.setValue(value);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                attributeSet.add(new EntityAttribute("passedFiltering", value));
-                            }
-                        }
-
-                        if (StringUtils.isNotEmpty(numberOfReadsElement.text())) {
-                            String value = numberOfReadsElement.text().replace(",", "");
-                            if (synchSet.contains("numberOfReads")) {
-                                for (EntityAttribute attribute : attributeSet) {
-                                    if (attribute.getName().equals("numberOfReads")) {
-                                        attribute.setValue(value);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                attributeSet.add(new EntityAttribute("numberOfReads", value));
-                            }
-                        }
-
-                        if (StringUtils.isNotEmpty(rawClustersPerLaneElement.text())) {
-                            String value = rawClustersPerLaneElement.text();
-                            if (synchSet.contains("rawClustersPerLane")) {
-                                for (EntityAttribute attribute : attributeSet) {
-                                    if (attribute.getName().equals("rawClustersPerLane")) {
-                                        attribute.setValue(value);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                attributeSet.add(new EntityAttribute("rawClustersPerLane", value));
-                            }
-                        }
-
-                        if (StringUtils.isNotEmpty(perfectIndexReadsElement.text())) {
-                            String value = perfectIndexReadsElement.text();
-                            if (synchSet.contains("perfectIndexReads")) {
-                                for (EntityAttribute attribute : attributeSet) {
-                                    if (attribute.getName().equals("perfectIndexReads")) {
-                                        attribute.setValue(value);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                attributeSet.add(new EntityAttribute("perfectIndexReads", value));
-                            }
-                        }
-
-                        if (StringUtils.isNotEmpty(oneMismatchReadsIndexElement.text())) {
-                            String value = oneMismatchReadsIndexElement.text();
-                            if (synchSet.contains("oneMismatchReadsIndex")) {
-                                for (EntityAttribute attribute : attributeSet) {
-                                    if (attribute.getName().equals("oneMismatchReadsIndex")) {
-                                        attribute.setValue(value);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                attributeSet.add(new EntityAttribute("oneMismatchReadsIndex", value));
-                            }
-                        }
-
-                        if (StringUtils.isNotEmpty(q30YeildPassingFilteringElement.text())) {
-                            String value = q30YeildPassingFilteringElement.text();
-                            if (synchSet.contains("q30YieldPassingFiltering")) {
-                                for (EntityAttribute attribute : attributeSet) {
-                                    if (attribute.getName().equals("q30YieldPassingFiltering")) {
-                                        attribute.setValue(value);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                attributeSet.add(new EntityAttribute("q30YieldPassingFiltering", value));
-                            }
-                        }
-
-                        if (StringUtils.isNotEmpty(meanQualityScorePassingFilteringElement.text())) {
-                            String value = meanQualityScorePassingFilteringElement.text();
-                            if (synchSet.contains("meanQualityScorePassingFiltering")) {
-                                for (EntityAttribute attribute : attributeSet) {
-                                    if (attribute.getName().equals("meanQualityScorePassingFiltering")) {
-                                        attribute.setValue(value);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                attributeSet.add(new EntityAttribute("meanQualityScorePassingFiltering", value));
-                            }
-                        }
-
-                        sample.setAttributes(attributeSet);
-                        pipelineBeanService.getMaPSeqDAOBean().getHTSFSampleDAO().save(sample);
-
-                    }
-
-                }
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (MaPSeqDAOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private String lookupFlowcell(File sequencerRunDir) {
-        String flowcell = null;
-        try {
-            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            File runInfoXmlFile = new File(sequencerRunDir, "RunInfo.xml");
-            if (!runInfoXmlFile.exists()) {
-                logger.error("RunInfo.xml file does not exist: {}", runInfoXmlFile.getAbsolutePath());
-                return null;
-            }
-            FileInputStream fis = new FileInputStream(runInfoXmlFile);
-            InputSource inputSource = new InputSource(fis);
-            Document document = documentBuilder.parse(inputSource);
-            XPath xpath = XPathFactory.newInstance().newXPath();
-
-            // find the flowcell
-            String runFlowcellIdPath = "/RunInfo/Run/Flowcell";
-            Node runFlowcellIdNode = (Node) xpath.evaluate(runFlowcellIdPath, document, XPathConstants.NODE);
-            flowcell = runFlowcellIdNode.getTextContent();
-            logger.debug("flowcell = {}", flowcell);
-
-        } catch (XPathExpressionException | DOMException | ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
-        }
-        return flowcell;
     }
 
     public CASAVAPipelineBeanService getPipelineBeanService() {
