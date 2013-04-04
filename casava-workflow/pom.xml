@@ -19,9 +19,9 @@
       <groupId>edu.unc.mapseq</groupId>
       <artifactId>mapseq-modules</artifactId>
     </dependency>
-    <dependency> 
-      <groupId>org.jsoup</groupId> 
-      <artifactId>com.springsource.org.jsoup</artifactId> 
+    <dependency>
+      <groupId>edu.unc.mapseq.pipelines.casava</groupId>
+      <artifactId>casava-commons</artifactId>
     </dependency>
   </dependencies>
   <build>
