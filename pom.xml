@@ -23,7 +23,7 @@
     <commons.cli.version>1.2</commons.cli.version>
     <karaf.version>2.3.1</karaf.version>
     <openjpa.version>2.2.1</openjpa.version>
-    <activemq.version>5.7.0</activemq.version>
+    <activemq.version>5.8.0</activemq.version>
     <slf4j.version>1.7.2</slf4j.version>
     <spring.version>3.1.4.RELEASE</spring.version>    
     <renci.commons.version>0.2.0</renci.commons.version>
@@ -190,6 +190,11 @@
       	<version>${mapseq.version}</version>
       </dependency>
       <dependency>
+	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
+	<artifactId>casava-commons</artifactId>
+	<version>0.0.10-SNAPSHOT</version>
+      </dependency>
+      <dependency>
       	<groupId>edu.unc.mapseq.mapseq-dao</groupId>
       	<artifactId>mapseq-dao-jpa</artifactId>
       	<version>${mapseq.version}</version>
@@ -252,7 +257,7 @@
       </dependency>
       <dependency>
 	<groupId>org.apache.activemq</groupId>
-	<artifactId>activemq-core</artifactId>
+	<artifactId>activemq-client</artifactId>
 	<version>${activemq.version}</version>
       </dependency>
       <dependency>
@@ -371,6 +376,7 @@
   <modules>
     <module>casava-workflow</module>
     <module>casava-commands</module>
+    <module>casava-commons</module>
     <module>casava-main</module>
     <module>casava-features</module>
     <module>casava-messaging</module>
