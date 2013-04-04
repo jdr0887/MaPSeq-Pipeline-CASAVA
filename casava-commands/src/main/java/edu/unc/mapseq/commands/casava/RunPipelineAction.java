@@ -18,72 +18,70 @@ import edu.unc.mapseq.dao.MaPSeqDAOBean;
 @Command(scope = "mapseq", name = "run-casava-pipeline", description = "Run Casava Pipeline")
 public class RunPipelineAction extends AbstractAction {
 
-	@Argument(index = 0, name = "workflowRunName", description = "WorkflowRun.name", required = true, multiValued = false)
-	private String workflowRunName;
+    @Argument(index = 0, name = "workflowRunName", description = "WorkflowRun.name", required = true, multiValued = false)
+    private String workflowRunName;
 
-	private MaPSeqDAOBean mapseqDAOBean;
+    private MaPSeqDAOBean mapseqDAOBean;
 
-	private MaPSeqConfigurationService mapseqConfigurationService;
+    private MaPSeqConfigurationService mapseqConfigurationService;
 
-	public RunPipelineAction() {
-		super();
-	}
+    public RunPipelineAction() {
+        super();
+    }
 
-	@Override
-	public Object doExecute() {
+    @Override
+    public Object doExecute() {
 
-		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
-				String.format("nio://%s:61616", mapseqConfigurationService
-						.getWebServiceHost("localhost")));
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(String.format("nio://%s:61616",
+                mapseqConfigurationService.getWebServiceHost("localhost")));
 
-		Connection connection = null;
-		Session session = null;
-		try {
-			connection = connectionFactory.createConnection();
-			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			Destination destination = session.createQueue("queue/casava");
-			MessageProducer producer = session.createProducer(destination);
-			producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-			String format = "{\"account_name\":\"%s\",\"entities\":[{\"entity_type\":\"WorkflowRun\",\"name\":\"%s\"}]}";
-			producer.send(session.createTextMessage(String.format(format,
-					System.getProperty("user.name"), workflowRunName)));
-		} catch (JMSException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				session.close();
-				connection.close();
-			} catch (JMSException e) {
-				e.printStackTrace();
-			}
-		}
+        Connection connection = null;
+        Session session = null;
+        try {
+            connection = connectionFactory.createConnection();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue("queue/casava");
+            MessageProducer producer = session.createProducer(destination);
+            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+            String format = "{\"account_name\":\"%s\",\"entities\":[{\"entity_type\":\"WorkflowRun\",\"name\":\"%s\"}]}";
+            producer.send(session.createTextMessage(String.format(format, System.getProperty("user.name"),
+                    workflowRunName)));
+        } catch (JMSException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                session.close();
+                connection.close();
+            } catch (JMSException e) {
+                e.printStackTrace();
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public String getWorkflowRunName() {
-		return workflowRunName;
-	}
+    public String getWorkflowRunName() {
+        return workflowRunName;
+    }
 
-	public void setWorkflowRunName(String workflowRunName) {
-		this.workflowRunName = workflowRunName;
-	}
+    public void setWorkflowRunName(String workflowRunName) {
+        this.workflowRunName = workflowRunName;
+    }
 
-	public MaPSeqDAOBean getMapseqDAOBean() {
-		return mapseqDAOBean;
-	}
+    public MaPSeqDAOBean getMapseqDAOBean() {
+        return mapseqDAOBean;
+    }
 
-	public void setMapseqDAOBean(MaPSeqDAOBean mapseqDAOBean) {
-		this.mapseqDAOBean = mapseqDAOBean;
-	}
+    public void setMapseqDAOBean(MaPSeqDAOBean mapseqDAOBean) {
+        this.mapseqDAOBean = mapseqDAOBean;
+    }
 
-	public MaPSeqConfigurationService getMapseqConfigurationService() {
-		return mapseqConfigurationService;
-	}
+    public MaPSeqConfigurationService getMapseqConfigurationService() {
+        return mapseqConfigurationService;
+    }
 
-	public void setMapseqConfigurationService(
-			MaPSeqConfigurationService mapseqConfigurationService) {
-		this.mapseqConfigurationService = mapseqConfigurationService;
-	}
+    public void setMapseqConfigurationService(MaPSeqConfigurationService mapseqConfigurationService) {
+        this.mapseqConfigurationService = mapseqConfigurationService;
+    }
 
 }

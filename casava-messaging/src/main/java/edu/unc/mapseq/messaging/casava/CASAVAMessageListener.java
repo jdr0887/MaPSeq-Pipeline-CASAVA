@@ -353,7 +353,8 @@ public class CASAVAMessageListener implements MessageListener {
                 }
 
                 if ("Workflow run".equals(entityType) || WorkflowRun.class.getSimpleName().equals(entityType)) {
-                    workflowRun = EntityUtil.getWorkflowRun(pipelineBeanService.getMaPSeqDAOBean(), "CASAVA", entityJSONObject, account);
+                    workflowRun = EntityUtil.getWorkflowRun(pipelineBeanService.getMaPSeqDAOBean(), "CASAVA",
+                            entityJSONObject, account);
                 }
 
                 if (Platform.class.getSimpleName().equals(entityType)) {
