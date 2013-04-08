@@ -27,7 +27,7 @@
     <slf4j.version>1.7.2</slf4j.version>
     <spring.version>3.1.4.RELEASE</spring.version>    
     <renci.commons.version>0.2.0</renci.commons.version>
-    <mapseq.version>0.0.8</mapseq.version>
+    <mapseq.version>0.1.0</mapseq.version>
   </properties>
   <organization>
     <name>UNC</name>
@@ -178,6 +178,11 @@
 	<groupId>org.jsoup</groupId> 
 	<artifactId>com.springsource.org.jsoup</artifactId> 
 	<version>1.5.2</version> 
+      </dependency>
+      <dependency>
+      	<groupId>org.apache.geronimo.specs</groupId>
+      	<artifactId>geronimo-jpa_2.0_spec</artifactId>
+      	<version>1.1</version>
       </dependency>
       <dependency>
       	<groupId>org.codehaus.jettison</groupId>
