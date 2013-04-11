@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" default-activation="lazy">
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" default-activation="lazy"
+  xsi:schemaLocation="
+  http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+  http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+  ">
 
   <cm:property-placeholder persistent-id="edu.unc.mapseq.pipeline.casava" update-strategy="reload">
     <cm:default-properties>
+      <cm:property name="corePoolSize" value="20" />
+      <cm:property name="maxPoolSize" value="20" />
+      <cm:property name="period" value="300000" />
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -40,11 +47,22 @@
     <cm:managed-properties persistent-id="edu.unc.mapseq.pipeline.casava" update-strategy="container-managed" />
   </bean>
 
+  <bean id="threadPoolExecutor" class="edu.unc.mapseq.pipeline.PipelineThreadPoolExecutor">
+    <argument value="${corePoolSize}" />
+    <argument value="${maxPoolSize}" />
+  </bean>
+
+  <bean id="task" class="edu.unc.mapseq.pipeline.casava.CASAVAPipelineExecutorTask">
+    <property name="pipelineBeanService" ref="casavaPipelineBeanService" />
+    <property name="threadPoolExecutor" ref="threadPoolExecutor" />
+  </bean>
+
   <service ref="casavaPipelineBeanService" interface="edu.unc.mapseq.pipeline.PipelineBeanService" />
 
   <bean id="CASAVAPipelineExecutorService" class="edu.unc.mapseq.pipeline.casava.CASAVAPipelineExecutorService"
     init-method="start" destroy-method="stop" activation="eager">
-    <property name="pipelineBeanService" ref="casavaPipelineBeanService" />
+    <property name="task" ref="task" />
+    <property name="period" value="${period}" />
   </bean>
 
 </blueprint>

@@ -15,12 +15,13 @@ import edu.unc.mapseq.dao.model.Workflow;
 import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.pipeline.PipelineExecutor;
+import edu.unc.mapseq.pipeline.PipelineThreadPoolExecutor;
 
 public class CASAVAPipelineExecutorTask extends TimerTask {
 
     private final Logger logger = LoggerFactory.getLogger(CASAVAPipelineExecutorTask.class);
 
-    private static final CASAVAPipelineTPE tpe = new CASAVAPipelineTPE();
+    private PipelineThreadPoolExecutor threadPoolExecutor;
 
     private CASAVAPipelineBeanService pipelineBeanService;
 
@@ -32,8 +33,9 @@ public class CASAVAPipelineExecutorTask extends TimerTask {
     public void run() {
         logger.info("ENTERING run()");
 
-        logger.info(String.format("ActiveCount: %d, TaskCount: %d, CompletedTaskCount: %d", tpe.getActiveCount(),
-                tpe.getTaskCount(), tpe.getCompletedTaskCount()));
+        logger.info(String.format("ActiveCount: %d, TaskCount: %d, CompletedTaskCount: %d",
+                threadPoolExecutor.getActiveCount(), threadPoolExecutor.getTaskCount(),
+                threadPoolExecutor.getCompletedTaskCount()));
 
         WorkflowDAO workflowDAO = this.pipelineBeanService.getMaPSeqDAOBean().getWorkflowDAO();
         WorkflowRunDAO workflowRunDAO = this.pipelineBeanService.getMaPSeqDAOBean().getWorkflowRunDAO();
@@ -57,7 +59,7 @@ public class CASAVAPipelineExecutorTask extends TimerTask {
 
                     pipeline.setPipelineBeanService(pipelineBeanService);
                     pipeline.setWorkflowPlan(workflowPlan);
-                    tpe.submit(new PipelineExecutor(pipeline));
+                    threadPoolExecutor.submit(new PipelineExecutor(pipeline));
 
                 }
 
@@ -75,6 +77,14 @@ public class CASAVAPipelineExecutorTask extends TimerTask {
 
     public void setPipelineBeanService(CASAVAPipelineBeanService pipelineBeanService) {
         this.pipelineBeanService = pipelineBeanService;
+    }
+
+    public PipelineThreadPoolExecutor getThreadPoolExecutor() {
+        return threadPoolExecutor;
+    }
+
+    public void setThreadPoolExecutor(PipelineThreadPoolExecutor threadPoolExecutor) {
+        this.threadPoolExecutor = threadPoolExecutor;
     }
 
 }

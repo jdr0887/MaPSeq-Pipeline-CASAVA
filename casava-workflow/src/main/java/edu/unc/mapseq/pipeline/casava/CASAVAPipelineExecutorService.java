@@ -11,18 +11,18 @@ public class CASAVAPipelineExecutorService {
 
     private final Timer mainTimer = new Timer();
 
-    private CASAVAPipelineBeanService pipelineBeanService;
+    private CASAVAPipelineExecutorTask task;
+
+    private Long period = Long.valueOf(5 * 60 * 1000);
+
+    public CASAVAPipelineExecutorService() {
+        super();
+    }
 
     public void start() throws Exception {
-        logger.info("ENTERING stop()");
-
+        logger.info("ENTERING start()");
         long delay = 1 * 60 * 1000; // 1 minute
-        long period = 5 * 60 * 1000; // 5 minutes
-
-        CASAVAPipelineExecutorTask task = new CASAVAPipelineExecutorTask();
-        task.setPipelineBeanService(pipelineBeanService);
         mainTimer.scheduleAtFixedRate(task, delay, period);
-
     }
 
     public void stop() throws Exception {
@@ -31,12 +31,20 @@ public class CASAVAPipelineExecutorService {
         mainTimer.cancel();
     }
 
-    public CASAVAPipelineBeanService getPipelineBeanService() {
-        return pipelineBeanService;
+    public CASAVAPipelineExecutorTask getTask() {
+        return task;
     }
 
-    public void setPipelineBeanService(CASAVAPipelineBeanService pipelineBeanService) {
-        this.pipelineBeanService = pipelineBeanService;
+    public void setTask(CASAVAPipelineExecutorTask task) {
+        this.task = task;
+    }
+
+    public Long getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Long period) {
+        this.period = period;
     }
 
 }
