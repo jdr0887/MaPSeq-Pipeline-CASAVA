@@ -2,7 +2,9 @@
   <body>
     <section name="About">
       <subsection name="Graph">
-	<p><img src="images/pipeline.dag.png"/></p>
+        <p>
+          <img src="images/pipeline.dag.png" />
+        </p>
       </subsection>
     </section>
   </body>
