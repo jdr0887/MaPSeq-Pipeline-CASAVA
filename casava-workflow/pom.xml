@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>edu.unc.mapseq.pipelines</groupId>
     <artifactId>casava</artifactId>
@@ -27,78 +28,80 @@
   <build>
     <plugins>
       <plugin>
-	<artifactId>maven-antrun-plugin</artifactId>
-	<executions>
-	  <execution>
-	    <id>0</id>
-	    <phase>validate</phase>
-	    <configuration>
-	      <tasks>
-		<delete file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" />
-		<touch file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" mkdirs="true" />
-		<echo file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" append="true">
-version=${project.version}
-		</echo>
-	      </tasks>
-	    </configuration>
-	    <goals>
-	      <goal>run</goal>
-	    </goals>
-	  </execution>
-	</executions>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>0</id>
+            <phase>validate</phase>
+            <configuration>
+              <tasks>
+                <delete file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" />
+                <touch file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties"
+                  mkdirs="true" />
+                <echo file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties"
+                  append="true">
+                  version=${project.version}
+                </echo>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>maven-bundle-plugin</artifactId>
-	<configuration>
-	  <instructions>
-	    <Private-Package />
-	    <Export-Package>edu.unc.mapseq.pipeline.casava*</Export-Package>
-	    <Import-Package>*</Import-Package>
-	  </instructions>
-	</configuration>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Private-Package />
+            <Export-Package>edu.unc.mapseq.pipeline.casava*</Export-Package>
+            <Import-Package>*</Import-Package>
+          </instructions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>${maven.site.plugin.version}</version>
         <configuration>
-	  <reportPlugins>
-	    <plugin>
-	      <groupId>org.apache.maven.plugins</groupId>
-	      <artifactId>maven-project-info-reports-plugin</artifactId>
-	      <version>${maven.project.info.reports.plugin}</version>
-	      <configuration>
-		<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-		<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-	      </configuration>
-	      <reports>
-	      </reports>
-	    </plugin>
-	    <plugin>
-	      <groupId>org.apache.maven.plugins</groupId>
-	      <artifactId>maven-javadoc-plugin</artifactId>
-	      <version>${maven.javadoc.plugin}</version>
-	    </plugin>
-	    <plugin>
-	      <groupId>org.apache.maven.plugins</groupId>
-	      <artifactId>maven-jxr-plugin</artifactId>
-	      <version>${maven.jxr.plugin}</version>
-	      <configuration>
-		<aggregate>true</aggregate>
-	      </configuration>
-	    </plugin>
-	    <plugin>
-	      <groupId>org.apache.maven.plugins</groupId>
-	      <artifactId>maven-surefire-report-plugin</artifactId>
-	      <version>${maven.surefire.report.plugin}</version>
-	    </plugin>
-	    <plugin>
-	      <groupId>org.apache.maven.plugins</groupId>
-	      <artifactId>maven-checkstyle-plugin</artifactId>
-	      <version>${maven.checkstyle.plugin}</version>
-	    </plugin>
-	  </reportPlugins>
+          <reportPlugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-project-info-reports-plugin</artifactId>
+              <version>${maven.project.info.reports.plugin}</version>
+              <configuration>
+                <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+              </configuration>
+              <reports>
+              </reports>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>${maven.javadoc.plugin}</version>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-jxr-plugin</artifactId>
+              <version>${maven.jxr.plugin}</version>
+              <configuration>
+                <aggregate>true</aggregate>
+              </configuration>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-surefire-report-plugin</artifactId>
+              <version>${maven.surefire.report.plugin}</version>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-checkstyle-plugin</artifactId>
+              <version>${maven.checkstyle.plugin}</version>
+            </plugin>
+          </reportPlugins>
         </configuration>
       </plugin>
     </plugins>
