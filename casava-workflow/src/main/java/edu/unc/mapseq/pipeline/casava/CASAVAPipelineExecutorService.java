@@ -13,7 +13,7 @@ public class CASAVAPipelineExecutorService {
 
     private CASAVAPipelineExecutorTask task;
 
-    private Long period = Long.valueOf(5 * 60 * 1000);
+    private Long period = 5L;
 
     public CASAVAPipelineExecutorService() {
         super();
@@ -22,7 +22,7 @@ public class CASAVAPipelineExecutorService {
     public void start() throws Exception {
         logger.info("ENTERING start()");
         long delay = 1 * 60 * 1000; // 1 minute
-        mainTimer.scheduleAtFixedRate(task, delay, period);
+        mainTimer.scheduleAtFixedRate(task, delay, period * 60 * 1000);
     }
 
     public void stop() throws Exception {
