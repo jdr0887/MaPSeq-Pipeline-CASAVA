@@ -10,7 +10,7 @@
     <cm:default-properties>
       <cm:property name="corePoolSize" value="20" />
       <cm:property name="maxPoolSize" value="20" />
-      <cm:property name="period" value="300000" />
+      <cm:property name="period" value="5" />
     </cm:default-properties>
   </cm:property-placeholder>
 
