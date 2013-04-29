@@ -8,8 +8,8 @@
 
   <cm:property-placeholder persistent-id="edu.unc.mapseq.pipeline.casava" update-strategy="reload">
     <cm:default-properties>
-      <cm:property name="corePoolSize" value="20" />
-      <cm:property name="maxPoolSize" value="20" />
+      <cm:property name="corePoolSize" value="100" />
+      <cm:property name="maxPoolSize" value="100" />
       <cm:property name="period" value="5" />
     </cm:default-properties>
   </cm:property-placeholder>
