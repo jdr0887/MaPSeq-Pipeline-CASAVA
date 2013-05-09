@@ -110,7 +110,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
 
                     CondorJob configureBCLToFastQJob = PipelineJobFactory.createJob(++count,
                             ConfigureBCLToFastqCLI.class, getWorkflowPlan());
-                    configureBCLToFastQJob.setSiteName("Kure");
+                    configureBCLToFastQJob.setSiteName(getPipelineBeanService().getSiteName());
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.INPUTDIR, baseCallsDir.getAbsolutePath());
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.MISMATCHES);
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGBCL);
@@ -154,14 +154,14 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                     if (unalignedDir.exists()) {
                         CondorJob removeUnalignedDirectoryJob = PipelineJobFactory.createJob(++count, RemoveCLI.class,
                                 getWorkflowPlan());
-                        removeUnalignedDirectoryJob.setSiteName("Kure");
+                        removeUnalignedDirectoryJob.setSiteName(getPipelineBeanService().getSiteName());
                         removeUnalignedDirectoryJob.addArgument(RemoveCLI.FILE, unalignedDir);
                         graph.addVertex(removeUnalignedDirectoryJob);
                         graph.addEdge(removeUnalignedDirectoryJob, configureBCLToFastQJob);
                     }
 
                     CondorJob makeJob = PipelineJobFactory.createJob(++count, MakeCLI.class, getWorkflowPlan(), null);
-                    makeJob.setSiteName("Kure");
+                    makeJob.setSiteName(getPipelineBeanService().getSiteName());
                     makeJob.setNumberOfProcessors(2);
                     makeJob.addArgument(MakeCLI.THREADS, "2");
                     makeJob.addArgument(MakeCLI.WORKDIR, unalignedDir.getAbsolutePath());
@@ -173,10 +173,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                     for (HTSFSample htsfSample : laneMap.get(laneIndex)) {
 
                         SequencerRun sequencerRun = htsfSample.getSequencerRun();
-                        File outputDirectory = createOutputDirectory(sequencerRun.getName(), htsfSample.getName(),
-                                getName());
-                        File tmpDir = new File(outputDirectory, "tmp");
-                        tmpDir.mkdirs();
+                        File outputDirectory = createOutputDirectory(sequencerRun.getName(), htsfSample, getName());
 
                         logger.info("outputDirectory.getAbsolutePath(): {}", outputDirectory.getAbsolutePath());
 
@@ -192,7 +189,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                             case 1:
                                 copyJob = PipelineJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
                                         htsfSample);
-                                copyJob.setSiteName("Kure");
+                                copyJob.setSiteName(getPipelineBeanService().getSiteName());
                                 sourceFile = new File(sampleDirectory, String.format("%s_%s_L%03d_R%d_001.fastq.gz",
                                         htsfSample.getName(), htsfSample.getBarcode(), laneIndex, 1));
                                 copyJob.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath());
@@ -211,7 +208,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                                 // read 1
                                 copyJob = PipelineJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
                                         htsfSample);
-                                copyJob.setSiteName("Kure");
+                                copyJob.setSiteName(getPipelineBeanService().getSiteName());
                                 sourceFile = new File(sampleDirectory, String.format("%s_%s_L%03d_R%d_001.fastq.gz",
                                         htsfSample.getName(), htsfSample.getBarcode(), laneIndex, 1));
                                 copyJob.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath());
@@ -226,6 +223,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                                 // read 2
                                 copyJob = PipelineJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
                                         htsfSample);
+                                copyJob.setSiteName(getPipelineBeanService().getSiteName());
                                 sourceFile = new File(sampleDirectory, String.format("%s_%s_L%03d_R%d_001.fastq.gz",
                                         htsfSample.getName(), htsfSample.getBarcode(), laneIndex, 2));
                                 copyJob.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath());
