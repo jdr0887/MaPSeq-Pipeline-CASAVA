@@ -11,6 +11,7 @@
       <cm:property name="corePoolSize" value="100" />
       <cm:property name="maxPoolSize" value="100" />
       <cm:property name="period" value="5" />
+      <cm:property name="siteName" value="Kure" />
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -44,6 +45,7 @@
   <bean id="casavaPipelineBeanService" class="edu.unc.mapseq.pipeline.casava.CASAVAPipelineBeanService">
     <property name="mapseqConfigurationService" ref="mapseqConfigurationService" />
     <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
+    <property name="siteName" value="${siteName}" />
     <cm:managed-properties persistent-id="edu.unc.mapseq.pipeline.casava" update-strategy="container-managed" />
   </bean>
 
