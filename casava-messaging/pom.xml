@@ -62,7 +62,7 @@
 	    <plugin>
 	      <groupId>org.apache.maven.plugins</groupId>
 	      <artifactId>maven-project-info-reports-plugin</artifactId>
-	      <version>${maven.project.info.reports.plugin}</version>
+	      <version>${maven.project.info.reports.plugin.version}</version>
 	      <configuration>
 		<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
 		<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
@@ -73,12 +73,12 @@
 	    <plugin>
 	      <groupId>org.apache.maven.plugins</groupId>
 	      <artifactId>maven-javadoc-plugin</artifactId>
-	      <version>${maven.javadoc.plugin}</version>
+	      <version>${maven.javadoc.plugin.version}</version>
 	    </plugin>
 	    <plugin>
 	      <groupId>org.apache.maven.plugins</groupId>
 	      <artifactId>maven-jxr-plugin</artifactId>
-	      <version>${maven.jxr.plugin}</version>
+	      <version>${maven.jxr.plugin.version}</version>
 	      <configuration>
 		<aggregate>true</aggregate>
 	      </configuration>
@@ -86,12 +86,12 @@
 	    <plugin>
 	      <groupId>org.apache.maven.plugins</groupId>
 	      <artifactId>maven-surefire-report-plugin</artifactId>
-	      <version>${maven.surefire.report.plugin}</version>
+	      <version>${maven.surefire.report.plugin.version}</version>
 	    </plugin>
 	    <plugin>
 	      <groupId>org.apache.maven.plugins</groupId>
 	      <artifactId>maven-checkstyle-plugin</artifactId>
-	      <version>${maven.checkstyle.plugin}</version>
+	      <version>${maven.checkstyle.plugin.version}</version>
 	    </plugin>
 	  </reportPlugins>
         </configuration>
