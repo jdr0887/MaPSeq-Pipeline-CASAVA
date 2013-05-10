@@ -8,12 +8,12 @@
   <url>https://ci-dev.renci.org/site/mapseq</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.project.info.reports.plugin>2.4</maven.project.info.reports.plugin>
-    <maven.javadoc.plugin>2.8</maven.javadoc.plugin>
-    <maven.jxr.plugin>2.3</maven.jxr.plugin>
-    <maven.compiler.plugin>2.5</maven.compiler.plugin>
-    <maven.surefire.report.plugin>2.9</maven.surefire.report.plugin>
-    <maven.checkstyle.plugin>2.8</maven.checkstyle.plugin>
+    <maven.project.info.reports.plugin.version>2.4</maven.project.info.reports.plugin.version>
+    <maven.javadoc.plugin.version>2.8</maven.javadoc.plugin.version>
+    <maven.jxr.plugin.version>2.3</maven.jxr.plugin.version>
+    <maven.compiler.plugin.version>2.5</maven.compiler.plugin.version>
+    <maven.surefire.report.plugin.version>2.9</maven.surefire.report.plugin.version>
+    <maven.checkstyle.plugin.version>2.8</maven.checkstyle.plugin.version>
     <maven.bundle.plugin.version>2.3.6</maven.bundle.plugin.version>
     <maven.eclipse.plugin.version>2.8</maven.eclipse.plugin.version>
     <maven.release.plugin.version>2.4.1</maven.release.plugin.version>
