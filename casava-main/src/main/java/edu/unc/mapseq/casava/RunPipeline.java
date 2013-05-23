@@ -163,6 +163,7 @@ public class RunPipeline implements Runnable {
             System.out.println("Please watch " + System.getenv("MAPSEQ_HOME")
                     + "/logs/mapseq.log for state changes and/or progress");
             CASAVAPipelineBeanService casavaPipelineBeanService = new CASAVAPipelineBeanService();
+            casavaPipelineBeanService.setSiteName("Kure");
             casavaPipelineBeanService.setMapseqConfigurationService(configService);
             casavaPipelineBeanService.setMaPSeqDAOBean(daoMgr.getWSDAOBean());
 
