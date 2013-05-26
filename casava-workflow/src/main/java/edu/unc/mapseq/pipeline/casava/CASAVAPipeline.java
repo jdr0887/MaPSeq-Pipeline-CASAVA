@@ -114,6 +114,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.INPUTDIR, baseCallsDir.getAbsolutePath());
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.MISMATCHES);
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGBCL);
+                    configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGSTATS);
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.FASTQCLUSTERCOUNT, "0");
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.TILES, laneIndex.toString());
                     configureBCLToFastQJob
