@@ -28,7 +28,7 @@
     <slf4j.version>1.7.2</slf4j.version>
     <spring.version>3.1.4.RELEASE</spring.version>    
     <renci.commons.version>0.2.0</renci.commons.version>
-    <mapseq.version>0.1.17</mapseq.version>
+    <mapseq.version>0.1.18</mapseq.version>
   </properties>
   <organization>
     <name>UNC</name>
