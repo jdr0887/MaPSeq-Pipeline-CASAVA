@@ -1,39 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>edu.unc</groupId>
+    <artifactId>mapseq</artifactId>
+    <version>0.2.0</version>
+  </parent>
   <name>MaPSeq :: Pipelines :: CASAVA</name>
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines</groupId>
   <artifactId>casava</artifactId>
-  <version>0.1.13-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <url>https://ci-dev.renci.org/site/mapseq</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.project.info.reports.plugin.version>2.4</maven.project.info.reports.plugin.version>
-    <maven.javadoc.plugin.version>2.8</maven.javadoc.plugin.version>
-    <maven.jxr.plugin.version>2.3</maven.jxr.plugin.version>
-    <maven.compiler.plugin.version>2.5</maven.compiler.plugin.version>
-    <maven.surefire.report.plugin.version>2.9</maven.surefire.report.plugin.version>
-    <maven.checkstyle.plugin.version>2.8</maven.checkstyle.plugin.version>
-    <maven.bundle.plugin.version>2.3.6</maven.bundle.plugin.version>
-    <maven.eclipse.plugin.version>2.8</maven.eclipse.plugin.version>
-    <maven.release.plugin.version>2.4.1</maven.release.plugin.version>
-    <maven.surefire.plugin.version>2.9</maven.surefire.plugin.version>
-    <maven.site.plugin.version>3.2</maven.site.plugin.version>
-    <commons.io.version>2.4</commons.io.version>
-    <commons.lang.version>2.4</commons.lang.version>
-    <commons.cli.version>1.2</commons.cli.version>
-    <karaf.version>2.3.1</karaf.version>
-    <openjpa.version>2.2.1</openjpa.version>
-    <activemq.version>5.8.0</activemq.version>
-    <slf4j.version>1.7.2</slf4j.version>
-    <spring.version>3.1.4.RELEASE</spring.version>    
-    <renci.commons.version>0.2.0</renci.commons.version>
-    <mapseq.version>0.1.17</mapseq.version>
-  </properties>
-  <organization>
-    <name>UNC</name>
-    <url>http://www.unc.edu</url>
-  </organization>
   <issueManagement>
     <system>gForge</system>
     <url>https://code.renci.org/gf/project/casava/tracker/</url>
@@ -64,330 +40,35 @@
     <connection>scm:git:ssh://developername@code.renci.org/gitroot/casava</connection>
     <tag>HEAD</tag>
   </scm>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>renci.plugin.repository</id>
-      <name>RENCI Plugin Repository</name>
-      <url>http://ci-dev.renci.org/nexus/content/repositories/public</url>
-      <layout>default</layout>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-    </pluginRepository>
-  </pluginRepositories>
-  <repositories>
-    <repository> 
-      <id>com.springsource.repository.bundles.external</id> 
-      <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle External</name> 
-      <url>http://repository.springsource.com/maven/bundles/external</url> 
-    </repository>
-    <repository>
-      <id>renci.repository</id>
-      <name>renci.repository</name>
-      <url>http://ci-dev.renci.org/nexus/content/repositories/public</url>
-      <releases>
-    	<enabled>true</enabled>
-    	<updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-    	<enabled>true</enabled>
-    	<updatePolicy>never</updatePolicy>
-      </snapshots>
-    </repository>
-  </repositories>
-  <developers>
-    <developer>
-      <id>jdr0887</id>
-      <name>Jason Reilly</name>
-      <email>jdr0887@renci.org</email>
-      <url>http://www.renci.org/~jdr0887</url>
-      <organization>RENCI</organization>
-      <organizationUrl>http://www.renci.org/</organizationUrl>
-      <roles>
-	<role>Senior Research Software Developer</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>roachjm</id>
-      <name>Jeff Roach</name>
-      <email>roachjm@unc.edu</email>
-    </developer>
-  </developers>
-  <distributionManagement>
-    <repository>
-      <id>renci.repository</id>
-      <name>renci.repository</name>
-      <url>https://ci-dev.renci.org/nexus/content/repositories/releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>renci.repository</id>
-      <name>renci.repository</name>
-      <url>https://ci-dev.renci.org/nexus/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <site>
-      <id>renci.site</id>
-      <name>renci.site</name>
-      <url>file:///${user.dir}/target/site-deploy</url>
-    </site>
-  </distributionManagement>
   <dependencyManagement>
     <dependencies>
       <dependency>
-	<groupId>org.hibernate</groupId>
-	<artifactId>hibernate-validator</artifactId>
-	<version>4.2.0.Final</version>
-      </dependency>
-      <dependency>
-	<groupId>org.slf4j</groupId>
-	<artifactId>slf4j-api</artifactId>
-	<version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-	<groupId>org.slf4j</groupId>
-	<artifactId>slf4j-log4j12</artifactId>
-	<version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-	<groupId>log4j</groupId>
-	<artifactId>log4j</artifactId>
-	<version>1.2.16</version>
-      </dependency>
-      <dependency>
-	<groupId>org.slf4j</groupId>
-	<artifactId>slf4j-simple</artifactId>
-	<version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-	<groupId>commons-io</groupId>
-	<artifactId>commons-io</artifactId>
-	<version>${commons.io.version}</version>
-      </dependency>
-      <dependency>
-	<groupId>commons-lang</groupId>
-	<artifactId>commons-lang</artifactId>
-	<version>${commons.lang.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.renci.commons</groupId>
-      	<artifactId>commons-exec</artifactId>
-      	<version>${renci.commons.version}</version>
-      </dependency>
-      <dependency> 
-	<groupId>org.jsoup</groupId> 
-	<artifactId>com.springsource.org.jsoup</artifactId> 
-	<version>1.5.2</version> 
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.geronimo.specs</groupId>
-      	<artifactId>geronimo-jpa_2.0_spec</artifactId>
-      	<version>1.1</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.codehaus.jettison</groupId>
-      	<artifactId>jettison</artifactId>
-      	<version>1.3.1</version>
-      </dependency>
-      <dependency>
-      	<groupId>edu.unc.mapseq.mapseq-dao</groupId>
-      	<artifactId>mapseq-dao-api</artifactId>
-      	<version>${mapseq.version}</version>
-      </dependency>
-      <dependency>
-	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
-	<artifactId>casava-commons</artifactId>
-	<version>0.1.13-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-      	<groupId>edu.unc.mapseq.mapseq-dao</groupId>
-      	<artifactId>mapseq-dao-jpa</artifactId>
-      	<version>${mapseq.version}</version>
+      	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
+      	<artifactId>casava-commons</artifactId>
+      	<version>0.2.0-SNAPSHOT</version>
       </dependency>
       <dependency>
       	<groupId>edu.unc.mapseq</groupId>
-      	<artifactId>mapseq-modules</artifactId>
-      	<version>${mapseq.version}</version>
+      	<artifactId>modules</artifactId>
+      	<version>0.0.1</version>
       </dependency>
       <dependency>
-      	<groupId>edu.unc.mapseq</groupId>
-      	<artifactId>mapseq-pipeline-api</artifactId>
-      	<version>${mapseq.version}</version>
-      </dependency>
-      <dependency>
-	<groupId>org.apache.servicemix.bundles</groupId>
-	<artifactId>org.apache.servicemix.bundles.xstream</artifactId>
-	<version>1.4.2_2</version>
+      	<groupId>org.apache.servicemix.bundles</groupId>
+      	<artifactId>org.apache.servicemix.bundles.xstream</artifactId>
+      	<version>1.4.2_2</version>
       </dependency>
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-workflow</artifactId>
-      	<version>0.1.13-SNAPSHOT</version>
+      	<version>0.2.0-SNAPSHOT</version>
       </dependency>
       <dependency>
-      	<groupId>junit</groupId>
-      	<artifactId>junit</artifactId>
-      	<version>4.8.2</version>
-      </dependency>
-      <dependency>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>org.apache.felix.gogo.runtime</artifactId>
-	<version>0.10.0</version>
-      </dependency>
-      <dependency>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>org.osgi.core</artifactId>
-	<version>1.4.0</version>
-      </dependency>    
-      <dependency>
-	<groupId>org.osgi</groupId>
-	<artifactId>org.osgi.compendium</artifactId>
-	<version>4.3.1</version>
-      </dependency>
-      <dependency>
-	<groupId>org.osgi</groupId>
-	<artifactId>org.osgi.core</artifactId>
-	<version>4.3.1</version>
-	<scope>provided</scope>
-      </dependency>
-      <dependency>
-	<groupId>org.apache.karaf</groupId>
-	<artifactId>org.apache.karaf.util</artifactId>
-	<version>${karaf.version}</version>
-      </dependency>      
-      <dependency>
-	<groupId>org.apache.karaf.shell</groupId>
-	<artifactId>org.apache.karaf.shell.console</artifactId>
-	<version>${karaf.version}</version>
-      </dependency>
-      <dependency>
-	<groupId>org.apache.activemq</groupId>
-	<artifactId>activemq-client</artifactId>
-	<version>${activemq.version}</version>
-      </dependency>
-      <dependency>
-	<groupId>org.apache.geronimo.specs</groupId>
-	<artifactId>geronimo-jms_1.1_spec</artifactId>
-	<version>1.1.1</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.openjpa</groupId>
-      	<artifactId>openjpa</artifactId>
-      	<version>${openjpa.version}</version>
+      	<groupId>org.apache.activemq</groupId>
+      	<artifactId>activemq-client</artifactId>
+      	<version>${activemq.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-compiler-plugin</artifactId>
-	<version>${maven.compiler.plugin.version}</version>
-	<configuration>
-	  <source>1.7</source>
-	  <target>1.7</target>
-	</configuration>
-      </plugin>
-      <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-eclipse-plugin</artifactId>
-	<version>${maven.eclipse.plugin.version}</version>
-	<configuration>
-	  <skip>false</skip>
-	</configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>${maven.release.plugin.version}</version>
-        <configuration>
-          <preparationGoals>clean install</preparationGoals>
-        </configuration>
-      </plugin>
-      <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-surefire-plugin</artifactId>
-	<version>${maven.eclipse.plugin.version}</version>
-	<configuration>
-	  <skip>true</skip>
-	</configuration>
-      </plugin>
-      <plugin>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>maven-bundle-plugin</artifactId>
-	<version>${maven.bundle.plugin.version}</version>
-	<extensions>true</extensions>
-	<inherited>true</inherited>
-	<configuration>
-	  <excludeDependencies>${aries.osgi.exclude.dependencies}</excludeDependencies>
-	  <instructions>
-	    <Bundle-Name>${project.name}</Bundle-Name>
-	    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-	    <Implementation-Title>${project.name}</Implementation-Title>
-	    <Implementation-Version>${project.version}</Implementation-Version>
-	    <Bundle-Vendor>UNC</Bundle-Vendor>
-	    <Include-Resource>{maven-resources}</Include-Resource>
-	    <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
-	    <_removeheaders>Ignore-Package,Include-Resource,Private-Package,Bundle-DocURL</_removeheaders>
-	    <_failok>false</_failok>
-	  </instructions>
-	</configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <version>${maven.site.plugin.version}</version>
-	<executions>
-	  <execution>
-            <id>attach-descriptor</id>
-            <goals>
-              <goal>attach-descriptor</goal>
-            </goals>
-          </execution>
-        </executions>
-	<configuration>
-	  <reportPlugins>
-	    <plugin>
-	      <groupId>org.apache.maven.plugins</groupId>
-	      <artifactId>maven-project-info-reports-plugin</artifactId>
-	      <version>2.4</version>
-	      <configuration>
-		<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-		<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-	      </configuration>
-	      <reports>
-		<report>scm</report>
-		<report>summary</report>
-		<report>issue-tracking</report>
-		<report>license</report>
-		<report>dependency-convergence</report>
-		<report>project-team</report>
-		<report>mailing-list</report>
-		<!-- <report>distribution-management</report> -->
-		<report>index</report>
-		<report>cim</report>
-		<!-- <report>dependency-management</report> -->
-	      </reports>
-	    </plugin>
-	  </reportPlugins>
-	</configuration>
-      </plugin>
-    </plugins>
-  </build>
   <modules>
     <module>casava-workflow</module>
     <module>casava-commands</module>
