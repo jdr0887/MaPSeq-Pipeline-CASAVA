@@ -17,7 +17,7 @@
     </dependency>
     <dependency>
       <groupId>edu.unc.mapseq</groupId>
-      <artifactId>mapseq-modules</artifactId>
+      <artifactId>modules</artifactId>
     </dependency>
     <dependency>
       <groupId>edu.unc.mapseq.pipelines.casava</groupId>
@@ -37,7 +37,7 @@
                 <delete file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" />
                 <touch file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" mkdirs="true" />
                 <echo file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" append="true">
-                  version=${project.version}
+version=${project.version}
                 </echo>
               </tasks>
             </configuration>
