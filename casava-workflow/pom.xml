@@ -2,13 +2,13 @@
   <parent>
     <groupId>edu.unc.mapseq.pipelines</groupId>
     <artifactId>casava</artifactId>
-    <version>0.1.15-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA :: Workflow</name>
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines.casava</groupId>
   <artifactId>casava-workflow</artifactId>
-  <version>0.1.15-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
@@ -37,7 +37,7 @@
                 <delete file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" />
                 <touch file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" mkdirs="true" />
                 <echo file="${basedir}/src/main/resources/edu/unc/mapseq/pipeline/casava/pipeline.properties" append="true">
-version=${project.version}
+		  version=${project.version}
                 </echo>
               </tasks>
             </configuration>
