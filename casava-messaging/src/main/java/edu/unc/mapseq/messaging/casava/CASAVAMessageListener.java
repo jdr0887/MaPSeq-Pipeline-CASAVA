@@ -57,19 +57,19 @@ import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
 import edu.unc.mapseq.pipeline.EntityUtil;
-import edu.unc.mapseq.pipeline.casava.CASAVAPipelineBeanService;
+import edu.unc.mapseq.pipeline.PipelineBeanService;
 
 public class CASAVAMessageListener implements MessageListener {
 
     private final Logger logger = LoggerFactory.getLogger(CASAVAMessageListener.class);
 
-    private CASAVAPipelineBeanService pipelineBeanService;
+    private PipelineBeanService pipelineBeanService;
 
     public CASAVAMessageListener() {
         super();
     }
 
-    public CASAVAMessageListener(CASAVAPipelineBeanService pipelineBeanService) {
+    public CASAVAMessageListener(PipelineBeanService pipelineBeanService) {
         super();
         this.pipelineBeanService = pipelineBeanService;
     }
@@ -445,11 +445,11 @@ public class CASAVAMessageListener implements MessageListener {
         }
     }
 
-    public CASAVAPipelineBeanService getPipelineBeanService() {
+    public PipelineBeanService getPipelineBeanService() {
         return pipelineBeanService;
     }
 
-    public void setPipelineBeanService(CASAVAPipelineBeanService pipelineBeanService) {
+    public void setPipelineBeanService(PipelineBeanService pipelineBeanService) {
         this.pipelineBeanService = pipelineBeanService;
     }
 
