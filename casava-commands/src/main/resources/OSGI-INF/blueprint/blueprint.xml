@@ -10,18 +10,18 @@
     <command name="mapseq/run-casava-pipeline">
       <action class="edu.unc.mapseq.commands.casava.RunPipelineAction">
         <property name="mapseqDAOBean" ref="mapseqDAOBean" />
-        <property name="mapseqConfigurationService" ref="mapseqConfigurationService" />
+        <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
       </action>
     </command>
     <command name="mapseq/save-observed-cluster-density-attributes">
       <action class="edu.unc.mapseq.commands.casava.SaveObservedClusterDensityAttributesAction">
         <property name="mapseqDAOBean" ref="mapseqDAOBean" />
-        <property name="mapseqConfigurationService" ref="mapseqConfigurationService" />
+        <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
       </action>
     </command>
   </command-bundle>
 
-  <reference id="mapseqConfigurationService" interface="edu.unc.mapseq.config.MaPSeqConfigurationService" />
+  <reference id="maPSeqConfigurationService" interface="edu.unc.mapseq.config.MaPSeqConfigurationService" />
   <reference id="accountDAO" interface="edu.unc.mapseq.dao.AccountDAO" />
   <reference id="accountGroupDAO" interface="edu.unc.mapseq.dao.AccountGroupDAO" />
   <reference id="fileDataDAO" interface="edu.unc.mapseq.dao.FileDataDAO" />
