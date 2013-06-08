@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" default-activation="eager">
+
+  <cm:property-placeholder persistent-id="edu.unc.mapseq.executor.casava" update-strategy="reload">
+    <cm:default-properties>
+      <cm:property name="period" value="2" />
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <reference id="CASAVAPipelineBeanService" interface="edu.unc.mapseq.pipeline.PipelineBeanService"
+    component-name="CASAVAPipelineBeanService" />
+
+  <bean id="task" class="edu.unc.mapseq.executor.casava.CASAVAPipelineExecutorTask">
+    <property name="pipelineBeanService" ref="CASAVAPipelineBeanService" />
+  </bean>
+
+  <bean id="CASAVAPipelineExecutorService" class="edu.unc.mapseq.executor.casava.CASAVAPipelineExecutorService"
+    init-method="start" destroy-method="stop" activation="eager">
+    <property name="task" ref="task" />
+    <property name="period" value="${period}" />
+    <cm:managed-properties persistent-id="edu.unc.mapseq.executor.casava" update-strategy="container-managed" />
+  </bean>
+
+</blueprint>
