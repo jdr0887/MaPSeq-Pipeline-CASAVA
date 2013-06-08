@@ -2,7 +2,7 @@
   <parent>
     <groupId>edu.unc</groupId>
     <artifactId>mapseq</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA</name>
   <modelVersion>4.0.0</modelVersion>
@@ -71,6 +71,7 @@
   </dependencyManagement>
   <modules>
     <module>casava-workflow</module>
+    <module>casava-executor</module>
     <module>casava-commands</module>
     <module>casava-commons</module>
     <module>casava-main</module>
