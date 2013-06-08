@@ -34,11 +34,9 @@ import edu.unc.mapseq.pipeline.AbstractPipeline;
 import edu.unc.mapseq.pipeline.PipelineException;
 import edu.unc.mapseq.pipeline.PipelineJobFactory;
 
-public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> {
+public class CASAVAPipeline extends AbstractPipeline {
 
     private final Logger logger = LoggerFactory.getLogger(CASAVAPipeline.class);
-
-    private CASAVAPipelineBeanService pipelineBeanService;
 
     public CASAVAPipeline() {
         super();
@@ -73,7 +71,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
 
         List<HTSFSample> htsfSampleList = null;
         try {
-            htsfSampleList = this.pipelineBeanService.getMaPSeqDAOBean().getHTSFSampleDAO()
+            htsfSampleList = getPipelineBeanService().getMaPSeqDAOBean().getHTSFSampleDAO()
                     .findBySequencerRunId(getWorkflowPlan().getSequencerRun().getId());
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
@@ -102,6 +100,8 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
 
         if (laneMap.size() > 0) {
 
+            String siteName = getPipelineBeanService().getAttributes().get("siteName");
+
             for (Integer laneIndex : laneMap.keySet()) {
 
                 try {
@@ -110,7 +110,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
 
                     CondorJob configureBCLToFastQJob = PipelineJobFactory.createJob(++count,
                             ConfigureBCLToFastqCLI.class, getWorkflowPlan());
-                    configureBCLToFastQJob.setSiteName(getPipelineBeanService().getSiteName());
+                    configureBCLToFastQJob.setSiteName(siteName);
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.INPUTDIR, baseCallsDir.getAbsolutePath());
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.MISMATCHES);
                     configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGBCL);
@@ -155,14 +155,15 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                     if (unalignedDir.exists()) {
                         CondorJob removeUnalignedDirectoryJob = PipelineJobFactory.createJob(++count, RemoveCLI.class,
                                 getWorkflowPlan());
-                        removeUnalignedDirectoryJob.setSiteName(getPipelineBeanService().getSiteName());
+                        removeUnalignedDirectoryJob.setSiteName(getPipelineBeanService().getAttributes()
+                                .get("siteName"));
                         removeUnalignedDirectoryJob.addArgument(RemoveCLI.FILE, unalignedDir);
                         graph.addVertex(removeUnalignedDirectoryJob);
                         graph.addEdge(removeUnalignedDirectoryJob, configureBCLToFastQJob);
                     }
 
                     CondorJob makeJob = PipelineJobFactory.createJob(++count, MakeCLI.class, getWorkflowPlan(), null);
-                    makeJob.setSiteName(getPipelineBeanService().getSiteName());
+                    makeJob.setSiteName(siteName);
                     makeJob.setNumberOfProcessors(2);
                     makeJob.addArgument(MakeCLI.THREADS, "2");
                     makeJob.addArgument(MakeCLI.WORKDIR, unalignedDir.getAbsolutePath());
@@ -190,7 +191,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                             case 1:
                                 copyJob = PipelineJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
                                         htsfSample);
-                                copyJob.setSiteName(getPipelineBeanService().getSiteName());
+                                copyJob.setSiteName(siteName);
                                 sourceFile = new File(sampleDirectory, String.format("%s_%s_L%03d_R%d_001.fastq.gz",
                                         htsfSample.getName(), htsfSample.getBarcode(), laneIndex, 1));
                                 copyJob.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath());
@@ -209,7 +210,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                                 // read 1
                                 copyJob = PipelineJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
                                         htsfSample);
-                                copyJob.setSiteName(getPipelineBeanService().getSiteName());
+                                copyJob.setSiteName(siteName);
                                 sourceFile = new File(sampleDirectory, String.format("%s_%s_L%03d_R%d_001.fastq.gz",
                                         htsfSample.getName(), htsfSample.getBarcode(), laneIndex, 1));
                                 copyJob.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath());
@@ -224,7 +225,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
                                 // read 2
                                 copyJob = PipelineJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
                                         htsfSample);
-                                copyJob.setSiteName(getPipelineBeanService().getSiteName());
+                                copyJob.setSiteName(siteName);
                                 sourceFile = new File(sampleDirectory, String.format("%s_%s_L%03d_R%d_001.fastq.gz",
                                         htsfSample.getName(), htsfSample.getBarcode(), laneIndex, 2));
                                 copyJob.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath());
@@ -256,7 +257,7 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
 
         List<HTSFSample> htsfSampleList = null;
         try {
-            htsfSampleList = pipelineBeanService.getMaPSeqDAOBean().getHTSFSampleDAO()
+            htsfSampleList = getPipelineBeanService().getMaPSeqDAOBean().getHTSFSampleDAO()
                     .findBySequencerRunId(getWorkflowPlan().getSequencerRun().getId());
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
@@ -271,25 +272,17 @@ public class CASAVAPipeline extends AbstractPipeline<CASAVAPipelineBeanService> 
         sequencerRunIdList.add(getWorkflowPlan().getSequencerRun().getId());
 
         SaveDemultiplexedStatsAttributesRunnable saveDemultiplexedStatsAttributesRunnable = new SaveDemultiplexedStatsAttributesRunnable();
-        saveDemultiplexedStatsAttributesRunnable.setMapseqDAOBean(pipelineBeanService.getMaPSeqDAOBean());
+        saveDemultiplexedStatsAttributesRunnable.setMapseqDAOBean(getPipelineBeanService().getMaPSeqDAOBean());
         saveDemultiplexedStatsAttributesRunnable.setSequencerRunIdList(sequencerRunIdList);
         Executors.newSingleThreadExecutor().execute(saveDemultiplexedStatsAttributesRunnable);
 
         SaveObservedClusterDensityAttributesRunnable saveObservedClusterDensityAttributesRunnable = new SaveObservedClusterDensityAttributesRunnable();
-        saveObservedClusterDensityAttributesRunnable.setMapseqDAOBean(pipelineBeanService.getMaPSeqDAOBean());
-        saveObservedClusterDensityAttributesRunnable.setMapseqConfigurationService(pipelineBeanService
-                .getMapseqConfigurationService());
+        saveObservedClusterDensityAttributesRunnable.setMapseqDAOBean(getPipelineBeanService().getMaPSeqDAOBean());
+        saveObservedClusterDensityAttributesRunnable.setMapseqConfigurationService(getPipelineBeanService()
+                .getMaPSeqConfigurationService());
         saveObservedClusterDensityAttributesRunnable.setSequencerRunIdList(sequencerRunIdList);
         Executors.newSingleThreadExecutor().execute(saveObservedClusterDensityAttributesRunnable);
 
-    }
-
-    public CASAVAPipelineBeanService getPipelineBeanService() {
-        return pipelineBeanService;
-    }
-
-    public void setPipelineBeanService(CASAVAPipelineBeanService pipelineBeanService) {
-        this.pipelineBeanService = pipelineBeanService;
     }
 
 }

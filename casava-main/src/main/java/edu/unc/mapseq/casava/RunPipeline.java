@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -52,9 +54,10 @@ import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
 import edu.unc.mapseq.dao.ws.WebServiceDAOManager;
+import edu.unc.mapseq.pipeline.PipelineBeanService;
+import edu.unc.mapseq.pipeline.PipelineBeanServiceImpl;
 import edu.unc.mapseq.pipeline.PipelineExecutor;
 import edu.unc.mapseq.pipeline.casava.CASAVAPipeline;
-import edu.unc.mapseq.pipeline.casava.CASAVAPipelineBeanService;
 
 public class RunPipeline implements Runnable {
 
@@ -162,10 +165,13 @@ public class RunPipeline implements Runnable {
             MaPSeqConfigurationService configService = new MaPSeqConfigurationServiceImpl();
             System.out.println("Please watch " + System.getenv("MAPSEQ_HOME")
                     + "/logs/mapseq.log for state changes and/or progress");
-            CASAVAPipelineBeanService casavaPipelineBeanService = new CASAVAPipelineBeanService();
-            casavaPipelineBeanService.setSiteName("Kure");
-            casavaPipelineBeanService.setMapseqConfigurationService(configService);
-            casavaPipelineBeanService.setMaPSeqDAOBean(daoMgr.getWSDAOBean());
+            PipelineBeanService pipelineBeanService = new PipelineBeanServiceImpl();
+
+            Map<String, String> attributeMap = new HashMap<String, String>();
+            attributeMap.put("siteName", "Kure");
+            pipelineBeanService.setAttributes(attributeMap);
+            pipelineBeanService.setMaPSeqConfigurationService(configService);
+            pipelineBeanService.setMaPSeqDAOBean(daoMgr.getWSDAOBean());
 
             File baseDir = new File(sequencerRun.getBaseDirectory());
             File sequencerRunDir = new File(baseDir, sequencerRun.getName());
@@ -270,7 +276,7 @@ public class RunPipeline implements Runnable {
             sequencerRun.setAttributes(entityAttributeSet);
             daoMgr.getWSDAOBean().getSequencerRunDAO().save(sequencerRun);
 
-            pipeline.setPipelineBeanService(casavaPipelineBeanService);
+            pipeline.setPipelineBeanService(pipelineBeanService);
             pipeline.setWorkflowPlan(workflowPlan);
             Executors.newSingleThreadExecutor().execute(new PipelineExecutor(pipeline));
 
