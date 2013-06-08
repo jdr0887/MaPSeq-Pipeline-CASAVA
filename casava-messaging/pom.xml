@@ -47,7 +47,7 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-	    <Bundle-Activator>edu.unc.mapseq.messaging.casava.Activator</Bundle-Activator>
+            <Export-Package>edu.unc.mapseq.messaging.casava.*</Export-Package>
 	    <Import-Package>*</Import-Package>
             <Private-Package />
           </instructions>
