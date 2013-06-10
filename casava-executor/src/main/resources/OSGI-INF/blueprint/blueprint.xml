@@ -4,7 +4,7 @@
 
   <cm:property-placeholder persistent-id="edu.unc.mapseq.executor.casava" update-strategy="reload">
     <cm:default-properties>
-      <cm:property name="period" value="2" />
+      <cm:property name="period" value="5" />
     </cm:default-properties>
   </cm:property-placeholder>
 
