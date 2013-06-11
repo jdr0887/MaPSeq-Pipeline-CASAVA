@@ -21,9 +21,9 @@ public class RunPipelineAction extends AbstractAction {
     @Argument(index = 0, name = "workflowRunName", description = "WorkflowRun.name", required = true, multiValued = false)
     private String workflowRunName;
 
-    private MaPSeqDAOBean mapseqDAOBean;
+    private MaPSeqDAOBean maPSeqDAOBean;
 
-    private MaPSeqConfigurationService mapseqConfigurationService;
+    private MaPSeqConfigurationService maPSeqConfigurationService;
 
     public RunPipelineAction() {
         super();
@@ -33,7 +33,7 @@ public class RunPipelineAction extends AbstractAction {
     public Object doExecute() {
 
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(String.format("nio://%s:61616",
-                mapseqConfigurationService.getWebServiceHost("localhost")));
+                maPSeqConfigurationService.getWebServiceHost("localhost")));
 
         Connection connection = null;
         Session session = null;
@@ -68,20 +68,20 @@ public class RunPipelineAction extends AbstractAction {
         this.workflowRunName = workflowRunName;
     }
 
-    public MaPSeqDAOBean getMapseqDAOBean() {
-        return mapseqDAOBean;
+    public MaPSeqDAOBean getMaPSeqDAOBean() {
+        return maPSeqDAOBean;
     }
 
-    public void setMapseqDAOBean(MaPSeqDAOBean mapseqDAOBean) {
-        this.mapseqDAOBean = mapseqDAOBean;
+    public void setMaPSeqDAOBean(MaPSeqDAOBean maPSeqDAOBean) {
+        this.maPSeqDAOBean = maPSeqDAOBean;
     }
 
-    public MaPSeqConfigurationService getMapseqConfigurationService() {
-        return mapseqConfigurationService;
+    public MaPSeqConfigurationService getMaPSeqConfigurationService() {
+        return maPSeqConfigurationService;
     }
 
-    public void setMapseqConfigurationService(MaPSeqConfigurationService mapseqConfigurationService) {
-        this.mapseqConfigurationService = mapseqConfigurationService;
+    public void setMaPSeqConfigurationService(MaPSeqConfigurationService maPSeqConfigurationService) {
+        this.maPSeqConfigurationService = maPSeqConfigurationService;
     }
 
 }

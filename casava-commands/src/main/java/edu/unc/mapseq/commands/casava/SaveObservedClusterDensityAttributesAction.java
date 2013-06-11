@@ -18,9 +18,9 @@ public class SaveObservedClusterDensityAttributesAction extends AbstractAction {
 
     private final Logger logger = LoggerFactory.getLogger(SaveObservedClusterDensityAttributesAction.class);
 
-    private MaPSeqDAOBean mapseqDAOBean;
+    private MaPSeqDAOBean maPSeqDAOBean;
 
-    private MaPSeqConfigurationService mapseqConfigurationService;
+    private MaPSeqConfigurationService maPSeqConfigurationService;
 
     @Argument(index = 0, name = "sequencerRunId", required = true, multiValued = true)
     private List<Long> sequencerRunIdList;
@@ -29,27 +29,27 @@ public class SaveObservedClusterDensityAttributesAction extends AbstractAction {
     protected Object doExecute() throws Exception {
         logger.info("ENTERING doExecute()");
         SaveObservedClusterDensityAttributesRunnable runnable = new SaveObservedClusterDensityAttributesRunnable();
-        runnable.setMapseqDAOBean(mapseqDAOBean);
-        runnable.setMapseqConfigurationService(mapseqConfigurationService);
+        runnable.setMapseqDAOBean(maPSeqDAOBean);
+        runnable.setMapseqConfigurationService(maPSeqConfigurationService);
         runnable.setSequencerRunIdList(sequencerRunIdList);
         Executors.newSingleThreadExecutor().execute(runnable);
         return null;
     }
 
-    public MaPSeqDAOBean getMapseqDAOBean() {
-        return mapseqDAOBean;
+    public MaPSeqDAOBean getMaPSeqDAOBean() {
+        return maPSeqDAOBean;
     }
 
-    public void setMapseqDAOBean(MaPSeqDAOBean mapseqDAOBean) {
-        this.mapseqDAOBean = mapseqDAOBean;
+    public void setMaPSeqDAOBean(MaPSeqDAOBean maPSeqDAOBean) {
+        this.maPSeqDAOBean = maPSeqDAOBean;
     }
 
-    public MaPSeqConfigurationService getMapseqConfigurationService() {
-        return mapseqConfigurationService;
+    public MaPSeqConfigurationService getMaPSeqConfigurationService() {
+        return maPSeqConfigurationService;
     }
 
-    public void setMapseqConfigurationService(MaPSeqConfigurationService mapseqConfigurationService) {
-        this.mapseqConfigurationService = mapseqConfigurationService;
+    public void setMaPSeqConfigurationService(MaPSeqConfigurationService maPSeqConfigurationService) {
+        this.maPSeqConfigurationService = maPSeqConfigurationService;
     }
 
     public List<Long> getSequencerRunIdList() {

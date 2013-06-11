@@ -17,7 +17,7 @@ public class SaveDemultiplexedStatsAttributesAction extends AbstractAction {
 
     private final Logger logger = LoggerFactory.getLogger(SaveDemultiplexedStatsAttributesAction.class);
 
-    private MaPSeqDAOBean mapseqDAOBean;
+    private MaPSeqDAOBean maPSeqDAOBean;
 
     @Argument(index = 0, name = "sequencerRunId", description = "Sequencer Run Identifier", required = true, multiValued = true)
     private List<Long> sequencerRunIdList;
@@ -26,18 +26,18 @@ public class SaveDemultiplexedStatsAttributesAction extends AbstractAction {
     protected Object doExecute() throws Exception {
         logger.info("ENTERING doExecute()");
         SaveDemultiplexedStatsAttributesRunnable runnable = new SaveDemultiplexedStatsAttributesRunnable();
-        runnable.setMapseqDAOBean(mapseqDAOBean);
+        runnable.setMapseqDAOBean(maPSeqDAOBean);
         runnable.setSequencerRunIdList(sequencerRunIdList);
         Executors.newSingleThreadExecutor().execute(runnable);
         return null;
     }
 
-    public MaPSeqDAOBean getMapseqDAOBean() {
-        return mapseqDAOBean;
+    public MaPSeqDAOBean getMaPSeqDAOBean() {
+        return maPSeqDAOBean;
     }
 
-    public void setMapseqDAOBean(MaPSeqDAOBean mapseqDAOBean) {
-        this.mapseqDAOBean = mapseqDAOBean;
+    public void setMaPSeqDAOBean(MaPSeqDAOBean maPSeqDAOBean) {
+        this.maPSeqDAOBean = maPSeqDAOBean;
     }
 
     public List<Long> getSequencerRunIdList() {
