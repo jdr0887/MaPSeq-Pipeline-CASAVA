@@ -13,7 +13,7 @@ import edu.unc.mapseq.commons.casava.SaveObservedClusterDensityAttributesRunnabl
 import edu.unc.mapseq.config.MaPSeqConfigurationService;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 
-@Command(scope = "mapseq", name = "save-observed-cluster-density-attributes", description = "Save Observed Cluster Density Attributes")
+@Command(scope = "casava", name = "save-observed-cluster-density-attributes", description = "Save Observed Cluster Density Attributes")
 public class SaveObservedClusterDensityAttributesAction extends AbstractAction {
 
     private final Logger logger = LoggerFactory.getLogger(SaveObservedClusterDensityAttributesAction.class);

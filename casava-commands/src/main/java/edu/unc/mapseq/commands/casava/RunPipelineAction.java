@@ -15,7 +15,7 @@ import org.apache.karaf.shell.console.AbstractAction;
 import edu.unc.mapseq.config.MaPSeqConfigurationService;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 
-@Command(scope = "mapseq", name = "run-casava-pipeline", description = "Run Casava Pipeline")
+@Command(scope = "casava", name = "run-pipeline", description = "Run Casava Pipeline")
 public class RunPipelineAction extends AbstractAction {
 
     @Argument(index = 0, name = "workflowRunName", description = "WorkflowRun.name", required = true, multiValued = false)
