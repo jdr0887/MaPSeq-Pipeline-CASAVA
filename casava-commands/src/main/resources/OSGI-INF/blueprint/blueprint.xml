@@ -4,18 +4,18 @@
   <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
     <command name="mapseq/save-demultiplexed-stats-attributes">
       <action class="edu.unc.mapseq.commands.casava.SaveDemultiplexedStatsAttributesAction">
-        <property name="mapseqDAOBean" ref="mapseqDAOBean" />
+        <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
       </action>
     </command>
     <command name="mapseq/run-casava-pipeline">
       <action class="edu.unc.mapseq.commands.casava.RunPipelineAction">
-        <property name="mapseqDAOBean" ref="mapseqDAOBean" />
+        <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
         <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
       </action>
     </command>
     <command name="mapseq/save-observed-cluster-density-attributes">
       <action class="edu.unc.mapseq.commands.casava.SaveObservedClusterDensityAttributesAction">
-        <property name="mapseqDAOBean" ref="mapseqDAOBean" />
+        <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
         <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
       </action>
     </command>
@@ -34,7 +34,7 @@
   <reference id="workflowPlanDAO" interface="edu.unc.mapseq.dao.WorkflowPlanDAO" />
   <reference id="workflowRunDAO" interface="edu.unc.mapseq.dao.WorkflowRunDAO" />
 
-  <bean id="mapseqDAOBean" class="edu.unc.mapseq.dao.MaPSeqDAOBean">
+  <bean id="maPSeqDAOBean" class="edu.unc.mapseq.dao.MaPSeqDAOBean">
     <property name="accountDAO" ref="accountDAO" />
     <property name="accountGroupDAO" ref="accountGroupDAO" />
     <property name="fileDataDAO" ref="fileDataDAO" />
