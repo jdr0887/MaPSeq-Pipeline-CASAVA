@@ -35,6 +35,9 @@ public class CASAVAPipelineExecutorTask extends TimerTask {
     public void run() {
         logger.info("ENTERING run()");
 
+        threadPoolExecutor.setCorePoolSize(pipelineBeanService.getCorePoolSize());
+        threadPoolExecutor.setMaximumPoolSize(pipelineBeanService.getMaxPoolSize());
+
         logger.info(String.format("ActiveCount: %d, TaskCount: %d, CompletedTaskCount: %d",
                 threadPoolExecutor.getActiveCount(), threadPoolExecutor.getTaskCount(),
                 threadPoolExecutor.getCompletedTaskCount()));
