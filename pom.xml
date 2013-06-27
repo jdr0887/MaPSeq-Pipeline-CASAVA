@@ -11,7 +11,7 @@
   <version>0.2.8-SNAPSHOT</version>
   <packaging>pom</packaging>
   <properties>
-    <mapseq.modules.version>0.0.5</mapseq.modules.version>
+    <mapseq.modules.version>0.0.6</mapseq.modules.version>
   </properties>
   <issueManagement>
     <system>gForge</system>
