@@ -10,6 +10,9 @@
   <artifactId>casava</artifactId>
   <version>0.2.8-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <properties>
+    <mapseq.modules.version>0.0.5</mapseq.modules.version>
+  </properties>
   <issueManagement>
     <system>gForge</system>
     <url>https://code.renci.org/gf/project/casava/tracker/</url>
@@ -50,7 +53,7 @@
       <dependency>
       	<groupId>edu.unc.mapseq</groupId>
       	<artifactId>modules</artifactId>
-      	<version>0.0.5</version>
+      	<version>${mapseq.modules.version}</version>
       </dependency>
       <dependency>
       	<groupId>org.apache.servicemix.bundles</groupId>
