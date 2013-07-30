@@ -11,7 +11,7 @@
   <version>0.2.13-SNAPSHOT</version>
   <packaging>pom</packaging>
   <properties>
-    <karaf.version>2.3.1</karaf.version>
+    <karaf.version>2.3.2</karaf.version>
     <activemq.version>5.8.0</activemq.version>
     <mapseq.version>0.2.14</mapseq.version>
     <mapseq.modules.version>0.0.11</mapseq.modules.version>
