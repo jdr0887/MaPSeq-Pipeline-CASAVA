@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -237,6 +238,10 @@ public class CASAVAMessageListener implements MessageListener {
                                         List<HTSFSample> htsfSamplesToDeleteList = htsfSampleDAO
                                                 .findBySequencerRunId(sequencerRun.getId());
 
+                                        List<Job> jobsToDeleteList = new ArrayList<Job>();
+                                        List<WorkflowPlan> workflowPlansToDeleteList = new ArrayList<WorkflowPlan>();
+                                        List<WorkflowRun> workflowRunsToDeleteList = new ArrayList<WorkflowRun>();
+
                                         WorkflowRunDAO workflowRunDAO = pipelineBeanService.getMaPSeqDAOBean()
                                                 .getWorkflowRunDAO();
 
@@ -250,23 +255,30 @@ public class CASAVAMessageListener implements MessageListener {
                                             List<WorkflowPlan> workflowPlanList = workflowPlanDAO
                                                     .findByHTSFSampleId(sample.getId());
 
-                                            for (WorkflowPlan workflowPlan : workflowPlanList) {
-                                                logger.debug("workflowPlan.toString(): {}", workflowPlan.toString());
+                                            if (workflowPlanList == null) {
+                                                logger.warn("no WorkflowPlan instances found");
+                                                continue;
+                                            }
 
-                                                List<Job> jobList = jobDAO.findByWorkflowRunId(workflowPlan
-                                                        .getWorkflowRun().getId());
-                                                jobDAO.delete(jobList);
+                                            for (WorkflowPlan workflowPlan : workflowPlanList) {
                                                 WorkflowRun workflowRunToDelete = workflowPlan.getWorkflowRun();
-                                                logger.debug("workflowRunToDelete.toString(): {}",
-                                                        workflowRunToDelete.toString());
-                                                workflowPlanDAO.delete(workflowPlan);
-                                                workflowRunDAO.delete(workflowRunToDelete);
+                                                jobsToDeleteList
+                                                        .addAll(jobDAO.findByWorkflowRunId(workflowRun.getId()));
+                                                workflowPlan.setHTSFSamples(null);
+                                                workflowPlanDAO.save(workflowPlan);
+                                                workflowPlansToDeleteList.add(workflowPlan);
+                                                workflowRunsToDeleteList.add(workflowRunToDelete);
 
                                             }
 
                                         }
 
+                                        // this will take a long time if there are lots of downstream analysis
+                                        jobDAO.delete(jobsToDeleteList);
+                                        workflowPlanDAO.delete(workflowPlansToDeleteList);
+                                        workflowRunDAO.delete(workflowRunsToDeleteList);
                                         htsfSampleDAO.delete(htsfSamplesToDeleteList);
+
                                     } else {
                                         sequencerRun.setCreator(account);
                                         sequencerRun.setStatus(SequencerRunStatusType.COMPLETED);
