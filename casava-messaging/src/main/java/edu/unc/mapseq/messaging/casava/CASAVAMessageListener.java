@@ -262,8 +262,8 @@ public class CASAVAMessageListener implements MessageListener {
 
                                             for (WorkflowPlan workflowPlan : workflowPlanList) {
                                                 WorkflowRun workflowRunToDelete = workflowPlan.getWorkflowRun();
-                                                jobsToDeleteList
-                                                        .addAll(jobDAO.findByWorkflowRunId(workflowRun.getId()));
+                                                jobsToDeleteList.addAll(jobDAO.findByWorkflowRunId(workflowRunToDelete
+                                                        .getId()));
                                                 workflowPlan.setHTSFSamples(null);
                                                 workflowPlanDAO.save(workflowPlan);
                                                 workflowPlansToDeleteList.add(workflowPlan);
