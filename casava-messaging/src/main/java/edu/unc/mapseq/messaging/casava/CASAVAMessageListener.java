@@ -118,27 +118,29 @@ public class CASAVAMessageListener implements MessageListener {
         File sampleSheet = null;
 
         try {
-
             String accountName = jsonMessage.getString("account_name");
+            account = pipelineBeanService.getMaPSeqDAOBean().getAccountDAO().findByName(accountName);
+        } catch (JSONException | MaPSeqDAOException e) {
+            logger.error("Error", e);
+        } catch (Exception e) {
+            logger.error("Error", e);
+        }
 
-            try {
-                account = pipelineBeanService.getMaPSeqDAOBean().getAccountDAO().findByName(accountName);
-            } catch (MaPSeqDAOException e) {
-            } catch (Exception e) {
-                logger.error("Error", e);
-            }
+        if (account == null) {
+            logger.error("Must register account first");
+            return;
+        }
 
-            if (account == null) {
-                logger.error("Must register account first");
-                return;
-            }
-
+        try {
             JSONArray entityArray = jsonMessage.getJSONArray("entities");
+            logger.debug("entityArray.length(): {}", entityArray.length());
 
             for (int i = 0; i < entityArray.length(); ++i) {
 
                 JSONObject entityJSONObject = entityArray.getJSONObject(i);
                 String entityType = entityJSONObject.getString("entity_type");
+
+                logger.debug("entityType: {}", entityType);
 
                 if ("Sequencer run".equals(entityType) || SequencerRun.class.getSimpleName().equals(entityType)) {
                     sequencerRun = EntityUtil.getSequencerRun(pipelineBeanService.getMaPSeqDAOBean(), entityJSONObject);
@@ -146,6 +148,7 @@ public class CASAVAMessageListener implements MessageListener {
 
                 if (FileData.class.getSimpleName().equals(entityType)) {
                     Long guid = entityJSONObject.getLong("id");
+                    logger.debug("guid: {}", guid);
                     try {
                         FileData fileData = null;
                         try {
@@ -157,25 +160,15 @@ public class CASAVAMessageListener implements MessageListener {
                         if (fileData != null && fileData.getName().endsWith(".csv")
                                 && fileData.getMimeType().equals(MimeType.TEXT_CSV)) {
 
+                            logger.debug("fileData.toString(): {}", fileData.toString());
+
                             Date creationDate = new Date();
 
                             sampleSheet = new File(fileData.getPath(), fileData.getName());
 
-                            Set<String> sampleProjectCache = new HashSet<String>();
+                            String sampleSheetContent = FileUtils.readFileToString(sampleSheet);
 
-                            LineNumberReader lnr = new LineNumberReader(new StringReader(
-                                    FileUtils.readFileToString(sampleSheet)));
-                            lnr.readLine();
-                            String line;
-
-                            while ((line = lnr.readLine()) != null) {
-                                String[] st = line.split(",");
-                                String sampleProject = st[9];
-                                sampleProjectCache.add(sampleProject);
-                            }
-                            lnr.close();
-
-                            Collections.synchronizedSet(sampleProjectCache);
+                            Set<String> sampleProjectCache = findStudyName(sampleSheetContent);
 
                             Map<String, Study> studyMap = new HashMap<String, Study>();
 
@@ -198,8 +191,6 @@ public class CASAVAMessageListener implements MessageListener {
                                 }
                             }
 
-                            String flowcellName = fileData.getName().replace(".csv", "");
-
                             // sequencerRun base directory is derived from study (aka sampleProject)
                             // assume studyMap is size 1
 
@@ -208,12 +199,16 @@ public class CASAVAMessageListener implements MessageListener {
                                 return;
                             }
 
+                            String flowcellName = fileData.getName().replace(".csv", "");
+
                             File studyDirectory = new File(System.getenv("MAPSEQ_BASE_DIRECTORY"), studyMap.get(
                                     studyMap.keySet().iterator().next()).getName());
                             File baseDirectory = new File(studyDirectory, "out");
                             File flowcellDirectory = new File(baseDirectory, flowcellName);
 
                             Set<Integer> laneIndexSet = new HashSet<Integer>();
+
+                            logger.debug("flowcellDirectory.exists(): {}", flowcellDirectory.exists());
 
                             if (flowcellDirectory.exists()) {
 
@@ -222,10 +217,15 @@ public class CASAVAMessageListener implements MessageListener {
                                 sequencerRun.setName(flowcellName);
 
                                 try {
+
                                     List<SequencerRun> foundSequencerRuns = pipelineBeanService.getMaPSeqDAOBean()
                                             .getSequencerRunDAO().findByExample(sequencerRun);
+
                                     if (foundSequencerRuns != null && foundSequencerRuns.size() > 0) {
+
                                         sequencerRun = foundSequencerRuns.get(0);
+                                        logger.debug("sequencerRun.toString(): {}", sequencerRun.toString());
+
                                         // sequencerRun to htsfSample is one to many and if a sequencerRun is found,
                                         // reset the htsfSamples from the samplesheet, but must first delete existing
                                         // htsfSamples
@@ -244,15 +244,26 @@ public class CASAVAMessageListener implements MessageListener {
                                                 .getWorkflowPlanDAO();
 
                                         for (HTSFSample sample : htsfSamplesToDeleteList) {
+
+                                            logger.debug("sample.toString(): {}", sample.toString());
+
                                             List<WorkflowPlan> workflowPlanList = workflowPlanDAO
                                                     .findByHTSFSampleId(sample.getId());
-                                            for (WorkflowPlan entity : workflowPlanList) {
-                                                List<Job> jobList = jobDAO.findByWorkflowRunId(entity.getWorkflowRun()
-                                                        .getId());
+
+                                            for (WorkflowPlan workflowPlan : workflowPlanList) {
+                                                logger.debug("workflowPlan.toString(): {}", workflowPlan.toString());
+
+                                                List<Job> jobList = jobDAO.findByWorkflowRunId(workflowPlan
+                                                        .getWorkflowRun().getId());
                                                 jobDAO.delete(jobList);
-                                                workflowPlanDAO.delete(entity);
-                                                workflowRunDAO.delete(entity.getWorkflowRun());
+                                                WorkflowRun workflowRunToDelete = workflowPlan.getWorkflowRun();
+                                                logger.debug("workflowRunToDelete.toString(): {}",
+                                                        workflowRunToDelete.toString());
+                                                workflowPlanDAO.delete(workflowPlan);
+                                                workflowRunDAO.delete(workflowRunToDelete);
+
                                             }
+
                                         }
 
                                         htsfSampleDAO.delete(htsfSamplesToDeleteList);
@@ -264,9 +275,10 @@ public class CASAVAMessageListener implements MessageListener {
                                         Long sequencerRunId = pipelineBeanService.getMaPSeqDAOBean()
                                                 .getSequencerRunDAO().save(sequencerRun);
                                         sequencerRun.setId(sequencerRunId);
+                                        logger.debug("sequencerRun.toString(): {}", sequencerRun.toString());
                                     }
-                                } catch (MaPSeqDAOException e1) {
-                                    e1.printStackTrace();
+                                } catch (MaPSeqDAOException e) {
+                                    logger.error("Error", e);
                                 }
                             }
 
@@ -275,8 +287,9 @@ public class CASAVAMessageListener implements MessageListener {
                                 return;
                             }
 
-                            lnr = new LineNumberReader(new StringReader(FileUtils.readFileToString(sampleSheet)));
+                            LineNumberReader lnr = new LineNumberReader(new StringReader(sampleSheetContent));
                             lnr.readLine();
+                            String line;
 
                             while ((line = lnr.readLine()) != null) {
 
@@ -345,25 +358,25 @@ public class CASAVAMessageListener implements MessageListener {
                             }
 
                         }
-                    } catch (NumberFormatException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    } catch (NumberFormatException | IOException e) {
+                        logger.error("ERROR", e);
                     }
                 }
 
                 if ("Workflow run".equals(entityType) || WorkflowRun.class.getSimpleName().equals(entityType)) {
                     workflowRun = EntityUtil.getWorkflowRun(pipelineBeanService.getMaPSeqDAOBean(), "CASAVA",
                             entityJSONObject, account);
+                    logger.debug("workflowRun.toString(): {}", workflowRun.toString());
                 }
 
                 if (Platform.class.getSimpleName().equals(entityType)) {
                     platform = EntityUtil.getPlatform(pipelineBeanService.getMaPSeqDAOBean(), entityJSONObject);
+                    logger.debug("platform.toString(): {}", platform.toString());
                 }
 
             }
-        } catch (JSONException e1) {
-            e1.printStackTrace();
+        } catch (JSONException e) {
+            logger.error("ERROR", e);
             return;
         }
 
@@ -443,6 +456,25 @@ public class CASAVAMessageListener implements MessageListener {
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
         }
+    }
+
+    private Set<String> findStudyName(String sampleSheetContent) throws IOException {
+        logger.info("ENTERING findStudyName(File)");
+        Set<String> sampleProjectCache = new HashSet<String>();
+
+        LineNumberReader lnr = new LineNumberReader(new StringReader(sampleSheetContent));
+        lnr.readLine();
+        String line;
+
+        while ((line = lnr.readLine()) != null) {
+            String[] st = line.split(",");
+            String sampleProject = st[9];
+            sampleProjectCache.add(sampleProject);
+        }
+        lnr.close();
+
+        Collections.synchronizedSet(sampleProjectCache);
+        return sampleProjectCache;
     }
 
     public PipelineBeanService getPipelineBeanService() {
