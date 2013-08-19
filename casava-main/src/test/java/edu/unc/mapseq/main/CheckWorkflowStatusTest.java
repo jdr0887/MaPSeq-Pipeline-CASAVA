@@ -17,17 +17,17 @@ import edu.unc.mapseq.dao.WorkflowPlanDAO;
 import edu.unc.mapseq.dao.model.HTSFSample;
 import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
-import edu.unc.mapseq.dao.ws.WebServiceDAOManager;
+import edu.unc.mapseq.dao.ws.WSDAOManager;
 
 public class CheckWorkflowStatusTest {
 
     @Test
     public void testWorkflowPlan() {
 
-        WebServiceDAOManager daoMgr = WebServiceDAOManager.getInstance();
+        WSDAOManager daoMgr = WSDAOManager.getInstance();
 
         List<WorkflowPlan> wpList = new ArrayList<WorkflowPlan>();
-        WorkflowPlanDAO workflowPlanDAO = daoMgr.getWSDAOBean().getWorkflowPlanDAO();
+        WorkflowPlanDAO workflowPlanDAO = daoMgr.getMaPSeqDAOBean().getWorkflowPlanDAO();
         try {
             List<WorkflowPlan> wfPlanList = workflowPlanDAO.findByStudyName("NC_GENES");
             if (wfPlanList != null) {
@@ -35,7 +35,7 @@ public class CheckWorkflowStatusTest {
             }
         } catch (MaPSeqDAOException e) {
         }
-        HTSFSampleDAO hTSFSampleDAO = daoMgr.getWSDAOBean().getHTSFSampleDAO();
+        HTSFSampleDAO hTSFSampleDAO = daoMgr.getMaPSeqDAOBean().getHTSFSampleDAO();
 
         try {
 
