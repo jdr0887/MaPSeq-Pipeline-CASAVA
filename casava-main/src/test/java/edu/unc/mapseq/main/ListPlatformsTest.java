@@ -11,7 +11,7 @@ import org.junit.Test;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.PlatformDAO;
 import edu.unc.mapseq.dao.model.Platform;
-import edu.unc.mapseq.dao.ws.WebServiceDAOManager;
+import edu.unc.mapseq.dao.ws.WSDAOManager;
 
 public class ListPlatformsTest {
 
@@ -27,8 +27,8 @@ public class ListPlatformsTest {
         // String platformName = "ILLUMINA";
         // String platformInstrument = "Illumina Genome Analyzer II";
 
-        WebServiceDAOManager daoMgr = WebServiceDAOManager.getInstance();
-        PlatformDAO platformDAO = daoMgr.getWSDAOBean().getPlatformDAO();
+        WSDAOManager daoMgr = WSDAOManager.getInstance();
+        PlatformDAO platformDAO = daoMgr.getMaPSeqDAOBean().getPlatformDAO();
 
         List<Platform> platformList = new ArrayList<Platform>();
 
