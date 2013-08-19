@@ -268,7 +268,6 @@ public class CASAVAMessageListener implements MessageListener {
                                                 workflowPlanDAO.save(workflowPlan);
                                                 workflowPlansToDeleteList.add(workflowPlan);
                                                 workflowRunsToDeleteList.add(workflowRunToDelete);
-
                                             }
 
                                         }
