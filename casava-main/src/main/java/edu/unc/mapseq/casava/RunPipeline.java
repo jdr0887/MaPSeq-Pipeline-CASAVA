@@ -53,7 +53,7 @@ import edu.unc.mapseq.dao.model.Workflow;
 import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
-import edu.unc.mapseq.dao.ws.WebServiceDAOManager;
+import edu.unc.mapseq.dao.ws.WSDAOManager;
 import edu.unc.mapseq.pipeline.PipelineBeanService;
 import edu.unc.mapseq.pipeline.PipelineBeanServiceImpl;
 import edu.unc.mapseq.pipeline.PipelineExecutor;
@@ -67,7 +67,7 @@ public class RunPipeline implements Runnable {
 
     private final static Options cliOptions = new Options();
 
-    private final WebServiceDAOManager daoMgr = WebServiceDAOManager.getInstance();
+    private final WSDAOManager daoMgr = WSDAOManager.getInstance();
 
     private String workflowRunName;
 
@@ -86,7 +86,7 @@ public class RunPipeline implements Runnable {
 
         Account account = null;
         try {
-            account = daoMgr.getWSDAOBean().getAccountDAO().findByName(System.getProperty("user.name"));
+            account = daoMgr.getMaPSeqDAOBean().getAccountDAO().findByName(System.getProperty("user.name"));
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
         }
@@ -106,9 +106,9 @@ public class RunPipeline implements Runnable {
 
         try {
             if (sequencerRunId != null && htsfSampleId == null) {
-                sequencerRun = daoMgr.getWSDAOBean().getSequencerRunDAO().findById(this.sequencerRunId);
+                sequencerRun = daoMgr.getMaPSeqDAOBean().getSequencerRunDAO().findById(this.sequencerRunId);
             } else if (sequencerRunId == null && htsfSampleId != null) {
-                HTSFSample htsfSample = daoMgr.getWSDAOBean().getHTSFSampleDAO().findById(this.htsfSampleId);
+                HTSFSample htsfSample = daoMgr.getMaPSeqDAOBean().getHTSFSampleDAO().findById(this.htsfSampleId);
                 htsfSampleSet.add(htsfSample);
             }
         } catch (MaPSeqDAOException e) {
@@ -122,7 +122,7 @@ public class RunPipeline implements Runnable {
         CASAVAPipeline pipeline = new CASAVAPipeline();
         Workflow workflow = null;
         try {
-            workflow = daoMgr.getWSDAOBean().getWorkflowDAO().findByName(pipeline.getName());
+            workflow = daoMgr.getMaPSeqDAOBean().getWorkflowDAO().findByName(pipeline.getName());
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
         }
@@ -144,7 +144,7 @@ public class RunPipeline implements Runnable {
 
         try {
             workflowRun.setStatus(WorkflowRunStatusType.PENDING);
-            Long workflowRunId = daoMgr.getWSDAOBean().getWorkflowRunDAO().save(workflowRun);
+            Long workflowRunId = daoMgr.getMaPSeqDAOBean().getWorkflowRunDAO().save(workflowRun);
             workflowRun.setId(workflowRunId);
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
@@ -159,7 +159,7 @@ public class RunPipeline implements Runnable {
                 workflowPlan.setHTSFSamples(htsfSampleSet);
             }
             workflowPlan.setWorkflowRun(workflowRun);
-            Long workflowPlanId = daoMgr.getWSDAOBean().getWorkflowPlanDAO().save(workflowPlan);
+            Long workflowPlanId = daoMgr.getMaPSeqDAOBean().getWorkflowPlanDAO().save(workflowPlan);
             workflowPlan.setId(workflowPlanId);
 
             MaPSeqConfigurationService configService = new MaPSeqConfigurationServiceImpl();
@@ -171,7 +171,7 @@ public class RunPipeline implements Runnable {
             attributeMap.put("siteName", "Kure");
             pipelineBeanService.setAttributes(attributeMap);
             pipelineBeanService.setMaPSeqConfigurationService(configService);
-            pipelineBeanService.setMaPSeqDAOBean(daoMgr.getWSDAOBean());
+            pipelineBeanService.setMaPSeqDAOBean(daoMgr.getMaPSeqDAOBean());
 
             File baseDir = new File(sequencerRun.getBaseDirectory());
             File sequencerRunDir = new File(baseDir, sequencerRun.getName());
@@ -229,7 +229,7 @@ public class RunPipeline implements Runnable {
 
             Vector<Vector<String>> data = new Vector<Vector<String>>();
             try {
-                List<HTSFSample> htsfSampleList = daoMgr.getWSDAOBean().getHTSFSampleDAO()
+                List<HTSFSample> htsfSampleList = daoMgr.getMaPSeqDAOBean().getHTSFSampleDAO()
                         .findBySequencerRunId(sequencerRun.getId());
 
                 if (htsfSampleList != null && htsfSampleList.size() > 0) {
@@ -274,7 +274,7 @@ public class RunPipeline implements Runnable {
             entityAttributeSet.add(new EntityAttribute("sampleSheet", sampleSheetFile.getAbsolutePath()));
 
             sequencerRun.setAttributes(entityAttributeSet);
-            daoMgr.getWSDAOBean().getSequencerRunDAO().save(sequencerRun);
+            daoMgr.getMaPSeqDAOBean().getSequencerRunDAO().save(sequencerRun);
 
             pipeline.setPipelineBeanService(pipelineBeanService);
             pipeline.setWorkflowPlan(workflowPlan);
