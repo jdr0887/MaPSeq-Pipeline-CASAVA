@@ -20,7 +20,7 @@ import edu.unc.mapseq.dao.model.HTSFSample;
 import edu.unc.mapseq.dao.model.Platform;
 import edu.unc.mapseq.dao.model.SequencerRun;
 import edu.unc.mapseq.dao.model.Study;
-import edu.unc.mapseq.dao.ws.WebServiceDAOManager;
+import edu.unc.mapseq.dao.ws.WSDAOManager;
 
 public class CreateSequencerRunTest {
 
@@ -39,7 +39,7 @@ public class CreateSequencerRunTest {
     @Test
     public void testRun() {
 
-        WebServiceDAOManager daoMgr = WebServiceDAOManager.getInstance();
+        WSDAOManager daoMgr = WSDAOManager.getInstance();
 
         Date creationDate = new Date();
 
@@ -50,7 +50,7 @@ public class CreateSequencerRunTest {
             lnr.readLine();
             String line;
 
-            Account account = daoMgr.getWSDAOBean().getAccountDAO().findByName(System.getProperty("user.name"));
+            Account account = daoMgr.getMaPSeqDAOBean().getAccountDAO().findByName(System.getProperty("user.name"));
 
             if (account == null) {
                 System.out.println("Must register account first");
@@ -59,7 +59,7 @@ public class CreateSequencerRunTest {
 
             Platform platform = null;
             try {
-                PlatformDAO platformDAO = daoMgr.getWSDAOBean().getPlatformDAO();
+                PlatformDAO platformDAO = daoMgr.getMaPSeqDAOBean().getPlatformDAO();
                 platform = platformDAO.findById(53L);
             } catch (MaPSeqDAOException e) {
                 e.printStackTrace();
@@ -73,7 +73,7 @@ public class CreateSequencerRunTest {
             sequencerRun.setPlatform(platform);
 
             try {
-                Long sequencerRunId = daoMgr.getWSDAOBean().getSequencerRunDAO().save(sequencerRun);
+                Long sequencerRunId = daoMgr.getMaPSeqDAOBean().getSequencerRunDAO().save(sequencerRun);
                 sequencerRun.setId(sequencerRunId);
             } catch (MaPSeqDAOException e1) {
                 e1.printStackTrace();
@@ -93,7 +93,7 @@ public class CreateSequencerRunTest {
                 String operator = st[8];
                 String sampleProject = st[9];
 
-                Study study = daoMgr.getWSDAOBean().getStudyDAO().findByName(sampleProject);
+                Study study = daoMgr.getMaPSeqDAOBean().getStudyDAO().findByName(sampleProject);
                 if (study == null) {
                     study = new Study();
                     study.setApproved(Boolean.TRUE);
@@ -102,7 +102,7 @@ public class CreateSequencerRunTest {
                     study.setCreator(account);
                     study.setGrant("test");
                     study.setName(sampleProject);
-                    daoMgr.getWSDAOBean().getStudyDAO().save(study);
+                    daoMgr.getMaPSeqDAOBean().getStudyDAO().save(study);
                 }
 
                 HTSFSample htsfSample = new HTSFSample();
@@ -115,7 +115,7 @@ public class CreateSequencerRunTest {
                 // htsfSample.setSequencerRun(sequencerRun);
                 htsfSample.setStudy(study);
 
-                daoMgr.getWSDAOBean().getHTSFSampleDAO().save(htsfSample);
+                daoMgr.getMaPSeqDAOBean().getHTSFSampleDAO().save(htsfSample);
             }
 
         } catch (MaPSeqDAOException e) {
