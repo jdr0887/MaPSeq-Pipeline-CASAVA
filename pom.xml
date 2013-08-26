@@ -13,7 +13,7 @@
   <properties>
     <karaf.version>2.3.2</karaf.version>
     <activemq.version>5.8.0</activemq.version>
-    <mapseq.version>0.2.23</mapseq.version>
+    <mapseq.version>0.2.24</mapseq.version>
     <mapseq.modules.version>0.0.13</mapseq.modules.version>
     <renci.commons.version>0.2.0</renci.commons.version>
   </properties>
