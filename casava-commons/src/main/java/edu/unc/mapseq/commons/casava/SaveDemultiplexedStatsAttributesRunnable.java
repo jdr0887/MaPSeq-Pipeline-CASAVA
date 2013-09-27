@@ -53,65 +53,68 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
     public void run() {
 
         List<SequencerRun> srList = new ArrayList<SequencerRun>();
-        SequencerRunDAO sequencerRunDAO = mapseqDAOBean.getSequencerRunDAO();
-        for (Long sequencerRunId : sequencerRunIdList) {
-            SequencerRun sequencerRun = null;
-            try {
-                sequencerRun = sequencerRunDAO.findById(sequencerRunId);
-            } catch (MaPSeqDAOException e) {
+
+        try {
+
+            SequencerRunDAO sequencerRunDAO = mapseqDAOBean.getSequencerRunDAO();
+            for (Long sequencerRunId : sequencerRunIdList) {
+                SequencerRun sequencerRun = sequencerRunDAO.findById(sequencerRunId);
+                if (sequencerRun != null) {
+                    srList.add(sequencerRun);
+                }
             }
-            if (sequencerRun != null) {
-                srList.add(sequencerRun);
-            }
-        }
 
-        if (srList.size() > 0) {
+            if (srList.size() > 0) {
 
-            for (SequencerRun sr : srList) {
+                for (SequencerRun sr : srList) {
 
-                File sequencerRunDir = new File(sr.getBaseDirectory(), sr.getName());
-                String flowcell = null;
+                    File sequencerRunDir = new File(sr.getBaseDirectory(), sr.getName());
+                    String flowcell = null;
 
-                try {
-                    DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                    File runInfoXmlFile = new File(sequencerRunDir, "RunInfo.xml");
-                    if (!runInfoXmlFile.exists()) {
-                        logger.error("RunInfo.xml file does not exist: {}", runInfoXmlFile.getAbsolutePath());
+                    try {
+                        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                        File runInfoXmlFile = new File(sequencerRunDir, "RunInfo.xml");
+                        if (!runInfoXmlFile.exists()) {
+                            logger.error("RunInfo.xml file does not exist: {}", runInfoXmlFile.getAbsolutePath());
+                            return;
+                        }
+                        FileInputStream fis = new FileInputStream(runInfoXmlFile);
+                        InputSource inputSource = new InputSource(fis);
+                        Document document = documentBuilder.parse(inputSource);
+                        XPath xpath = XPathFactory.newInstance().newXPath();
+
+                        // find the flowcell
+                        String runFlowcellIdPath = "/RunInfo/Run/Flowcell";
+                        Node runFlowcellIdNode = (Node) xpath
+                                .evaluate(runFlowcellIdPath, document, XPathConstants.NODE);
+                        flowcell = runFlowcellIdNode.getTextContent();
+                        logger.debug("flowcell = {}", flowcell);
+
+                    } catch (XPathExpressionException | DOMException | ParserConfigurationException | SAXException
+                            | IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    List<HTSFSample> htsfSampleList = mapseqDAOBean.getHTSFSampleDAO().findBySequencerRunId(sr.getId());
+
+                    if (htsfSampleList == null) {
+                        logger.warn("htsfSampleList was null");
                         return;
                     }
-                    FileInputStream fis = new FileInputStream(runInfoXmlFile);
-                    InputSource inputSource = new InputSource(fis);
-                    Document document = documentBuilder.parse(inputSource);
-                    XPath xpath = XPathFactory.newInstance().newXPath();
 
-                    // find the flowcell
-                    String runFlowcellIdPath = "/RunInfo/Run/Flowcell";
-                    Node runFlowcellIdNode = (Node) xpath.evaluate(runFlowcellIdPath, document, XPathConstants.NODE);
-                    flowcell = runFlowcellIdNode.getTextContent();
-                    logger.debug("flowcell = {}", flowcell);
+                    for (HTSFSample sample : htsfSampleList) {
 
-                } catch (XPathExpressionException | DOMException | ParserConfigurationException | SAXException
-                        | IOException e) {
-                    e.printStackTrace();
-                }
+                        File unalignedDir = new File(sequencerRunDir, String.format("Unaligned.%d",
+                                sample.getLaneIndex()));
+                        File baseCallStatsDir = new File(unalignedDir, String.format("Basecall_Stats_%s", flowcell));
+                        File statsFile = new File(baseCallStatsDir, "Demultiplex_Stats.htm");
 
-                List<HTSFSample> htsfSampleList = null;
-                try {
-                    htsfSampleList = mapseqDAOBean.getHTSFSampleDAO().findBySequencerRunId(sr.getId());
-                } catch (MaPSeqDAOException e) {
-                }
+                        if (!statsFile.exists()) {
+                            logger.warn("statsFile doesn't exist: {}", statsFile.getAbsolutePath());
+                            continue;
+                        }
 
-                if (htsfSampleList == null) {
-                    logger.warn("htsfSampleList was null");
-                    return;
-                }
-
-                for (HTSFSample sample : htsfSampleList) {
-
-                    File unalignedDir = new File(sequencerRunDir, String.format("Unaligned.%d", sample.getLaneIndex()));
-                    File baseCallStatsDir = new File(unalignedDir, String.format("Basecall_Stats_%s", flowcell));
-                    File statsFile = new File(baseCallStatsDir, "Demultiplex_Stats.htm");
-                    if (statsFile.exists()) {
+                        logger.info("parsing statsFile: {}", statsFile.getAbsolutePath());
 
                         try {
                             org.jsoup.nodes.Document doc = Jsoup.parse(FileUtils.readFileToString(statsFile));
@@ -280,8 +283,6 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                             e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
-                        } catch (MaPSeqDAOException e) {
-                            e.printStackTrace();
                         }
 
                     }
@@ -290,6 +291,10 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
 
             }
 
+        } catch (MaPSeqDAOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
