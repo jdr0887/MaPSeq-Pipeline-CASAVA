@@ -2,13 +2,13 @@
   <parent>
     <groupId>edu.unc.mapseq.pipelines</groupId>
     <artifactId>casava</artifactId>
-    <version>0.2.31-SNAPSHOT</version>
+    <version>0.2.31</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA :: Features</name>
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines.casava</groupId>
   <artifactId>casava-features</artifactId>
-  <version>0.2.31-SNAPSHOT</version>
+  <version>0.2.31</version>
   <packaging>pom</packaging>
   <build>
     <plugins>
