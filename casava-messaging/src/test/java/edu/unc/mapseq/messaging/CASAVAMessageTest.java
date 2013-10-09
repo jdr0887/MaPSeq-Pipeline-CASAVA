@@ -45,20 +45,23 @@ public class CASAVAMessageTest {
             // producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 10710,
             // "121109_UNC10-SN254_0391_BC0YNYACXX")));
 
-            producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 15251,
-                    "121204_UNC12-SN629_0241_BC180FACXX")));
+            // producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 15251,
+            // "121204_UNC12-SN629_0241_BC180FACXX")));
+            //
+            // producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 15255,
+            // "121213_UNC14-SN744_0279_BD1MCVACXX")));
+            //
+            // producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 51595,
+            // "121212_UNC13-SN749_0207_BD1LCDACXX")));
+            //
+            // producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 50683,
+            // "130105_UNC15-SN850_0250_BC1JMKACXX")));
+            //
+            // producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 10710,
+            // "121109_UNC10-SN254_0391_BC0YNYACXX")));
 
-            producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 15255,
-                    "121213_UNC14-SN744_0279_BD1MCVACXX")));
-
-            producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 51595,
-                    "121212_UNC13-SN749_0207_BD1LCDACXX")));
-
-            producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 50683,
-                    "130105_UNC15-SN850_0250_BC1JMKACXX")));
-
-            producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 10710,
-                    "121109_UNC10-SN254_0391_BC0YNYACXX")));
+            producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 29107,
+                    "130104_UNC16-SN851_0201_BC1GHTACXX")));
 
         } catch (JMSException e) {
             e.printStackTrace();
