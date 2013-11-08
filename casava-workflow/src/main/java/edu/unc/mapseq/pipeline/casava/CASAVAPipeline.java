@@ -175,7 +175,8 @@ public class CASAVAPipeline extends AbstractPipeline {
                     for (HTSFSample htsfSample : laneMap.get(laneIndex)) {
 
                         SequencerRun sequencerRun = htsfSample.getSequencerRun();
-                        File outputDirectory = createOutputDirectory(sequencerRun.getName(), htsfSample, getName());
+                        File outputDirectory = createOutputDirectory(sequencerRun.getName(), htsfSample, getName(),
+                                getVersion());
 
                         logger.info("outputDirectory.getAbsolutePath(): {}", outputDirectory.getAbsolutePath());
 
