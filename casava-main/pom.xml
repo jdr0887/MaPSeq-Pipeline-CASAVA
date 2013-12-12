@@ -88,16 +88,19 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>edu.unc.mapseq.mapseq-maven-plugins</groupId>
-        <artifactId>mapseq-maven-plugin-create-scripts</artifactId>
-        <version>0.0.4</version>
-        <configuration>
-          <outputDir>${project.basedir}/src/main/distribution/bin</outputDir>
-        </configuration>
+        <groupId>edu.unc.mapseq.maven-plugins</groupId>
+        <artifactId>scripts-plugin</artifactId>
+        <version>0.0.9</version>
         <executions>
           <execution>
+	    <id>mapseq-run-pipeline</id>
+	    <configuration>
+	      <outputDir>${project.basedir}/src/main/distribution/bin</outputDir>
+	      <scriptName>mapseq-run-pipeline.sh</scriptName>
+	      <className>edu.unc.mapseq.casava.RunWorkflow</className>
+	    </configuration>	
             <goals>
-              <goal>run-pipeline-script</goal>
+              <goal>mapseq-script</goal>
             </goals>
           </execution>
         </executions>
