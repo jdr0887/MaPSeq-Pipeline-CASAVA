@@ -7,7 +7,6 @@ import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,9 +38,14 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import edu.unc.mapseq.dao.AccountDAO;
+import edu.unc.mapseq.dao.FileDataDAO;
 import edu.unc.mapseq.dao.HTSFSampleDAO;
 import edu.unc.mapseq.dao.JobDAO;
+import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
+import edu.unc.mapseq.dao.SequencerRunDAO;
+import edu.unc.mapseq.dao.StudyDAO;
 import edu.unc.mapseq.dao.WorkflowPlanDAO;
 import edu.unc.mapseq.dao.WorkflowRunDAO;
 import edu.unc.mapseq.dao.model.Account;
@@ -57,22 +61,22 @@ import edu.unc.mapseq.dao.model.Study;
 import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
-import edu.unc.mapseq.pipeline.EntityUtil;
-import edu.unc.mapseq.pipeline.PipelineBeanService;
+import edu.unc.mapseq.workflow.EntityUtil;
+import edu.unc.mapseq.workflow.WorkflowBeanService;
 
 public class CASAVAMessageListener implements MessageListener {
 
     private final Logger logger = LoggerFactory.getLogger(CASAVAMessageListener.class);
 
-    private PipelineBeanService pipelineBeanService;
+    private WorkflowBeanService workflowBeanService;
 
     public CASAVAMessageListener() {
         super();
     }
 
-    public CASAVAMessageListener(PipelineBeanService pipelineBeanService) {
+    public CASAVAMessageListener(WorkflowBeanService workflowBeanService) {
         super();
-        this.pipelineBeanService = pipelineBeanService;
+        this.workflowBeanService = workflowBeanService;
     }
 
     @Override
@@ -118,9 +122,20 @@ public class CASAVAMessageListener implements MessageListener {
 
         File sampleSheet = null;
 
+        MaPSeqDAOBean daoBean = workflowBeanService.getMaPSeqDAOBean();
+
+        JobDAO jobDAO = daoBean.getJobDAO();
+        AccountDAO accountDAO = daoBean.getAccountDAO();
+        HTSFSampleDAO htsfSampleDAO = daoBean.getHTSFSampleDAO();
+        WorkflowRunDAO workflowRunDAO = daoBean.getWorkflowRunDAO();
+        WorkflowPlanDAO workflowPlanDAO = daoBean.getWorkflowPlanDAO();
+        FileDataDAO fileDataDAO = daoBean.getFileDataDAO();
+        SequencerRunDAO sequencerRunDAO = daoBean.getSequencerRunDAO();
+        StudyDAO studyDAO = daoBean.getStudyDAO();
+
         try {
             String accountName = jsonMessage.getString("account_name");
-            account = pipelineBeanService.getMaPSeqDAOBean().getAccountDAO().findByName(accountName);
+            account = accountDAO.findByName(accountName);
         } catch (JSONException | MaPSeqDAOException e) {
             logger.error("Error", e);
         } catch (Exception e) {
@@ -144,7 +159,7 @@ public class CASAVAMessageListener implements MessageListener {
                 logger.debug("entityType: {}", entityType);
 
                 if ("Sequencer run".equals(entityType) || SequencerRun.class.getSimpleName().equals(entityType)) {
-                    sequencerRun = EntityUtil.getSequencerRun(pipelineBeanService.getMaPSeqDAOBean(), entityJSONObject);
+                    sequencerRun = EntityUtil.getSequencerRun(daoBean, entityJSONObject);
                 }
 
                 if (FileData.class.getSimpleName().equals(entityType)) {
@@ -153,7 +168,7 @@ public class CASAVAMessageListener implements MessageListener {
                     try {
                         FileData fileData = null;
                         try {
-                            fileData = pipelineBeanService.getMaPSeqDAOBean().getFileDataDAO().findById(guid);
+                            fileData = fileDataDAO.findById(guid);
                         } catch (MaPSeqDAOException e) {
                             logger.error("ERROR", e);
                         }
@@ -162,8 +177,6 @@ public class CASAVAMessageListener implements MessageListener {
                                 && fileData.getMimeType().equals(MimeType.TEXT_CSV)) {
 
                             logger.debug("fileData.toString(): {}", fileData.toString());
-
-                            Date creationDate = new Date();
 
                             sampleSheet = new File(fileData.getPath(), fileData.getName());
 
@@ -175,15 +188,12 @@ public class CASAVAMessageListener implements MessageListener {
 
                             for (String sampleProject : sampleProjectCache) {
                                 try {
-                                    Study study = pipelineBeanService.getMaPSeqDAOBean().getStudyDAO()
-                                            .findByName(sampleProject);
+                                    Study study = daoBean.getStudyDAO().findByName(sampleProject);
                                     if (study == null) {
                                         study = new Study();
-                                        study.setCreationDate(creationDate);
-                                        study.setModificationDate(creationDate);
                                         study.setCreator(account);
                                         study.setName(sampleProject);
-                                        Long studyId = pipelineBeanService.getMaPSeqDAOBean().getStudyDAO().save(study);
+                                        Long studyId = studyDAO.save(study);
                                         study.setId(studyId);
                                     }
                                     studyMap.put(sampleProject, study);
@@ -219,8 +229,7 @@ public class CASAVAMessageListener implements MessageListener {
 
                                 try {
 
-                                    List<SequencerRun> foundSequencerRuns = pipelineBeanService.getMaPSeqDAOBean()
-                                            .getSequencerRunDAO().findByExample(sequencerRun);
+                                    List<SequencerRun> foundSequencerRuns = sequencerRunDAO.findByExample(sequencerRun);
 
                                     if (foundSequencerRuns != null && foundSequencerRuns.size() > 0) {
 
@@ -230,10 +239,6 @@ public class CASAVAMessageListener implements MessageListener {
                                         // sequencerRun to htsfSample is one to many and if a sequencerRun is found,
                                         // reset the htsfSamples from the samplesheet, but must first delete existing
                                         // htsfSamples
-                                        JobDAO jobDAO = pipelineBeanService.getMaPSeqDAOBean().getJobDAO();
-
-                                        HTSFSampleDAO htsfSampleDAO = pipelineBeanService.getMaPSeqDAOBean()
-                                                .getHTSFSampleDAO();
 
                                         List<HTSFSample> htsfSamplesToDeleteList = htsfSampleDAO
                                                 .findBySequencerRunId(sequencerRun.getId());
@@ -241,12 +246,6 @@ public class CASAVAMessageListener implements MessageListener {
                                         List<Job> jobsToDeleteList = new ArrayList<Job>();
                                         List<WorkflowPlan> workflowPlansToDeleteList = new ArrayList<WorkflowPlan>();
                                         List<WorkflowRun> workflowRunsToDeleteList = new ArrayList<WorkflowRun>();
-
-                                        WorkflowRunDAO workflowRunDAO = pipelineBeanService.getMaPSeqDAOBean()
-                                                .getWorkflowRunDAO();
-
-                                        WorkflowPlanDAO workflowPlanDAO = pipelineBeanService.getMaPSeqDAOBean()
-                                                .getWorkflowPlanDAO();
 
                                         for (HTSFSample sample : htsfSamplesToDeleteList) {
 
@@ -281,10 +280,7 @@ public class CASAVAMessageListener implements MessageListener {
                                     } else {
                                         sequencerRun.setCreator(account);
                                         sequencerRun.setStatus(SequencerRunStatusType.COMPLETED);
-                                        sequencerRun.setCreationDate(creationDate);
-                                        sequencerRun.setModificationDate(creationDate);
-                                        Long sequencerRunId = pipelineBeanService.getMaPSeqDAOBean()
-                                                .getSequencerRunDAO().save(sequencerRun);
+                                        Long sequencerRunId = daoBean.getSequencerRunDAO().save(sequencerRun);
                                         sequencerRun.setId(sequencerRunId);
                                         logger.debug("sequencerRun.toString(): {}", sequencerRun.toString());
                                     }
@@ -320,8 +316,6 @@ public class CASAVAMessageListener implements MessageListener {
                                 try {
                                     HTSFSample htsfSample = new HTSFSample();
                                     htsfSample.setBarcode(index);
-                                    htsfSample.setCreationDate(creationDate);
-                                    htsfSample.setModificationDate(creationDate);
                                     htsfSample.setCreator(account);
                                     htsfSample.setLaneIndex(Integer.valueOf(laneIndex));
                                     htsfSample.setName(sampleId);
@@ -342,7 +336,7 @@ public class CASAVAMessageListener implements MessageListener {
 
                                     htsfSample.setAttributes(attributes);
 
-                                    pipelineBeanService.getMaPSeqDAOBean().getHTSFSampleDAO().save(htsfSample);
+                                    daoBean.getHTSFSampleDAO().save(htsfSample);
 
                                 } catch (MaPSeqDAOException e) {
                                     logger.error("ERROR", e);
@@ -355,14 +349,12 @@ public class CASAVAMessageListener implements MessageListener {
                                 try {
                                     HTSFSample htsfSample = new HTSFSample();
                                     htsfSample.setBarcode("Undetermined");
-                                    htsfSample.setCreationDate(creationDate);
-                                    htsfSample.setModificationDate(creationDate);
                                     htsfSample.setCreator(account);
                                     htsfSample.setLaneIndex(lane);
                                     htsfSample.setName(String.format("lane%d", lane));
                                     htsfSample.setSequencerRun(sequencerRun);
                                     htsfSample.setStudy(studyMap.entrySet().iterator().next().getValue());
-                                    pipelineBeanService.getMaPSeqDAOBean().getHTSFSampleDAO().save(htsfSample);
+                                    daoBean.getHTSFSampleDAO().save(htsfSample);
                                 } catch (MaPSeqDAOException e) {
                                     logger.error("ERROR", e);
                                 }
@@ -375,13 +367,12 @@ public class CASAVAMessageListener implements MessageListener {
                 }
 
                 if ("Workflow run".equals(entityType) || WorkflowRun.class.getSimpleName().equals(entityType)) {
-                    workflowRun = EntityUtil.getWorkflowRun(pipelineBeanService.getMaPSeqDAOBean(), "CASAVA",
-                            entityJSONObject, account);
+                    workflowRun = EntityUtil.getWorkflowRun(daoBean, "CASAVA", entityJSONObject, account);
                     logger.debug("workflowRun.toString(): {}", workflowRun.toString());
                 }
 
                 if (Platform.class.getSimpleName().equals(entityType)) {
-                    platform = EntityUtil.getPlatform(pipelineBeanService.getMaPSeqDAOBean(), entityJSONObject);
+                    platform = EntityUtil.getPlatform(daoBean, entityJSONObject);
                     logger.debug("platform.toString(): {}", platform.toString());
                 }
 
@@ -445,12 +436,12 @@ public class CASAVAMessageListener implements MessageListener {
             attributeSet.add(new EntityAttribute("sampleSheet", sampleSheet.getAbsolutePath()));
             if (platform == null) {
                 // get default platform
-                platform = pipelineBeanService.getMaPSeqDAOBean().getPlatformDAO().findById(66L);
+                platform = daoBean.getPlatformDAO().findById(66L);
             }
             sequencerRun.setPlatform(platform);
             sequencerRun.setAttributes(attributeSet);
-            pipelineBeanService.getMaPSeqDAOBean().getSequencerRunDAO().save(sequencerRun);
-            Long workflowRunId = pipelineBeanService.getMaPSeqDAOBean().getWorkflowRunDAO().save(workflowRun);
+            daoBean.getSequencerRunDAO().save(sequencerRun);
+            Long workflowRunId = daoBean.getWorkflowRunDAO().save(workflowRun);
             workflowRun.setId(workflowRunId);
 
         } catch (XPathExpressionException | DOMException | ParserConfigurationException | SAXException
@@ -463,7 +454,7 @@ public class CASAVAMessageListener implements MessageListener {
             WorkflowPlan workflowPlan = new WorkflowPlan();
             workflowPlan.setSequencerRun(sequencerRun);
             workflowPlan.setWorkflowRun(workflowRun);
-            pipelineBeanService.getMaPSeqDAOBean().getWorkflowPlanDAO().save(workflowPlan);
+            daoBean.getWorkflowPlanDAO().save(workflowPlan);
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
         }
@@ -488,12 +479,12 @@ public class CASAVAMessageListener implements MessageListener {
         return sampleProjectCache;
     }
 
-    public PipelineBeanService getPipelineBeanService() {
-        return pipelineBeanService;
+    public WorkflowBeanService getWorkflowBeanService() {
+        return workflowBeanService;
     }
 
-    public void setPipelineBeanService(PipelineBeanService pipelineBeanService) {
-        this.pipelineBeanService = pipelineBeanService;
+    public void setWorkflowBeanService(WorkflowBeanService workflowBeanService) {
+        this.workflowBeanService = workflowBeanService;
     }
 
 }
