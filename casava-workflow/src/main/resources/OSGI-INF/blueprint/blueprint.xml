@@ -6,7 +6,7 @@
   http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
   ">
 
-  <cm:property-placeholder persistent-id="edu.unc.mapseq.pipeline.casava" update-strategy="reload">
+  <cm:property-placeholder persistent-id="edu.unc.mapseq.workflow.casava" update-strategy="reload">
     <cm:default-properties>
       <cm:property name="corePoolSize" value="100" />
       <cm:property name="maxPoolSize" value="100" />
@@ -41,7 +41,7 @@
     <property name="workflowRunDAO" ref="workflowRunDAO" />
   </bean>
 
-  <bean id="CASAVAPipelineBeanService" class="edu.unc.mapseq.pipeline.PipelineBeanServiceImpl">
+  <bean id="CASAVAWorkflowBeanService" class="edu.unc.mapseq.workflow.WorkflowBeanServiceImpl">
     <property name="corePoolSize" value="${corePoolSize}" />
     <property name="maxPoolSize" value="${maxPoolSize}" />
     <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
@@ -51,9 +51,9 @@
         <entry key="siteName" value="${siteName}" />
       </map>
     </property>
-    <cm:managed-properties persistent-id="edu.unc.mapseq.pipeline.casava" update-strategy="container-managed" />
+    <cm:managed-properties persistent-id="edu.unc.mapseq.workflow.casava" update-strategy="container-managed" />
   </bean>
 
-  <service ref="CASAVAPipelineBeanService" interface="edu.unc.mapseq.pipeline.PipelineBeanService" />
+  <service ref="CASAVAWorkflowBeanService" interface="edu.unc.mapseq.workflow.WorkflowBeanService" />
 
 </blueprint>

@@ -7,8 +7,8 @@
         <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
       </action>
     </command>
-    <command name="casava/run-casava-pipeline">
-      <action class="edu.unc.mapseq.commands.casava.RunPipelineAction">
+    <command name="casava/run-workflow">
+      <action class="edu.unc.mapseq.commands.casava.RunCASAVAWorkflowAction">
         <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
         <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
       </action>

@@ -8,14 +8,14 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <reference id="CASAVAPipelineBeanService" interface="edu.unc.mapseq.pipeline.PipelineBeanService"
-    component-name="CASAVAPipelineBeanService" />
+  <reference id="CASAVAWorkflowBeanService" interface="edu.unc.mapseq.workflow.WorkflowBeanService"
+    component-name="CASAVAWorkflowBeanService" />
 
-  <bean id="task" class="edu.unc.mapseq.executor.casava.CASAVAPipelineExecutorTask">
-    <property name="pipelineBeanService" ref="CASAVAPipelineBeanService" />
+  <bean id="task" class="edu.unc.mapseq.executor.casava.CASAVAWorkflowExecutorTask">
+    <property name="workflowBeanService" ref="CASAVAWorkflowBeanService" />
   </bean>
 
-  <bean id="CASAVAPipelineExecutorService" class="edu.unc.mapseq.executor.casava.CASAVAPipelineExecutorService"
+  <bean id="CASAVAWorkflowExecutorService" class="edu.unc.mapseq.executor.casava.CASAVAWorkflowExecutorService"
     init-method="start" destroy-method="stop" activation="eager">
     <property name="task" ref="task" />
     <property name="period" value="${period}" />
