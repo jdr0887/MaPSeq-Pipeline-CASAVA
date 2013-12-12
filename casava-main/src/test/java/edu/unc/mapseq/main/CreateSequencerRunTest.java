@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,8 +40,6 @@ public class CreateSequencerRunTest {
 
         WSDAOManager daoMgr = WSDAOManager.getInstance();
 
-        Date creationDate = new Date();
-
         try {
             String sampleSheetContent = IOUtils.toString(this.getClass().getClassLoader()
                     .getResourceAsStream("edu/unc/mapseq/main/SampleSheet.csv"));
@@ -68,8 +65,6 @@ public class CreateSequencerRunTest {
             SequencerRun sequencerRun = new SequencerRun();
             sequencerRun.setCreator(account);
             sequencerRun.setBaseDirectory("asdfasdf");
-            sequencerRun.setCreationDate(creationDate);
-            sequencerRun.setModificationDate(creationDate);
             sequencerRun.setPlatform(platform);
 
             try {
@@ -97,8 +92,6 @@ public class CreateSequencerRunTest {
                 if (study == null) {
                     study = new Study();
                     study.setApproved(Boolean.TRUE);
-                    study.setCreationDate(creationDate);
-                    study.setModificationDate(creationDate);
                     study.setCreator(account);
                     study.setGrant("test");
                     study.setName(sampleProject);
@@ -107,8 +100,6 @@ public class CreateSequencerRunTest {
 
                 HTSFSample htsfSample = new HTSFSample();
                 htsfSample.setBarcode(index);
-                htsfSample.setCreationDate(creationDate);
-                htsfSample.setModificationDate(creationDate);
                 htsfSample.setCreator(account);
                 htsfSample.setLaneIndex(Integer.valueOf(laneIndex));
                 htsfSample.setName(sampleId);
