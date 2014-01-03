@@ -5,6 +5,8 @@
     <bundle>mvn:edu.unc.mapseq.pipelines.casava/casava-commons/${project.version}</bundle>
     <bundle>mvn:edu.unc.mapseq.pipelines.casava/casava-workflow/${project.version}</bundle>
     <bundle>mvn:edu.unc.mapseq.pipelines.casava/casava-commands/${project.version}</bundle>
+    <bundle>mvn:edu.unc.mapseq.pipelines.casava.casava-web/casava-web-service-api/${project.version}</bundle>
+    <bundle>mvn:edu.unc.mapseq.pipelines.casava.casava-web/casava-web-service-impl/${project.version}</bundle>
     <bundle start-level="100">mvn:edu.unc.mapseq.pipelines.casava/casava-executor/${project.version}</bundle>
     <bundle start-level="100">mvn:edu.unc.mapseq.pipelines.casava/casava-messaging/${project.version}</bundle>
   </feature>
