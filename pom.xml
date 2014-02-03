@@ -16,7 +16,6 @@
     <activemq.version>5.8.0</activemq.version>
     <mapseq.version>0.2.45</mapseq.version>
     <mapseq.modules.version>0.0.44</mapseq.modules.version>
-    <renci.commons.version>0.2.0</renci.commons.version>
   </properties>
   <issueManagement>
     <system>gForge</system>
@@ -185,11 +184,6 @@
       	<artifactId>org.osgi.core</artifactId>
       	<version>4.3.1</version>
       	<scope>provided</scope>
-      </dependency>
-      <dependency>
-      	<groupId>org.renci.commons</groupId>
-      	<artifactId>commons-exec</artifactId>
-      	<version>${renci.commons.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
