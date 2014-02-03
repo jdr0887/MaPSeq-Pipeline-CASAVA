@@ -2,7 +2,7 @@
   <parent>
     <groupId>edu.unc.mapseq</groupId>
     <artifactId>mapseq</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.7</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA</name>
   <modelVersion>4.0.0</modelVersion>
