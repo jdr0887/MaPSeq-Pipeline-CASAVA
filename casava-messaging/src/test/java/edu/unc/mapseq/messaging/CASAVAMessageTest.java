@@ -60,8 +60,11 @@ public class CASAVAMessageTest {
             // producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 10710,
             // "121109_UNC10-SN254_0391_BC0YNYACXX")));
 
-            producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 29107,
-                    "130104_UNC16-SN851_0201_BC1GHTACXX")));
+            // producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 29107,
+            // "130104_UNC16-SN851_0201_BC1GHTACXX")));
+
+            producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 435964,
+                    "131022_UNC16-SN851_0288_AH7FALADXX")));
 
         } catch (JMSException e) {
             e.printStackTrace();
