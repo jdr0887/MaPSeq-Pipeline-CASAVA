@@ -461,7 +461,7 @@ public class CASAVAMessageListener implements MessageListener {
     }
 
     private Set<String> findStudyName(String sampleSheetContent) throws IOException {
-        logger.info("ENTERING findStudyName(File)");
+        logger.info("ENTERING findStudyName(String)");
         Set<String> sampleProjectCache = new HashSet<String>();
 
         LineNumberReader lnr = new LineNumberReader(new StringReader(sampleSheetContent));
