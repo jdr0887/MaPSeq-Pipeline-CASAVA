@@ -2,7 +2,7 @@
   <parent>
     <groupId>edu.unc.mapseq</groupId>
     <artifactId>mapseq</artifactId>
-    <version>0.0.10</version>
+    <version>0.0.11</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA</name>
   <modelVersion>4.0.0</modelVersion>
@@ -11,11 +11,11 @@
   <version>0.2.51-SNAPSHOT</version>
   <packaging>pom</packaging>
   <properties>
-    <karaf.version>2.3.3</karaf.version>
+    <karaf.version>2.3.4</karaf.version>
     <cxf.version>2.7.6</cxf.version>
     <activemq.version>5.8.0</activemq.version>
-    <mapseq.version>0.2.45</mapseq.version>
-    <mapseq.modules.version>0.0.44</mapseq.modules.version>
+    <mapseq.version>0.3.4</mapseq.version>
+    <mapseq.modules.version>0.0.46</mapseq.modules.version>
   </properties>
   <issueManagement>
     <system>gForge</system>
