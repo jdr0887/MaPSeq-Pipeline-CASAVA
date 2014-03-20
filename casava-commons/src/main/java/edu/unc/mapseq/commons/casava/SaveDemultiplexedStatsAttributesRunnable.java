@@ -51,6 +51,7 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
 
     @Override
     public void run() {
+        logger.debug("ENTERING run()");
 
         List<SequencerRun> srList = new ArrayList<SequencerRun>();
 

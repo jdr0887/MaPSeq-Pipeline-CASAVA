@@ -40,7 +40,7 @@ public class SaveObservedClusterDensityAttributesRunnable implements Runnable {
 
     @Override
     public void run() {
-        logger.info("ENTERING run()");
+        logger.debug("ENTERING run()");
 
         List<SequencerRun> sequencerRunList = new ArrayList<SequencerRun>();
 

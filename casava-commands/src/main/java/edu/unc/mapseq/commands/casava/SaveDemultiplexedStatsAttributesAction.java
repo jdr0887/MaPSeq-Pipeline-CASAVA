@@ -24,7 +24,7 @@ public class SaveDemultiplexedStatsAttributesAction extends AbstractAction {
 
     @Override
     protected Object doExecute() throws Exception {
-        logger.info("ENTERING doExecute()");
+        logger.debug("ENTERING doExecute()");
         SaveDemultiplexedStatsAttributesRunnable runnable = new SaveDemultiplexedStatsAttributesRunnable();
         runnable.setMapseqDAOBean(maPSeqDAOBean);
         runnable.setSequencerRunIdList(sequencerRunIdList);

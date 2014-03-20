@@ -27,7 +27,7 @@ public class SaveObservedClusterDensityAttributesAction extends AbstractAction {
 
     @Override
     protected Object doExecute() throws Exception {
-        logger.info("ENTERING doExecute()");
+        logger.debug("ENTERING doExecute()");
         SaveObservedClusterDensityAttributesRunnable runnable = new SaveObservedClusterDensityAttributesRunnable();
         runnable.setMapseqDAOBean(maPSeqDAOBean);
         runnable.setMapseqConfigurationService(maPSeqConfigurationService);
