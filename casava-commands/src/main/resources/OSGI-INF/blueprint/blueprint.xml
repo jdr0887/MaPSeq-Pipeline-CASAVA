@@ -19,6 +19,11 @@
         <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
       </action>
     </command>
+    <command name="casava/fix-mismapped-fastq-file-data">
+      <action class="edu.unc.mapseq.commands.casava.FixMisappedFastqFileDataAction">
+        <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
+      </action>
+    </command>
   </command-bundle>
 
   <reference id="maPSeqConfigurationService" interface="edu.unc.mapseq.config.MaPSeqConfigurationService" />
