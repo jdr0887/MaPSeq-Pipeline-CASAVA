@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>edu.unc.mapseq.pipelines.casava</groupId>
     <artifactId>casava-web</artifactId>
@@ -28,6 +29,22 @@
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jpa_2.0_spec</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-jaxrs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-core-asl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-xc</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -37,15 +54,15 @@
         <configuration>
           <instructions>
             <Private-Package />
-	    <Import-Package>javax.activation,
-	    javax.xml.bind.annotation,
-	    javax.xml.ws,
-	    javax.xml.ws.soap,
-	    javax.jws,
-	    javax.jws.soap,
-	    javax.wsdl,
-	    edu.unc.mapseq.dao,
-	    edu.unc.mapseq.dao.model,*</Import-Package>
+            <Import-Package>javax.activation,
+              javax.xml.bind.annotation,
+              javax.xml.ws,
+              javax.xml.ws.soap,
+              javax.jws,
+              javax.jws.soap,
+              javax.wsdl,
+              edu.unc.mapseq.dao,
+              edu.unc.mapseq.dao.model,*</Import-Package>
             <Export-Package>edu.unc.mapseq.ws.casava*</Export-Package>
           </instructions>
         </configuration>
