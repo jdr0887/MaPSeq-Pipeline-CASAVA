@@ -21,6 +21,9 @@
     <jaxrs:serviceBeans>
       <ref component-id="casava" />
     </jaxrs:serviceBeans>
+    <jaxrs:providers>
+      <bean class="org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider" />
+    </jaxrs:providers>
   </jaxrs:server>
 
   <jaxws:endpoint id="CASAVAServiceWS" implementor="#casava" address="/CASAVAService">
