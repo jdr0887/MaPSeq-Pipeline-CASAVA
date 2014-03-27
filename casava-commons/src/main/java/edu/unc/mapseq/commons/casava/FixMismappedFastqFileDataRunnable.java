@@ -1,5 +1,6 @@
 package edu.unc.mapseq.commons.casava;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.unc.mapseq.dao.FileDataDAO;
+import edu.unc.mapseq.dao.HTSFSampleDAO;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.SequencerRunDAO;
@@ -32,11 +35,14 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
     public void run() {
         logger.debug("ENTERING run()");
 
+        SequencerRunDAO sequencerRunDAO = mapseqDAOBean.getSequencerRunDAO();
+        HTSFSampleDAO htsfSampleDAO = mapseqDAOBean.getHTSFSampleDAO();
+        FileDataDAO fileDataDAO = mapseqDAOBean.getFileDataDAO();
+
         List<SequencerRun> srList = new ArrayList<SequencerRun>();
 
         try {
 
-            SequencerRunDAO sequencerRunDAO = mapseqDAOBean.getSequencerRunDAO();
             for (Long sequencerRunId : sequencerRunIdList) {
                 SequencerRun sequencerRun = sequencerRunDAO.findById(sequencerRunId);
                 if (sequencerRun != null) {
@@ -50,7 +56,7 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
 
                 for (SequencerRun sr : srList) {
 
-                    List<HTSFSample> htsfSampleList = mapseqDAOBean.getHTSFSampleDAO().findBySequencerRunId(sr.getId());
+                    List<HTSFSample> htsfSampleList = htsfSampleDAO.findBySequencerRunId(sr.getId());
 
                     if (htsfSampleList == null) {
                         logger.warn("htsfSampleList was null");
@@ -60,6 +66,12 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
                     for (HTSFSample sample : htsfSampleList) {
 
                         logger.debug("{}", sample.toString());
+
+                        String read1FileName = String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(),
+                                sample.getBarcode(), sample.getLaneIndex(), 1);
+
+                        String read2FileName = String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(),
+                                sample.getBarcode(), sample.getLaneIndex(), 2);
 
                         Set<FileData> fileDataSet = sample.getFileDatas();
                         Set<FileData> fastqFileDataSet = new HashSet<FileData>();
@@ -87,8 +99,25 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
                             FileData tmpFastqFileData = new FileData();
                             tmpFastqFileData.setMimeType(MimeType.FASTQ);
                             tmpFastqFileData.setPath(oneOfFastqPair.getPath());
-                            List<FileData> results = mapseqDAOBean.getFileDataDAO().findByExample(tmpFastqFileData);
+                            List<FileData> results = fileDataDAO.findByExample(tmpFastqFileData);
                             FileData tmpFileData = null;
+                            if (results.size() == 1) {
+                                FileData fd = results.get(0);
+                                File read1 = new File(fd.getPath(), read1FileName);
+                                File read2 = new File(fd.getPath(), read2FileName);
+                                if (fd.getName().equals(read1FileName) && read2.exists()) {
+                                    tmpFileData = tmpFastqFileData;
+                                    tmpFileData.setName(read2FileName);
+                                    Long id = fileDataDAO.save(tmpFileData);
+                                    tmpFileData.setId(id);
+                                }
+                                if (fd.getName().equals(read2FileName) && read1.exists()) {
+                                    tmpFileData = tmpFastqFileData;
+                                    tmpFileData.setName(read1FileName);
+                                    Long id = fileDataDAO.save(tmpFileData);
+                                    tmpFileData.setId(id);
+                                }
+                            }
                             if (results.size() == 2) {
                                 // get the one not already mapped
                                 FileData first = results.get(0);
@@ -102,7 +131,7 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
                             }
                             // we now have the mismapped fastq file...attach to sample
                             sample.getFileDatas().add(tmpFileData);
-                            mapseqDAOBean.getHTSFSampleDAO().save(sample);
+                            htsfSampleDAO.save(sample);
                         }
 
                     }
