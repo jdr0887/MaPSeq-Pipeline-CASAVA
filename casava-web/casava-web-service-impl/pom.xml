@@ -78,6 +78,10 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+    </dependency>
+    <dependency>
       <groupId>edu.unc.mapseq.pipelines.casava.casava-web</groupId>
       <artifactId>casava-web-service-api</artifactId>
     </dependency>
