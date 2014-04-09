@@ -15,7 +15,7 @@
     <cxf.version>2.7.10</cxf.version>
     <activemq.version>5.8.0</activemq.version>
     <mapseq.version>0.3.8</mapseq.version>
-    <mapseq.modules.version>0.0.48</mapseq.modules.version>
+    <mapseq.modules.version>0.0.49</mapseq.modules.version>
   </properties>
   <issueManagement>
     <system>gForge</system>
