@@ -37,7 +37,7 @@
   </ciManagement>
   <licenses>    
     <license>
-      <name>RENCI Open Source Software License</name>
+      <name>UNC Open Source Public License</name>
       <url>LICENSE</url>
       <distribution>repo</distribution>
     </license>
