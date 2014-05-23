@@ -14,7 +14,7 @@
     <karaf.version>2.3.5</karaf.version>
     <cxf.version>2.7.10</cxf.version>
     <activemq.version>5.8.0</activemq.version>
-    <mapseq.version>0.3.11</mapseq.version>
+    <mapseq.version>0.3.12</mapseq.version>
     <mapseq.modules.version>0.0.52</mapseq.modules.version>
   </properties>
   <issueManagement>
