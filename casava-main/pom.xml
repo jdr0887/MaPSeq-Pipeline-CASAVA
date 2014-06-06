@@ -88,9 +88,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>edu.unc.mapseq.mapseq-maven-plugins</groupId>
+        <groupId>edu.unc.mapseq.distribution.mapseq-maven-plugins</groupId>
         <artifactId>mapseq-scripts-plugin</artifactId>
-        <version>${mapseq.version}</version>
+        <version>${mapseq.distribution.version}</version>
         <executions>
           <execution>
 	    <id>mapseq-run-pipeline</id>
