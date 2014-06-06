@@ -41,7 +41,7 @@
     <property name="workflowRunDAO" ref="workflowRunDAO" />
   </bean>
 
-  <bean id="CASAVAWorkflowBeanService" class="edu.unc.mapseq.workflow.WorkflowBeanServiceImpl">
+  <bean id="CASAVAWorkflowBeanService" class="edu.unc.mapseq.workflow.impl.WorkflowBeanServiceImpl">
     <property name="corePoolSize" value="${corePoolSize}" />
     <property name="maxPoolSize" value="${maxPoolSize}" />
     <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
