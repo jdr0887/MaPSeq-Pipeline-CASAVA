@@ -1,8 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>edu.unc.mapseq</groupId>
-    <artifactId>mapseq</artifactId>
-    <version>0.0.15</version>
+    <artifactId>pipeline</artifactId>
+    <version>0.0.3</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA</name>
   <modelVersion>4.0.0</modelVersion>
@@ -10,13 +11,6 @@
   <artifactId>casava</artifactId>
   <version>0.3.10-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <properties>
-    <karaf.version>2.3.5</karaf.version>
-    <cxf.version>2.7.10</cxf.version>
-    <activemq.version>5.8.0</activemq.version>
-    <mapseq.version>0.3.12</mapseq.version>
-    <mapseq.modules.version>0.0.53</mapseq.modules.version>
-  </properties>
   <issueManagement>
     <system>gForge</system>
     <url>https://code.renci.org/gf/project/casava/tracker/</url>
@@ -50,51 +44,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-      	<groupId>org.apache.geronimo.specs</groupId>
-      	<artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
-      	<version>1.1.3</version>
-      </dependency>
-      <dependency>
-	<groupId>com.fasterxml.jackson.jaxrs</groupId>
-	<artifactId>jackson-jaxrs-json-provider</artifactId>
-	<version>2.3.0</version>
-      </dependency>
-      <dependency>
-	<groupId>com.fasterxml.jackson.core</groupId>
-	<artifactId>jackson-core</artifactId>
-	<version>2.3.0</version>
-      </dependency>
-      <dependency>
-	<groupId>com.fasterxml.jackson.core</groupId>
-	<artifactId>jackson-annotations</artifactId>
-	<version>2.3.0</version>
-      </dependency>
-      <dependency>
-	<groupId>com.fasterxml.jackson.core</groupId>
-	<artifactId>jackson-databind</artifactId>
-	<version>2.3.0</version>
-      </dependency>
-      <dependency>
-	<groupId>org.apache.cxf</groupId>
-	<artifactId>cxf-rt-frontend-jaxrs</artifactId>
-	<version>${cxf.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.cxf</groupId>
-      	<artifactId>cxf-rt-frontend-jaxws</artifactId>
-      	<version>${cxf.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.cxf</groupId>
-      	<artifactId>cxf-rt-transports-http</artifactId>
-      	<version>${cxf.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.cxf</groupId>
-      	<artifactId>cxf-rt-transports-http-jetty</artifactId>
-      	<version>${cxf.version}</version>
-      </dependency>
-      <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-commons</artifactId>
       	<version>0.3.10-SNAPSHOT</version>
@@ -105,105 +54,14 @@
       	<version>0.3.10-SNAPSHOT</version>
       </dependency>
       <dependency>
-	<groupId>org.apache.geronimo.specs</groupId>
-	<artifactId>geronimo-jaxrs_1.1_spec</artifactId>
-	<version>1.0</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.geronimo.specs</groupId>
-      	<artifactId>geronimo-jaxws_2.2_spec</artifactId>
-      	<version>1.1</version>
-      </dependency>
-      <dependency>
-      	<groupId>edu.unc.mapseq</groupId>
-      	<artifactId>mapseq-workflow-api</artifactId>
-      	<version>${mapseq.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>edu.unc.mapseq</groupId>
-      	<artifactId>modules</artifactId>
-      	<version>${mapseq.modules.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>edu.unc.mapseq.mapseq-dao</groupId>
-      	<artifactId>mapseq-dao-api</artifactId>
-      	<version>${mapseq.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>edu.unc.mapseq.mapseq-dao</groupId>
-      	<artifactId>mapseq-dao-jpa</artifactId>
-      	<version>${mapseq.version}</version>
-      </dependency>
-      <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-workflow</artifactId>
       	<version>0.3.10-SNAPSHOT</version>
       </dependency>
       <dependency>
-      	<groupId>org.apache.activemq</groupId>
-      	<artifactId>activemq-client</artifactId>
-      	<version>${activemq.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.felix</groupId>
-      	<artifactId>org.apache.felix.gogo.runtime</artifactId>
-      	<version>0.10.0</version>
-      </dependency>
-      <dependency>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>org.osgi.core</artifactId>
-	<version>1.4.0</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.karaf</groupId>
-      	<artifactId>org.apache.karaf.util</artifactId>
-      	<version>${karaf.version}</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.karaf.shell</groupId>
-      	<artifactId>org.apache.karaf.shell.console</artifactId>
-      	<version>${karaf.version}</version>
-      </dependency>    
-      <dependency>
-      	<groupId>org.apache.geronimo.specs</groupId>
-      	<artifactId>geronimo-jms_1.1_spec</artifactId>
-      	<version>1.1.1</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.geronimo.specs</groupId>
-      	<artifactId>geronimo-jpa_2.0_spec</artifactId>
-      	<version>1.1</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.servicemix.bundles</groupId>
-      	<artifactId>org.apache.servicemix.bundles.xstream</artifactId>
-      	<version>1.4.2_2</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.codehaus.jettison</groupId>
-      	<artifactId>jettison</artifactId>
-      	<version>1.3.1</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.hibernate</groupId>
-      	<artifactId>hibernate-validator</artifactId>
-      	<version>4.2.0.Final</version>
-      </dependency>
-      <dependency>
       	<groupId>org.jsoup</groupId>
       	<artifactId>com.springsource.org.jsoup</artifactId>
       	<version>1.5.2</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.osgi</groupId>
-      	<artifactId>org.osgi.compendium</artifactId>
-      	<version>4.3.1</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.osgi</groupId>
-      	<artifactId>org.osgi.core</artifactId>
-      	<version>4.3.1</version>
-      	<scope>provided</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
