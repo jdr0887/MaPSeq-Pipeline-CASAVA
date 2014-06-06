@@ -15,6 +15,7 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.renci.jlrm.condor.CondorJob;
+import org.renci.jlrm.condor.CondorJobBuilder;
 import org.renci.jlrm.condor.CondorJobEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +32,9 @@ import edu.unc.mapseq.module.casava.ConfigureBCLToFastqCLI;
 import edu.unc.mapseq.module.core.CopyCLI;
 import edu.unc.mapseq.module.core.MakeCLI;
 import edu.unc.mapseq.module.core.RemoveCLI;
-import edu.unc.mapseq.workflow.AbstractWorkflow;
 import edu.unc.mapseq.workflow.WorkflowException;
-import edu.unc.mapseq.workflow.WorkflowJobFactory;
+import edu.unc.mapseq.workflow.impl.AbstractWorkflow;
+import edu.unc.mapseq.workflow.impl.WorkflowJobFactory;
 
 public class CASAVAWorkflow extends AbstractWorkflow {
 
@@ -109,18 +110,6 @@ public class CASAVAWorkflow extends AbstractWorkflow {
 
                     File unalignedDir = new File(sequencerRunDir, String.format("%s.%d", "Unaligned", laneIndex));
 
-                    CondorJob configureBCLToFastQJob = WorkflowJobFactory.createJob(++count,
-                            ConfigureBCLToFastqCLI.class, getWorkflowPlan());
-                    configureBCLToFastQJob.setSiteName(siteName);
-                    configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.INPUTDIR, baseCallsDir.getAbsolutePath());
-                    configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.MISMATCHES);
-                    configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGBCL);
-                    configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGSTATS);
-                    configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.FASTQCLUSTERCOUNT, "0");
-                    configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.TILES, laneIndex.toString());
-                    configureBCLToFastQJob
-                            .addArgument(ConfigureBCLToFastqCLI.OUTPUTDIR, unalignedDir.getAbsolutePath());
-
                     Set<EntityAttribute> srEntityAttributeSet = getWorkflowPlan().getSequencerRun().getAttributes();
 
                     File sampleSheetFile = null;
@@ -148,26 +137,37 @@ public class CASAVAWorkflow extends AbstractWorkflow {
                         throw new WorkflowException("Invalid SampleSheet: ");
                     }
 
-                    configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.SAMPLESHEET,
-                            sampleSheetFile.getAbsolutePath());
-                    configureBCLToFastQJob.addArgument(ConfigureBCLToFastqCLI.FORCE);
+                    CondorJobBuilder builder = WorkflowJobFactory.createJob(++count, ConfigureBCLToFastqCLI.class,
+                            getWorkflowPlan()).siteName(siteName);
+                    builder.addArgument(ConfigureBCLToFastqCLI.INPUTDIR, baseCallsDir.getAbsolutePath())
+                            .addArgument(ConfigureBCLToFastqCLI.MISMATCHES)
+                            .addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGBCL)
+                            .addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGSTATS)
+                            .addArgument(ConfigureBCLToFastqCLI.FASTQCLUSTERCOUNT, "0")
+                            .addArgument(ConfigureBCLToFastqCLI.TILES, laneIndex.toString())
+                            .addArgument(ConfigureBCLToFastqCLI.OUTPUTDIR, unalignedDir.getAbsolutePath())
+                            .addArgument(ConfigureBCLToFastqCLI.SAMPLESHEET, sampleSheetFile.getAbsolutePath())
+                            .addArgument(ConfigureBCLToFastqCLI.FORCE);
+                    CondorJob configureBCLToFastQJob = builder.build();
+                    logger.info(configureBCLToFastQJob.toString());
                     graph.addVertex(configureBCLToFastQJob);
 
                     if (unalignedDir.exists()) {
-                        CondorJob removeUnalignedDirectoryJob = WorkflowJobFactory.createJob(++count, RemoveCLI.class,
-                                getWorkflowPlan());
-                        removeUnalignedDirectoryJob.setSiteName(getWorkflowBeanService().getAttributes()
-                                .get("siteName"));
-                        removeUnalignedDirectoryJob.addArgument(RemoveCLI.FILE, unalignedDir);
+                        builder = WorkflowJobFactory.createJob(++count, RemoveCLI.class, getWorkflowPlan()).siteName(
+                                siteName);
+                        builder.addArgument(RemoveCLI.FILE, unalignedDir);
+                        CondorJob removeUnalignedDirectoryJob = builder.build();
+                        logger.info(removeUnalignedDirectoryJob.toString());
                         graph.addVertex(removeUnalignedDirectoryJob);
                         graph.addEdge(removeUnalignedDirectoryJob, configureBCLToFastQJob);
                     }
 
-                    CondorJob makeJob = WorkflowJobFactory.createJob(++count, MakeCLI.class, getWorkflowPlan(), null);
-                    makeJob.setSiteName(siteName);
-                    makeJob.setNumberOfProcessors(2);
-                    makeJob.addArgument(MakeCLI.THREADS, "2");
-                    makeJob.addArgument(MakeCLI.WORKDIR, unalignedDir.getAbsolutePath());
+                    builder = WorkflowJobFactory.createJob(++count, MakeCLI.class, getWorkflowPlan(), null)
+                            .siteName(siteName).numberOfProcessors(2);
+                    builder.addArgument(MakeCLI.THREADS, "2").addArgument(MakeCLI.WORKDIR,
+                            unalignedDir.getAbsolutePath());
+                    CondorJob makeJob = builder.build();
+                    logger.info(makeJob.toString());
                     graph.addVertex(makeJob);
                     graph.addEdge(configureBCLToFastQJob, makeJob);
 
@@ -191,17 +191,18 @@ public class CASAVAWorkflow extends AbstractWorkflow {
 
                         switch (readCount) {
                             case 1:
-                                copyJob = WorkflowJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
-                                        htsfSample);
-                                copyJob.setSiteName(siteName);
+                                builder = WorkflowJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
+                                        htsfSample).siteName(siteName);
                                 sourceFile = new File(sampleDirectory, String.format("%s_%s_L%03d_R%d_001.fastq.gz",
                                         htsfSample.getName(), htsfSample.getBarcode(), laneIndex, 1));
-                                copyJob.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath());
                                 outputFileName = String.format("%s_%s_L%03d_R%d.fastq.gz", getWorkflowPlan()
                                         .getSequencerRun().getName(), htsfSample.getBarcode(), laneIndex, 1);
                                 outputFile = new File(outputDirectory, outputFileName);
-                                copyJob.addArgument(CopyCLI.DESTINATION, outputFile.getAbsolutePath());
-                                copyJob.addArgument(CopyCLI.MIMETYPE, MimeType.FASTQ.toString());
+                                builder.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath())
+                                        .addArgument(CopyCLI.DESTINATION, outputFile.getAbsolutePath())
+                                        .addArgument(CopyCLI.MIMETYPE, MimeType.FASTQ.toString());
+                                copyJob = builder.build();
+                                logger.info(copyJob.toString());
                                 graph.addVertex(copyJob);
                                 graph.addEdge(makeJob, copyJob);
 
@@ -210,32 +211,34 @@ public class CASAVAWorkflow extends AbstractWorkflow {
                             default:
 
                                 // read 1
-                                copyJob = WorkflowJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
-                                        htsfSample);
-                                copyJob.setSiteName(siteName);
+                                builder = WorkflowJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
+                                        htsfSample).siteName(siteName);
                                 sourceFile = new File(sampleDirectory, String.format("%s_%s_L%03d_R%d_001.fastq.gz",
                                         htsfSample.getName(), htsfSample.getBarcode(), laneIndex, 1));
-                                copyJob.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath());
                                 outputFileName = String.format("%s_%s_L%03d_R%d.fastq.gz", getWorkflowPlan()
                                         .getSequencerRun().getName(), htsfSample.getBarcode(), laneIndex, 1);
                                 outputFile = new File(outputDirectory, outputFileName);
-                                copyJob.addArgument(CopyCLI.DESTINATION, outputFile.getAbsolutePath());
-                                copyJob.addArgument(CopyCLI.MIMETYPE, MimeType.FASTQ.toString());
+                                builder.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath())
+                                        .addArgument(CopyCLI.DESTINATION, outputFile.getAbsolutePath())
+                                        .addArgument(CopyCLI.MIMETYPE, MimeType.FASTQ.toString());
+                                copyJob = builder.build();
+                                logger.info(copyJob.toString());
                                 graph.addVertex(copyJob);
                                 graph.addEdge(makeJob, copyJob);
 
                                 // read 2
-                                copyJob = WorkflowJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
-                                        htsfSample);
-                                copyJob.setSiteName(siteName);
+                                builder = WorkflowJobFactory.createJob(++count, CopyCLI.class, getWorkflowPlan(),
+                                        htsfSample).siteName(siteName);
                                 sourceFile = new File(sampleDirectory, String.format("%s_%s_L%03d_R%d_001.fastq.gz",
                                         htsfSample.getName(), htsfSample.getBarcode(), laneIndex, 2));
-                                copyJob.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath());
                                 outputFileName = String.format("%s_%s_L%03d_R%d.fastq.gz", getWorkflowPlan()
                                         .getSequencerRun().getName(), htsfSample.getBarcode(), laneIndex, 2);
                                 outputFile = new File(outputDirectory, outputFileName);
-                                copyJob.addArgument(CopyCLI.DESTINATION, outputFile.getAbsolutePath());
-                                copyJob.addArgument(CopyCLI.MIMETYPE, MimeType.FASTQ.toString());
+                                builder.addArgument(CopyCLI.SOURCE, sourceFile.getAbsolutePath())
+                                        .addArgument(CopyCLI.DESTINATION, outputFile.getAbsolutePath())
+                                        .addArgument(CopyCLI.MIMETYPE, MimeType.FASTQ.toString());
+                                copyJob = builder.build();
+                                logger.info(copyJob.toString());
                                 graph.addVertex(copyJob);
                                 graph.addEdge(makeJob, copyJob);
 
