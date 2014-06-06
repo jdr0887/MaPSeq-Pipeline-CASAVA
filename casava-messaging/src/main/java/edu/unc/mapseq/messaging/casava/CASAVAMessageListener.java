@@ -15,7 +15,6 @@ import java.util.Set;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,9 +26,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -37,6 +33,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.unc.mapseq.dao.AccountDAO;
 import edu.unc.mapseq.dao.FileDataDAO;
@@ -46,6 +44,7 @@ import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.SequencerRunDAO;
 import edu.unc.mapseq.dao.StudyDAO;
+import edu.unc.mapseq.dao.WorkflowDAO;
 import edu.unc.mapseq.dao.WorkflowPlanDAO;
 import edu.unc.mapseq.dao.WorkflowRunDAO;
 import edu.unc.mapseq.dao.model.Account;
@@ -58,25 +57,21 @@ import edu.unc.mapseq.dao.model.Platform;
 import edu.unc.mapseq.dao.model.SequencerRun;
 import edu.unc.mapseq.dao.model.SequencerRunStatusType;
 import edu.unc.mapseq.dao.model.Study;
+import edu.unc.mapseq.dao.model.Workflow;
 import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
-import edu.unc.mapseq.workflow.EntityUtil;
-import edu.unc.mapseq.workflow.WorkflowBeanService;
+import edu.unc.mapseq.workflow.WorkflowException;
+import edu.unc.mapseq.workflow.impl.AbstractMessageListener;
+import edu.unc.mapseq.workflow.model.WorkflowEntity;
+import edu.unc.mapseq.workflow.model.WorkflowMessage;
 
-public class CASAVAMessageListener implements MessageListener {
+public class CASAVAMessageListener extends AbstractMessageListener {
 
     private final Logger logger = LoggerFactory.getLogger(CASAVAMessageListener.class);
 
-    private WorkflowBeanService workflowBeanService;
-
     public CASAVAMessageListener() {
         super();
-    }
-
-    public CASAVAMessageListener(WorkflowBeanService workflowBeanService) {
-        super();
-        this.workflowBeanService = workflowBeanService;
     }
 
     @Override
@@ -102,18 +97,35 @@ public class CASAVAMessageListener implements MessageListener {
 
         logger.info("messageValue: {}", messageValue);
 
-        JSONObject jsonMessage = null;
+        ObjectMapper mapper = new ObjectMapper();
+        WorkflowMessage workflowMessage = null;
 
         try {
-            jsonMessage = new JSONObject(messageValue);
-            if (!jsonMessage.has("entities") || !jsonMessage.has("account_name")) {
-                logger.error("json lacks entities or account_name");
+            workflowMessage = mapper.readValue(messageValue, WorkflowMessage.class);
+            if (StringUtils.isEmpty(workflowMessage.getAccountName())) {
+                logger.error("json lacks account_name");
                 return;
             }
-        } catch (JSONException e) {
+            if (workflowMessage.getEntities() == null) {
+                logger.error("json lacks entities");
+                return;
+            }
+        } catch (IOException e) {
             logger.error("BAD JSON format", e);
             return;
         }
+
+        MaPSeqDAOBean daoBean = getWorkflowBeanService().getMaPSeqDAOBean();
+
+        JobDAO jobDAO = daoBean.getJobDAO();
+        AccountDAO accountDAO = daoBean.getAccountDAO();
+        HTSFSampleDAO htsfSampleDAO = daoBean.getHTSFSampleDAO();
+        WorkflowDAO workflowDAO = daoBean.getWorkflowDAO();
+        WorkflowRunDAO workflowRunDAO = daoBean.getWorkflowRunDAO();
+        WorkflowPlanDAO workflowPlanDAO = daoBean.getWorkflowPlanDAO();
+        FileDataDAO fileDataDAO = daoBean.getFileDataDAO();
+        SequencerRunDAO sequencerRunDAO = daoBean.getSequencerRunDAO();
+        StudyDAO studyDAO = daoBean.getStudyDAO();
 
         SequencerRun sequencerRun = null;
         WorkflowRun workflowRun = null;
@@ -122,24 +134,11 @@ public class CASAVAMessageListener implements MessageListener {
 
         File sampleSheet = null;
 
-        MaPSeqDAOBean daoBean = workflowBeanService.getMaPSeqDAOBean();
-
-        JobDAO jobDAO = daoBean.getJobDAO();
-        AccountDAO accountDAO = daoBean.getAccountDAO();
-        HTSFSampleDAO htsfSampleDAO = daoBean.getHTSFSampleDAO();
-        WorkflowRunDAO workflowRunDAO = daoBean.getWorkflowRunDAO();
-        WorkflowPlanDAO workflowPlanDAO = daoBean.getWorkflowPlanDAO();
-        FileDataDAO fileDataDAO = daoBean.getFileDataDAO();
-        SequencerRunDAO sequencerRunDAO = daoBean.getSequencerRunDAO();
-        StudyDAO studyDAO = daoBean.getStudyDAO();
+        String accountName = workflowMessage.getAccountName();
 
         try {
-            String accountName = jsonMessage.getString("account_name");
             account = accountDAO.findByName(accountName);
-        } catch (JSONException | MaPSeqDAOException e) {
-            logger.error("Error", e);
-        } catch (Exception e) {
-            logger.error("Error", e);
+        } catch (MaPSeqDAOException e) {
         }
 
         if (account == null) {
@@ -147,238 +146,247 @@ public class CASAVAMessageListener implements MessageListener {
             return;
         }
 
+        Workflow workflow = null;
+        String workflowName = "CASAVA";
         try {
-            JSONArray entityArray = jsonMessage.getJSONArray("entities");
-            logger.debug("entityArray.length(): {}", entityArray.length());
+            workflow = workflowDAO.findByName(workflowName);
+        } catch (MaPSeqDAOException e) {
+            logger.error("ERROR", e);
+        }
 
-            for (int i = 0; i < entityArray.length(); ++i) {
+        if (workflow == null) {
+            logger.error("No Workflow Found: {}", workflowName);
+            return;
+        }
 
-                JSONObject entityJSONObject = entityArray.getJSONObject(i);
-                String entityType = entityJSONObject.getString("entity_type");
+        try {
 
-                logger.debug("entityType: {}", entityType);
+            for (WorkflowEntity entity : workflowMessage.getEntities()) {
 
-                if ("Sequencer run".equals(entityType) || SequencerRun.class.getSimpleName().equals(entityType)) {
-                    sequencerRun = EntityUtil.getSequencerRun(daoBean, entityJSONObject);
-                }
+                if (StringUtils.isNotEmpty(entity.getEntityType())) {
 
-                if (FileData.class.getSimpleName().equals(entityType)) {
-                    Long guid = entityJSONObject.getLong("id");
-                    logger.debug("guid: {}", guid);
-                    try {
-                        FileData fileData = null;
+                    if (SequencerRun.class.getSimpleName().equals(entity.getEntityType())) {
+                        sequencerRun = getSequencerRun(entity);
+                    }
+
+                    if (FileData.class.getSimpleName().equals(entity.getEntityType())) {
+                        Long guid = entity.getGuid();
+                        logger.debug("guid: {}", guid);
                         try {
-                            fileData = fileDataDAO.findById(guid);
-                        } catch (MaPSeqDAOException e) {
-                            logger.error("ERROR", e);
-                        }
+                            FileData fileData = null;
+                            try {
+                                fileData = fileDataDAO.findById(guid);
+                            } catch (MaPSeqDAOException e) {
+                                logger.error("ERROR", e);
+                            }
 
-                        if (fileData != null && fileData.getName().endsWith(".csv")
-                                && fileData.getMimeType().equals(MimeType.TEXT_CSV)) {
+                            if (fileData != null && fileData.getName().endsWith(".csv")
+                                    && fileData.getMimeType().equals(MimeType.TEXT_CSV)) {
 
-                            logger.debug("fileData.toString(): {}", fileData.toString());
+                                logger.debug("fileData.toString(): {}", fileData.toString());
 
-                            sampleSheet = new File(fileData.getPath(), fileData.getName());
+                                sampleSheet = new File(fileData.getPath(), fileData.getName());
 
-                            String sampleSheetContent = FileUtils.readFileToString(sampleSheet);
+                                String sampleSheetContent = FileUtils.readFileToString(sampleSheet);
 
-                            Set<String> sampleProjectCache = findStudyName(sampleSheetContent);
+                                Set<String> sampleProjectCache = findStudyName(sampleSheetContent);
 
-                            Map<String, Study> studyMap = new HashMap<String, Study>();
+                                Map<String, Study> studyMap = new HashMap<String, Study>();
 
-                            for (String sampleProject : sampleProjectCache) {
-                                try {
-                                    Study study = daoBean.getStudyDAO().findByName(sampleProject);
-                                    if (study == null) {
-                                        study = new Study();
-                                        study.setCreator(account);
-                                        study.setName(sampleProject);
-                                        Long studyId = studyDAO.save(study);
-                                        study.setId(studyId);
+                                for (String sampleProject : sampleProjectCache) {
+                                    try {
+                                        Study study = daoBean.getStudyDAO().findByName(sampleProject);
+                                        if (study == null) {
+                                            study = new Study();
+                                            study.setCreator(account);
+                                            study.setName(sampleProject);
+                                            Long studyId = studyDAO.save(study);
+                                            study.setId(studyId);
+                                        }
+                                        studyMap.put(sampleProject, study);
+                                    } catch (Exception e) {
+                                        logger.error("ERROR", e);
                                     }
-                                    studyMap.put(sampleProject, study);
-                                } catch (Exception e) {
-                                    logger.error("ERROR", e);
                                 }
-                            }
 
-                            // sequencerRun base directory is derived from study (aka sampleProject)
-                            // assume studyMap is size 1
+                                // sequencerRun base directory is derived from study (aka sampleProject)
+                                // assume studyMap is size 1
 
-                            if (studyMap.size() > 1) {
-                                logger.error("Too many studies specified");
-                                return;
-                            }
+                                if (studyMap.size() > 1) {
+                                    logger.error("Too many studies specified");
+                                    return;
+                                }
 
-                            String flowcellName = fileData.getName().replace(".csv", "");
+                                String flowcellName = fileData.getName().replace(".csv", "");
 
-                            File studyDirectory = new File(System.getenv("MAPSEQ_BASE_DIRECTORY"), studyMap.get(
-                                    studyMap.keySet().iterator().next()).getName());
-                            File baseDirectory = new File(studyDirectory, "out");
-                            File flowcellDirectory = new File(baseDirectory, flowcellName);
+                                File studyDirectory = new File(System.getenv("MAPSEQ_BASE_DIRECTORY"), studyMap.get(
+                                        studyMap.keySet().iterator().next()).getName());
+                                File baseDirectory = new File(studyDirectory, "out");
+                                File flowcellDirectory = new File(baseDirectory, flowcellName);
 
-                            Set<Integer> laneIndexSet = new HashSet<Integer>();
+                                Set<Integer> laneIndexSet = new HashSet<Integer>();
 
-                            logger.debug("flowcellDirectory.exists(): {}", flowcellDirectory.exists());
+                                logger.debug("flowcellDirectory.exists(): {}", flowcellDirectory.exists());
 
-                            if (flowcellDirectory.exists()) {
+                                if (flowcellDirectory.exists()) {
 
-                                sequencerRun = new SequencerRun();
-                                sequencerRun.setBaseDirectory(baseDirectory.getAbsolutePath());
-                                sequencerRun.setName(flowcellName);
+                                    sequencerRun = new SequencerRun();
+                                    sequencerRun.setBaseDirectory(baseDirectory.getAbsolutePath());
+                                    sequencerRun.setName(flowcellName);
 
-                                try {
+                                    try {
 
-                                    List<SequencerRun> foundSequencerRuns = sequencerRunDAO.findByExample(sequencerRun);
+                                        List<SequencerRun> foundSequencerRuns = sequencerRunDAO
+                                                .findByExample(sequencerRun);
 
-                                    if (foundSequencerRuns != null && foundSequencerRuns.size() > 0) {
+                                        if (foundSequencerRuns != null && foundSequencerRuns.size() > 0) {
 
-                                        sequencerRun = foundSequencerRuns.get(0);
-                                        logger.debug("sequencerRun.toString(): {}", sequencerRun.toString());
+                                            sequencerRun = foundSequencerRuns.get(0);
+                                            logger.debug("sequencerRun.toString(): {}", sequencerRun.toString());
 
-                                        // sequencerRun to htsfSample is one to many and if a sequencerRun is found,
-                                        // reset the htsfSamples from the samplesheet, but must first delete existing
-                                        // htsfSamples
+                                            // sequencerRun to htsfSample is one to many and if a sequencerRun is found,
+                                            // reset the htsfSamples from the samplesheet, but must first delete
+                                            // existing
+                                            // htsfSamples
 
-                                        List<HTSFSample> htsfSamplesToDeleteList = htsfSampleDAO
-                                                .findBySequencerRunId(sequencerRun.getId());
+                                            List<HTSFSample> htsfSamplesToDeleteList = htsfSampleDAO
+                                                    .findBySequencerRunId(sequencerRun.getId());
 
-                                        List<Job> jobsToDeleteList = new ArrayList<Job>();
-                                        List<WorkflowPlan> workflowPlansToDeleteList = new ArrayList<WorkflowPlan>();
-                                        List<WorkflowRun> workflowRunsToDeleteList = new ArrayList<WorkflowRun>();
+                                            List<Job> jobsToDeleteList = new ArrayList<Job>();
+                                            List<WorkflowPlan> workflowPlansToDeleteList = new ArrayList<WorkflowPlan>();
+                                            List<WorkflowRun> workflowRunsToDeleteList = new ArrayList<WorkflowRun>();
 
-                                        for (HTSFSample sample : htsfSamplesToDeleteList) {
+                                            for (HTSFSample sample : htsfSamplesToDeleteList) {
 
-                                            logger.debug("sample.toString(): {}", sample.toString());
+                                                logger.debug("sample.toString(): {}", sample.toString());
 
-                                            List<WorkflowPlan> workflowPlanList = workflowPlanDAO
-                                                    .findByHTSFSampleId(sample.getId());
+                                                List<WorkflowPlan> workflowPlanList = workflowPlanDAO
+                                                        .findByHTSFSampleId(sample.getId());
 
-                                            if (workflowPlanList == null) {
-                                                logger.warn("no WorkflowPlan instances found");
-                                                continue;
+                                                if (workflowPlanList == null) {
+                                                    logger.warn("no WorkflowPlan instances found");
+                                                    continue;
+                                                }
+
+                                                for (WorkflowPlan workflowPlan : workflowPlanList) {
+                                                    WorkflowRun workflowRunToDelete = workflowPlan.getWorkflowRun();
+                                                    jobsToDeleteList.addAll(jobDAO
+                                                            .findByWorkflowRunId(workflowRunToDelete.getId()));
+                                                    workflowPlan.setHTSFSamples(null);
+                                                    workflowPlanDAO.save(workflowPlan);
+                                                    workflowPlansToDeleteList.add(workflowPlan);
+                                                    workflowRunsToDeleteList.add(workflowRunToDelete);
+                                                }
+
                                             }
 
-                                            for (WorkflowPlan workflowPlan : workflowPlanList) {
-                                                WorkflowRun workflowRunToDelete = workflowPlan.getWorkflowRun();
-                                                jobsToDeleteList.addAll(jobDAO.findByWorkflowRunId(workflowRunToDelete
-                                                        .getId()));
-                                                workflowPlan.setHTSFSamples(null);
-                                                workflowPlanDAO.save(workflowPlan);
-                                                workflowPlansToDeleteList.add(workflowPlan);
-                                                workflowRunsToDeleteList.add(workflowRunToDelete);
-                                            }
+                                            // this will take a long time if there are lots of downstream analysis
+                                            jobDAO.delete(jobsToDeleteList);
+                                            workflowPlanDAO.delete(workflowPlansToDeleteList);
+                                            workflowRunDAO.delete(workflowRunsToDeleteList);
+                                            htsfSampleDAO.delete(htsfSamplesToDeleteList);
 
+                                        } else {
+                                            sequencerRun.setCreator(account);
+                                            sequencerRun.setStatus(SequencerRunStatusType.COMPLETED);
+                                            Long sequencerRunId = daoBean.getSequencerRunDAO().save(sequencerRun);
+                                            sequencerRun.setId(sequencerRunId);
+                                            logger.debug("sequencerRun.toString(): {}", sequencerRun.toString());
+                                        }
+                                    } catch (MaPSeqDAOException e) {
+                                        logger.error("Error", e);
+                                    }
+                                }
+
+                                if (sequencerRun == null) {
+                                    logger.warn("Invalid JSON: sequencerRun is null, not running anything");
+                                    return;
+                                }
+
+                                LineNumberReader lnr = new LineNumberReader(new StringReader(sampleSheetContent));
+                                lnr.readLine();
+                                String line;
+
+                                while ((line = lnr.readLine()) != null) {
+
+                                    String[] st = line.split(",");
+                                    String flowcell = st[0];
+                                    String laneIndex = st[1];
+                                    laneIndexSet.add(Integer.valueOf(laneIndex));
+                                    String sampleId = st[2];
+                                    String sampleRef = st[3];
+                                    String index = st[4];
+                                    String description = st[5];
+                                    String control = st[6];
+                                    String recipe = st[7];
+                                    String operator = st[8];
+                                    String sampleProject = st[9];
+
+                                    try {
+                                        HTSFSample htsfSample = new HTSFSample();
+                                        htsfSample.setBarcode(index);
+                                        htsfSample.setCreator(account);
+                                        htsfSample.setLaneIndex(Integer.valueOf(laneIndex));
+                                        htsfSample.setName(sampleId);
+                                        htsfSample.setSequencerRun(sequencerRun);
+                                        htsfSample.setStudy(studyMap.get(sampleProject));
+
+                                        Set<EntityAttribute> attributes = htsfSample.getAttributes();
+                                        if (attributes == null) {
+                                            attributes = new HashSet<EntityAttribute>();
                                         }
 
-                                        // this will take a long time if there are lots of downstream analysis
-                                        jobDAO.delete(jobsToDeleteList);
-                                        workflowPlanDAO.delete(workflowPlansToDeleteList);
-                                        workflowRunDAO.delete(workflowRunsToDeleteList);
-                                        htsfSampleDAO.delete(htsfSamplesToDeleteList);
+                                        if (StringUtils.isNotEmpty(description)) {
+                                            EntityAttribute descAttribute = new EntityAttribute();
+                                            descAttribute.setName("production.id.description");
+                                            descAttribute.setValue(description);
+                                            attributes.add(descAttribute);
+                                        }
 
-                                    } else {
-                                        sequencerRun.setCreator(account);
-                                        sequencerRun.setStatus(SequencerRunStatusType.COMPLETED);
-                                        Long sequencerRunId = daoBean.getSequencerRunDAO().save(sequencerRun);
-                                        sequencerRun.setId(sequencerRunId);
-                                        logger.debug("sequencerRun.toString(): {}", sequencerRun.toString());
+                                        htsfSample.setAttributes(attributes);
+
+                                        daoBean.getHTSFSampleDAO().save(htsfSample);
+
+                                    } catch (MaPSeqDAOException e) {
+                                        logger.error("ERROR", e);
                                     }
-                                } catch (MaPSeqDAOException e) {
-                                    logger.error("Error", e);
+
                                 }
-                            }
 
-                            if (sequencerRun == null) {
-                                logger.warn("Invalid JSON: sequencerRun is null, not running anything");
-                                return;
-                            }
-
-                            LineNumberReader lnr = new LineNumberReader(new StringReader(sampleSheetContent));
-                            lnr.readLine();
-                            String line;
-
-                            while ((line = lnr.readLine()) != null) {
-
-                                String[] st = line.split(",");
-                                String flowcell = st[0];
-                                String laneIndex = st[1];
-                                laneIndexSet.add(Integer.valueOf(laneIndex));
-                                String sampleId = st[2];
-                                String sampleRef = st[3];
-                                String index = st[4];
-                                String description = st[5];
-                                String control = st[6];
-                                String recipe = st[7];
-                                String operator = st[8];
-                                String sampleProject = st[9];
-
-                                try {
-                                    HTSFSample htsfSample = new HTSFSample();
-                                    htsfSample.setBarcode(index);
-                                    htsfSample.setCreator(account);
-                                    htsfSample.setLaneIndex(Integer.valueOf(laneIndex));
-                                    htsfSample.setName(sampleId);
-                                    htsfSample.setSequencerRun(sequencerRun);
-                                    htsfSample.setStudy(studyMap.get(sampleProject));
-
-                                    Set<EntityAttribute> attributes = htsfSample.getAttributes();
-                                    if (attributes == null) {
-                                        attributes = new HashSet<EntityAttribute>();
+                                Collections.synchronizedSet(laneIndexSet);
+                                for (Integer lane : laneIndexSet) {
+                                    try {
+                                        HTSFSample htsfSample = new HTSFSample();
+                                        htsfSample.setBarcode("Undetermined");
+                                        htsfSample.setCreator(account);
+                                        htsfSample.setLaneIndex(lane);
+                                        htsfSample.setName(String.format("lane%d", lane));
+                                        htsfSample.setSequencerRun(sequencerRun);
+                                        htsfSample.setStudy(studyMap.entrySet().iterator().next().getValue());
+                                        daoBean.getHTSFSampleDAO().save(htsfSample);
+                                    } catch (MaPSeqDAOException e) {
+                                        logger.error("ERROR", e);
                                     }
-
-                                    if (StringUtils.isNotEmpty(description)) {
-                                        EntityAttribute descAttribute = new EntityAttribute();
-                                        descAttribute.setName("production.id.description");
-                                        descAttribute.setValue(description);
-                                        attributes.add(descAttribute);
-                                    }
-
-                                    htsfSample.setAttributes(attributes);
-
-                                    daoBean.getHTSFSampleDAO().save(htsfSample);
-
-                                } catch (MaPSeqDAOException e) {
-                                    logger.error("ERROR", e);
                                 }
 
                             }
-
-                            Collections.synchronizedSet(laneIndexSet);
-                            for (Integer lane : laneIndexSet) {
-                                try {
-                                    HTSFSample htsfSample = new HTSFSample();
-                                    htsfSample.setBarcode("Undetermined");
-                                    htsfSample.setCreator(account);
-                                    htsfSample.setLaneIndex(lane);
-                                    htsfSample.setName(String.format("lane%d", lane));
-                                    htsfSample.setSequencerRun(sequencerRun);
-                                    htsfSample.setStudy(studyMap.entrySet().iterator().next().getValue());
-                                    daoBean.getHTSFSampleDAO().save(htsfSample);
-                                } catch (MaPSeqDAOException e) {
-                                    logger.error("ERROR", e);
-                                }
-                            }
-
+                        } catch (NumberFormatException | IOException e) {
+                            logger.error("ERROR", e);
                         }
-                    } catch (NumberFormatException | IOException e) {
-                        logger.error("ERROR", e);
                     }
-                }
 
-                if ("Workflow run".equals(entityType) || WorkflowRun.class.getSimpleName().equals(entityType)) {
-                    workflowRun = EntityUtil.getWorkflowRun(daoBean, "CASAVA", entityJSONObject, account);
-                    logger.debug("workflowRun.toString(): {}", workflowRun.toString());
-                }
+                    if (WorkflowRun.class.getSimpleName().equals(entity.getEntityType())) {
+                        workflowRun = getWorkflowRun(workflow, entity, account);
+                    }
 
-                if (Platform.class.getSimpleName().equals(entityType)) {
-                    platform = EntityUtil.getPlatform(daoBean, entityJSONObject);
-                    logger.debug("platform.toString(): {}", platform.toString());
-                }
+                    if (Platform.class.getSimpleName().equals(entity.getEntityType())) {
+                        platform = getPlatform(entity);
+                    }
 
+                }
             }
-        } catch (JSONException e) {
-            logger.error("ERROR", e);
+        } catch (WorkflowException e1) {
+            logger.error(e1.getMessage(), e1);
             return;
         }
 
@@ -477,14 +485,6 @@ public class CASAVAMessageListener implements MessageListener {
 
         Collections.synchronizedSet(sampleProjectCache);
         return sampleProjectCache;
-    }
-
-    public WorkflowBeanService getWorkflowBeanService() {
-        return workflowBeanService;
-    }
-
-    public void setWorkflowBeanService(WorkflowBeanService workflowBeanService) {
-        this.workflowBeanService = workflowBeanService;
     }
 
 }
