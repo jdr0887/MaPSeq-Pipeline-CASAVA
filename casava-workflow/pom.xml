@@ -16,8 +16,12 @@
       <artifactId>mapseq-workflow-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>edu.unc.mapseq</groupId>
-      <artifactId>modules</artifactId>
+      <groupId>edu.unc.mapseq.distribution</groupId>
+      <artifactId>mapseq-workflow-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>edu.unc.mapseq.distribution</groupId>
+      <artifactId>mapseq-modules</artifactId>
     </dependency>
     <dependency>
       <groupId>edu.unc.mapseq.pipelines.casava</groupId>
