@@ -1,5 +1,8 @@
 package edu.unc.mapseq.messaging;
 
+import java.io.IOException;
+import java.io.StringWriter;
+
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -9,6 +12,9 @@ import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.Test;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 
 public class CASAVAMessageTest {
 
@@ -78,4 +84,42 @@ public class CASAVAMessageTest {
         }
 
     }
+
+    @Test
+    public void testJSON() {
+
+        try {
+            StringWriter sw = new StringWriter();
+
+            JsonGenerator generator = new JsonFactory().createGenerator(sw);
+
+            generator.writeStartObject();
+            generator.writeStringField("accountName", System.getProperty("user.name"));
+            generator.writeArrayFieldStart("entities");
+
+            generator.writeStartObject();
+            generator.writeStringField("entityType", "HTSFSample");
+            generator.writeStringField("guid", "12345");
+            generator.writeEndObject();
+
+            generator.writeStartObject();
+            generator.writeStringField("entityType", "WorkflowRun");
+            generator.writeStringField("name", "my workflow run");
+            generator.writeEndObject();
+
+            generator.writeEndArray();
+            generator.writeEndObject();
+
+            generator.flush();
+            generator.close();
+
+            sw.flush();
+            sw.close();
+            System.out.println(sw.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
