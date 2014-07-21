@@ -130,33 +130,31 @@ public class CASAVAMessageListener extends AbstractMessageListener {
         SequencerRun sequencerRun = null;
         WorkflowRun workflowRun = null;
         Platform platform = null;
-        Account account = null;
 
         File sampleSheet = null;
 
-        String accountName = workflowMessage.getAccountName();
-
+        Account account = null;
         try {
-            account = accountDAO.findByName(accountName);
+            List<Account> accountList = accountDAO.findByName(workflowMessage.getAccountName());
+            if (accountList == null || (accountList != null && accountList.isEmpty())) {
+                logger.error("Account doesn't exist: {}", workflowMessage.getAccountName());
+                return;
+            }
+            account = accountList.get(0);
         } catch (MaPSeqDAOException e) {
-        }
-
-        if (account == null) {
-            logger.error("Must register account first");
-            return;
+            e.printStackTrace();
         }
 
         Workflow workflow = null;
-        String workflowName = "CASAVA";
         try {
-            workflow = workflowDAO.findByName(workflowName);
+            List<Workflow> workflowList = workflowDAO.findByName("CASAVA");
+            if (workflowList == null || (workflowList != null && workflowList.isEmpty())) {
+                logger.error("No Workflow Found: {}", "CASAVA");
+                return;
+            }
+            workflow = workflowList.get(0);
         } catch (MaPSeqDAOException e) {
             logger.error("ERROR", e);
-        }
-
-        if (workflow == null) {
-            logger.error("No Workflow Found: {}", workflowName);
-            return;
         }
 
         try {
@@ -195,7 +193,8 @@ public class CASAVAMessageListener extends AbstractMessageListener {
 
                                 for (String sampleProject : sampleProjectCache) {
                                     try {
-                                        Study study = daoBean.getStudyDAO().findByName(sampleProject);
+                                        List<Study> studyList = daoBean.getStudyDAO().findByName(sampleProject);
+                                        Study study = studyList.get(0);
                                         if (study == null) {
                                             study = new Study();
                                             study.setCreator(account);

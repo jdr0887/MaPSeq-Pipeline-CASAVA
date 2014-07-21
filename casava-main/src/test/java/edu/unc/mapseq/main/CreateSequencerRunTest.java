@@ -6,12 +6,15 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.PlatformDAO;
 import edu.unc.mapseq.dao.model.Account;
@@ -47,12 +50,21 @@ public class CreateSequencerRunTest {
             lnr.readLine();
             String line;
 
-            Account account = daoMgr.getMaPSeqDAOBean().getAccountDAO().findByName(System.getProperty("user.name"));
+            MaPSeqDAOBean maPSeqDAOBean = daoMgr.getMaPSeqDAOBean();
 
-            if (account == null) {
-                System.out.println("Must register account first");
-                return;
+            List<Account> accountList = null;
+            try {
+                accountList = maPSeqDAOBean.getAccountDAO().findByName(System.getProperty("user.name"));
+                if (accountList == null || (accountList != null && accountList.isEmpty())) {
+                    System.err.printf("Account doesn't exist: %s%n", System.getProperty("user.name"));
+                    System.err.println("Must register account first");
+                    return;
+                }
+            } catch (MaPSeqDAOException e) {
+                e.printStackTrace();
             }
+
+            Account account = accountList.get(0);
 
             Platform platform = null;
             try {
@@ -88,7 +100,11 @@ public class CreateSequencerRunTest {
                 String operator = st[8];
                 String sampleProject = st[9];
 
-                Study study = daoMgr.getMaPSeqDAOBean().getStudyDAO().findByName(sampleProject);
+                if (StringUtils.isEmpty(sampleProject)) {
+                    System.err.printf("SampleProject is empty");
+                    return;
+                }
+                Study study = daoMgr.getMaPSeqDAOBean().getStudyDAO().findByName(sampleProject).get(0);
                 if (study == null) {
                     study = new Study();
                     study.setApproved(Boolean.TRUE);

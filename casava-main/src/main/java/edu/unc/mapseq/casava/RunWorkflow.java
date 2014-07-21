@@ -42,6 +42,7 @@ import org.xml.sax.SAXException;
 
 import edu.unc.mapseq.config.MaPSeqConfigurationService;
 import edu.unc.mapseq.config.MaPSeqConfigurationServiceImpl;
+import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.model.Account;
 import edu.unc.mapseq.dao.model.EntityAttribute;
@@ -83,16 +84,19 @@ public class RunWorkflow implements Runnable {
     @Override
     public void run() {
 
+        MaPSeqDAOBean maPSeqDAOBean = daoMgr.getMaPSeqDAOBean();
+
         Account account = null;
         try {
-            account = daoMgr.getMaPSeqDAOBean().getAccountDAO().findByName(System.getProperty("user.name"));
+            List<Account> accountList = maPSeqDAOBean.getAccountDAO().findByName(System.getProperty("user.name"));
+            if (accountList == null || (accountList != null && accountList.isEmpty())) {
+                System.err.printf("Account doesn't exist: %s%n", System.getProperty("user.name"));
+                System.err.println("Must register account first");
+                return;
+            }
+            account = accountList.get(0);
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
-        }
-
-        if (account == null) {
-            System.out.println("Must register account first");
-            return;
         }
 
         if (this.sequencerRunId == null && this.htsfSampleId == null) {
@@ -121,9 +125,12 @@ public class RunWorkflow implements Runnable {
         CASAVAWorkflow casavaWorkflow = new CASAVAWorkflow();
         Workflow workflow = null;
         try {
-            workflow = daoMgr.getMaPSeqDAOBean().getWorkflowDAO().findByName(casavaWorkflow.getName());
-        } catch (MaPSeqDAOException e) {
-            e.printStackTrace();
+            List<Workflow> workflowList = daoMgr.getMaPSeqDAOBean().getWorkflowDAO().findByName("CASAVA");
+            if (workflowList != null && !workflowList.isEmpty()) {
+                workflow = workflowList.get(0);
+            }
+        } catch (MaPSeqDAOException e2) {
+            e2.printStackTrace();
         }
 
         if (workflow == null) {
