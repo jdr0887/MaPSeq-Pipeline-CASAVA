@@ -42,17 +42,21 @@ import org.xml.sax.SAXException;
 
 import edu.unc.mapseq.config.MaPSeqConfigurationService;
 import edu.unc.mapseq.config.MaPSeqConfigurationServiceImpl;
+import edu.unc.mapseq.dao.FlowcellDAO;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
-import edu.unc.mapseq.dao.model.Account;
-import edu.unc.mapseq.dao.model.EntityAttribute;
-import edu.unc.mapseq.dao.model.HTSFSample;
-import edu.unc.mapseq.dao.model.SequencerRun;
+import edu.unc.mapseq.dao.SampleDAO;
+import edu.unc.mapseq.dao.WorkflowDAO;
+import edu.unc.mapseq.dao.WorkflowRunAttemptDAO;
+import edu.unc.mapseq.dao.WorkflowRunDAO;
+import edu.unc.mapseq.dao.model.Attribute;
+import edu.unc.mapseq.dao.model.Flowcell;
+import edu.unc.mapseq.dao.model.Sample;
 import edu.unc.mapseq.dao.model.Study;
 import edu.unc.mapseq.dao.model.Workflow;
-import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
-import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
+import edu.unc.mapseq.dao.model.WorkflowRunAttempt;
+import edu.unc.mapseq.dao.model.WorkflowRunAttemptStatusType;
 import edu.unc.mapseq.dao.ws.WSDAOManager;
 import edu.unc.mapseq.workflow.WorkflowBeanService;
 import edu.unc.mapseq.workflow.WorkflowExecutor;
@@ -67,13 +71,11 @@ public class RunWorkflow implements Runnable {
 
     private final static Options cliOptions = new Options();
 
-    private final WSDAOManager daoMgr = WSDAOManager.getInstance();
-
     private String workflowRunName;
 
-    private Long sequencerRunId;
+    private Long flowcellId;
 
-    private Long htsfSampleId;
+    private Long sampleId;
 
     private Properties properties;
 
@@ -84,48 +86,42 @@ public class RunWorkflow implements Runnable {
     @Override
     public void run() {
 
+        WSDAOManager daoMgr = WSDAOManager.getInstance();
         MaPSeqDAOBean maPSeqDAOBean = daoMgr.getMaPSeqDAOBean();
 
-        Account account = null;
-        try {
-            List<Account> accountList = maPSeqDAOBean.getAccountDAO().findByName(System.getProperty("user.name"));
-            if (accountList == null || (accountList != null && accountList.isEmpty())) {
-                System.err.printf("Account doesn't exist: %s%n", System.getProperty("user.name"));
-                System.err.println("Must register account first");
-                return;
-            }
-            account = accountList.get(0);
-        } catch (MaPSeqDAOException e) {
-            e.printStackTrace();
-        }
+        FlowcellDAO flowcellDAO = maPSeqDAOBean.getFlowcellDAO();
+        SampleDAO sampleDAO = maPSeqDAOBean.getSampleDAO();
+        WorkflowDAO workflowDAO = maPSeqDAOBean.getWorkflowDAO();
+        WorkflowRunDAO workflowRunDAO = maPSeqDAOBean.getWorkflowRunDAO();
+        WorkflowRunAttemptDAO workflowRunAttemptDAO = maPSeqDAOBean.getWorkflowRunAttemptDAO();
 
-        if (this.sequencerRunId == null && this.htsfSampleId == null) {
-            System.err.println("Both sequencerRunId and htsfSampeId can't be null");
+        if (this.flowcellId == null && this.sampleId == null) {
+            System.err.println("Both flowcellId and sampleId can't be null");
             return;
         }
 
-        SequencerRun sequencerRun = null;
-        Set<HTSFSample> htsfSampleSet = new HashSet<HTSFSample>();
+        Flowcell flowcell = null;
+        Set<Sample> sampleSet = new HashSet<Sample>();
 
         try {
-            if (sequencerRunId != null && htsfSampleId == null) {
-                sequencerRun = daoMgr.getMaPSeqDAOBean().getSequencerRunDAO().findById(this.sequencerRunId);
-            } else if (sequencerRunId == null && htsfSampleId != null) {
-                HTSFSample htsfSample = daoMgr.getMaPSeqDAOBean().getHTSFSampleDAO().findById(this.htsfSampleId);
-                htsfSampleSet.add(htsfSample);
+            if (flowcellId != null && sampleId == null) {
+                flowcell = flowcellDAO.findById(this.flowcellId);
+            } else if (flowcellId == null && sampleId != null) {
+                Sample sample = sampleDAO.findById(this.sampleId);
+                sampleSet.add(sample);
             }
         } catch (MaPSeqDAOException e) {
         }
 
-        if (sequencerRun == null && htsfSampleSet.size() == 0) {
-            System.err.println("SequencerRun & Set<HTSFSample> are both empty");
+        if (flowcell == null && sampleSet.isEmpty()) {
+            System.err.println("Flowcell & Set<Sample> are both empty");
             return;
         }
 
         CASAVAWorkflow casavaWorkflow = new CASAVAWorkflow();
         Workflow workflow = null;
         try {
-            List<Workflow> workflowList = daoMgr.getMaPSeqDAOBean().getWorkflowDAO().findByName("CASAVA");
+            List<Workflow> workflowList = workflowDAO.findByName("CASAVA");
             if (workflowList != null && !workflowList.isEmpty()) {
                 workflow = workflowList.get(0);
             }
@@ -139,30 +135,30 @@ public class RunWorkflow implements Runnable {
         }
 
         WorkflowRun workflowRun = new WorkflowRun();
-        workflowRun.setCreator(account);
         workflowRun.setName(this.workflowRunName);
         workflowRun.setWorkflow(workflow);
-        workflowRun.setVersion(casavaWorkflow.getVersion());
+        if (flowcell != null) {
+            workflowRun.getFlowcells().add(flowcell);
+        }
+        if (!sampleSet.isEmpty()) {
+            workflowRun.getSamples().addAll(sampleSet);
+        }
 
         try {
-            workflowRun.setStatus(WorkflowRunStatusType.PENDING);
-            Long workflowRunId = daoMgr.getMaPSeqDAOBean().getWorkflowRunDAO().save(workflowRun);
+            Long workflowRunId = workflowRunDAO.save(workflowRun);
             workflowRun.setId(workflowRunId);
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
         }
 
         try {
-            WorkflowPlan workflowPlan = new WorkflowPlan();
-            if (sequencerRun != null) {
-                workflowPlan.setSequencerRun(sequencerRun);
-            }
-            if (htsfSampleSet.size() > 0) {
-                workflowPlan.setHTSFSamples(htsfSampleSet);
-            }
-            workflowPlan.setWorkflowRun(workflowRun);
-            Long workflowPlanId = daoMgr.getMaPSeqDAOBean().getWorkflowPlanDAO().save(workflowPlan);
-            workflowPlan.setId(workflowPlanId);
+            WorkflowRunAttempt attempt = new WorkflowRunAttempt();
+            attempt.setVersion(casavaWorkflow.getVersion());
+            attempt.setStatus(WorkflowRunAttemptStatusType.PENDING);
+            attempt.setWorkflowRun(workflowRun);
+
+            Long attemptId = workflowRunAttemptDAO.save(attempt);
+            attempt.setId(attemptId);
 
             MaPSeqConfigurationService configService = new MaPSeqConfigurationServiceImpl();
             System.out.println("Please watch " + System.getenv("MAPSEQ_HOME")
@@ -175,9 +171,9 @@ public class RunWorkflow implements Runnable {
             workflowBeanService.setMaPSeqConfigurationService(configService);
             workflowBeanService.setMaPSeqDAOBean(daoMgr.getMaPSeqDAOBean());
 
-            File baseDir = new File(sequencerRun.getBaseDirectory());
-            File sequencerRunDir = new File(baseDir, sequencerRun.getName());
-            File dataDir = new File(sequencerRunDir, "Data");
+            File baseDir = new File(flowcell.getBaseDirectory());
+            File flowcellDir = new File(baseDir, flowcell.getName());
+            File dataDir = new File(flowcellDir, "Data");
             File intensitiesDir = new File(dataDir, "Intensities");
             File baseCallsDir = new File(intensitiesDir, "BaseCalls");
 
@@ -188,17 +184,12 @@ public class RunWorkflow implements Runnable {
                 return;
             }
 
-            String flowcell = null;
-
-            Set<EntityAttribute> entityAttributeSet = sequencerRun.getAttributes();
-            if (entityAttributeSet == null) {
-                entityAttributeSet = new HashSet<EntityAttribute>();
-            }
+            String flowcellProper = null;
 
             int readCount = 1;
             try {
                 DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                File runInfoXmlFile = new File(sequencerRunDir, "RunInfo.xml");
+                File runInfoXmlFile = new File(flowcellDir, "RunInfo.xml");
                 if (!runInfoXmlFile.exists()) {
                     logger.error("RunInfo.xml file does not exist: {}", runInfoXmlFile.getAbsolutePath());
                     return;
@@ -211,8 +202,8 @@ public class RunWorkflow implements Runnable {
                 // find the flowcell
                 String runFlowcellIdPath = "/RunInfo/Run/Flowcell";
                 Node runFlowcellIdNode = (Node) xpath.evaluate(runFlowcellIdPath, document, XPathConstants.NODE);
-                flowcell = runFlowcellIdNode.getTextContent();
-                logger.debug("flowcell = {}", flowcell);
+                flowcellProper = runFlowcellIdNode.getTextContent();
+                logger.debug("flowcellProper = {}", flowcellProper);
 
                 readCount = 0;
                 String readsPath = "/RunInfo/Run/Reads/Read/@IsIndexedRead";
@@ -223,7 +214,7 @@ public class RunWorkflow implements Runnable {
                     }
                 }
                 logger.debug("readCount = {}", readCount);
-                entityAttributeSet.add(new EntityAttribute("readCount", readCount + ""));
+                flowcell.getAttributes().add(new Attribute("readCount", readCount + ""));
             } catch (XPathExpressionException | DOMException | ParserConfigurationException | SAXException
                     | IOException e1) {
                 e1.printStackTrace();
@@ -231,12 +222,11 @@ public class RunWorkflow implements Runnable {
 
             Vector<Vector<String>> data = new Vector<Vector<String>>();
             try {
-                List<HTSFSample> htsfSampleList = daoMgr.getMaPSeqDAOBean().getHTSFSampleDAO()
-                        .findBySequencerRunId(sequencerRun.getId());
+                List<Sample> sampleList = sampleDAO.findByFlowcellId(flowcell.getId());
 
-                if (htsfSampleList != null && htsfSampleList.size() > 0) {
-                    logger.debug("htsfSampleList.size() = {}", htsfSampleList.size());
-                    for (HTSFSample sample : htsfSampleList) {
+                if (sampleList != null && !sampleList.isEmpty()) {
+                    logger.debug("sampleList.size() = {}", sampleList.size());
+                    for (Sample sample : sampleList) {
                         Study study = sample.getStudy();
                         Vector<String> childVector = new Vector<String>();
                         childVector.add(sample.getLaneIndex().toString());
@@ -262,8 +252,8 @@ public class RunWorkflow implements Runnable {
             Iterator<Vector<String>> dataIter = data.iterator();
             while (dataIter.hasNext()) {
                 Vector<String> values = dataIter.next();
-                sb.append(String.format("%s,%s,%s,,%s,,,,,%s%n", flowcell, values.get(0), values.get(1), values.get(2),
-                        values.get(3)));
+                sb.append(String.format("%s,%s,%s,,%s,,,,,%s%n", flowcellProper, values.get(0), values.get(1),
+                        values.get(2), values.get(3)));
             }
 
             File sampleSheetFile = new File(baseCallsDir, "SampleSheet.csv");
@@ -273,13 +263,11 @@ public class RunWorkflow implements Runnable {
                 e.printStackTrace();
             }
 
-            entityAttributeSet.add(new EntityAttribute("sampleSheet", sampleSheetFile.getAbsolutePath()));
-
-            sequencerRun.setAttributes(entityAttributeSet);
-            daoMgr.getMaPSeqDAOBean().getSequencerRunDAO().save(sequencerRun);
+            flowcell.getAttributes().add(new Attribute("sampleSheet", sampleSheetFile.getAbsolutePath()));
+            flowcellDAO.save(flowcell);
 
             casavaWorkflow.setWorkflowBeanService(workflowBeanService);
-            casavaWorkflow.setWorkflowPlan(workflowPlan);
+            casavaWorkflow.setWorkflowRunAttempt(attempt);
             Executors.newSingleThreadExecutor().execute(new WorkflowExecutor(casavaWorkflow));
 
         } catch (MaPSeqDAOException e) {
@@ -304,28 +292,28 @@ public class RunWorkflow implements Runnable {
         this.workflowRunName = workflowRunName;
     }
 
-    public Long getSequencerRunId() {
-        return sequencerRunId;
+    public Long getFlowcellId() {
+        return flowcellId;
     }
 
-    public void setSequencerRunId(Long sequencerRunId) {
-        this.sequencerRunId = sequencerRunId;
+    public void setFlowcellId(Long flowcellId) {
+        this.flowcellId = flowcellId;
     }
 
-    public Long getHtsfSampleId() {
-        return htsfSampleId;
+    public Long getSampleId() {
+        return sampleId;
     }
 
-    public void setHtsfSampleId(Long htsfSampleId) {
-        this.htsfSampleId = htsfSampleId;
+    public void setSampleId(Long sampleId) {
+        this.sampleId = sampleId;
     }
 
     @SuppressWarnings("static-access")
     public static void main(String[] args) {
-        cliOptions.addOption(OptionBuilder.withArgName("htsfSampleId").hasArg()
-                .withDescription("HTSFSample identifier").withLongOpt("htsfSampleId").create());
-        cliOptions.addOption(OptionBuilder.withArgName("sequencerRunId").hasArg()
-                .withDescription("SequencerRun identifier").withLongOpt("sequencerRunId").create());
+        cliOptions.addOption(OptionBuilder.withArgName("sampleId").hasArg().withDescription("Sample identifier")
+                .withLongOpt("sampleId").create());
+        cliOptions.addOption(OptionBuilder.withArgName("flowcellId").hasArg().withDescription("Flowcell identifier")
+                .withLongOpt("flowcellId").create());
         cliOptions.addOption(OptionBuilder.withArgName("workflowRunName").withLongOpt("workflowRunName").isRequired()
                 .hasArg().create());
         cliOptions.addOption(OptionBuilder.withArgName("propertyFile").withLongOpt("propertyFile").hasArg().create());
@@ -344,14 +332,14 @@ public class RunWorkflow implements Runnable {
                 main.setWorkflowRunName(workflowRunName);
             }
 
-            if (commandLine.hasOption("sequencerRunId")) {
-                Long sequencerRunId = Long.valueOf(commandLine.getOptionValue("sequencerRunId"));
-                main.setSequencerRunId(sequencerRunId);
+            if (commandLine.hasOption("flowcellId")) {
+                Long flowcellId = Long.valueOf(commandLine.getOptionValue("flowcellId"));
+                main.setFlowcellId(flowcellId);
             }
 
-            if (commandLine.hasOption("htsfSampleId")) {
-                Long htsfSampleId = Long.valueOf(commandLine.getOptionValue("htsfSampleId"));
-                main.setHtsfSampleId(htsfSampleId);
+            if (commandLine.hasOption("sampleId")) {
+                Long sampleId = Long.valueOf(commandLine.getOptionValue("sampleId"));
+                main.setSampleId(sampleId);
             }
 
             if (commandLine.hasOption("propertyFile")) {
