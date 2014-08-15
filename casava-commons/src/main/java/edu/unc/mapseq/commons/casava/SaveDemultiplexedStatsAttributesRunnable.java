@@ -30,12 +30,12 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import edu.unc.mapseq.dao.FlowcellDAO;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
-import edu.unc.mapseq.dao.SequencerRunDAO;
-import edu.unc.mapseq.dao.model.EntityAttribute;
-import edu.unc.mapseq.dao.model.HTSFSample;
-import edu.unc.mapseq.dao.model.SequencerRun;
+import edu.unc.mapseq.dao.model.Attribute;
+import edu.unc.mapseq.dao.model.Flowcell;
+import edu.unc.mapseq.dao.model.Sample;
 
 public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
 
@@ -43,7 +43,7 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
 
     private MaPSeqDAOBean mapseqDAOBean;
 
-    private List<Long> sequencerRunIdList;
+    private List<Long> flowcellIdList;
 
     public SaveDemultiplexedStatsAttributesRunnable() {
         super();
@@ -53,24 +53,24 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
     public void run() {
         logger.debug("ENTERING run()");
 
-        List<SequencerRun> srList = new ArrayList<SequencerRun>();
+        List<Flowcell> fList = new ArrayList<Flowcell>();
 
         try {
 
-            SequencerRunDAO sequencerRunDAO = mapseqDAOBean.getSequencerRunDAO();
-            for (Long sequencerRunId : sequencerRunIdList) {
-                SequencerRun sequencerRun = sequencerRunDAO.findById(sequencerRunId);
-                if (sequencerRun != null) {
-                    srList.add(sequencerRun);
+            FlowcellDAO flowcellDAO = mapseqDAOBean.getFlowcellDAO();
+            for (Long flowcellId : getFlowcellIdList()) {
+                Flowcell flowcell = flowcellDAO.findById(flowcellId);
+                if (flowcell != null) {
+                    fList.add(flowcell);
                 }
             }
 
-            if (srList.size() > 0) {
+            if (!fList.isEmpty()) {
 
-                for (SequencerRun sr : srList) {
+                for (Flowcell flowcell : fList) {
 
-                    File sequencerRunDir = new File(sr.getBaseDirectory(), sr.getName());
-                    String flowcell = null;
+                    File sequencerRunDir = new File(flowcell.getBaseDirectory(), flowcell.getName());
+                    String flowcellProper = null;
 
                     try {
                         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -88,26 +88,27 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                         String runFlowcellIdPath = "/RunInfo/Run/Flowcell";
                         Node runFlowcellIdNode = (Node) xpath
                                 .evaluate(runFlowcellIdPath, document, XPathConstants.NODE);
-                        flowcell = runFlowcellIdNode.getTextContent();
-                        logger.debug("flowcell = {}", flowcell);
+                        flowcellProper = runFlowcellIdNode.getTextContent();
+                        logger.debug("flowcell = {}", flowcellProper);
 
                     } catch (XPathExpressionException | DOMException | ParserConfigurationException | SAXException
                             | IOException e) {
                         e.printStackTrace();
                     }
 
-                    List<HTSFSample> htsfSampleList = mapseqDAOBean.getHTSFSampleDAO().findBySequencerRunId(sr.getId());
+                    List<Sample> sampleList = mapseqDAOBean.getSampleDAO().findByFlowcellId(flowcell.getId());
 
-                    if (htsfSampleList == null) {
-                        logger.warn("htsfSampleList was null");
+                    if (sampleList == null) {
+                        logger.warn("sampleList was null");
                         return;
                     }
 
-                    for (HTSFSample sample : htsfSampleList) {
+                    for (Sample sample : sampleList) {
 
                         File unalignedDir = new File(sequencerRunDir, String.format("Unaligned.%d",
                                 sample.getLaneIndex()));
-                        File baseCallStatsDir = new File(unalignedDir, String.format("Basecall_Stats_%s", flowcell));
+                        File baseCallStatsDir = new File(unalignedDir, String.format("Basecall_Stats_%s",
+                                flowcellProper));
                         File statsFile = new File(baseCallStatsDir, "Demultiplex_Stats.htm");
 
                         if (!statsFile.exists()) {
@@ -146,15 +147,15 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                         && sample.getLaneIndex().toString().equals(laneElement.text())
                                         && sample.getBarcode().equals(indexElement.text())) {
 
-                                    Set<EntityAttribute> attributeSet = sample.getAttributes();
+                                    Set<Attribute> attributeSet = sample.getAttributes();
 
                                     if (attributeSet == null) {
-                                        attributeSet = new HashSet<EntityAttribute>();
+                                        attributeSet = new HashSet<Attribute>();
                                     }
 
                                     Set<String> entityAttributeNameSet = new HashSet<String>();
 
-                                    for (EntityAttribute attribute : attributeSet) {
+                                    for (Attribute attribute : attributeSet) {
                                         entityAttributeNameSet.add(attribute.getName());
                                     }
 
@@ -163,118 +164,117 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                     if (StringUtils.isNotEmpty(yeildElement.text())) {
                                         String value = yeildElement.text().replace(",", "");
                                         if (synchSet.contains("yield")) {
-                                            for (EntityAttribute attribute : attributeSet) {
+                                            for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("yield")) {
                                                     attribute.setValue(value);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new EntityAttribute("yield", value));
+                                            attributeSet.add(new Attribute("yield", value));
                                         }
                                     }
 
                                     if (StringUtils.isNotEmpty(passingFilteringElement.text())) {
                                         String value = passingFilteringElement.text();
                                         if (synchSet.contains("passedFiltering")) {
-                                            for (EntityAttribute attribute : attributeSet) {
+                                            for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("passedFiltering")) {
                                                     attribute.setValue(value);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new EntityAttribute("passedFiltering", value));
+                                            attributeSet.add(new Attribute("passedFiltering", value));
                                         }
                                     }
 
                                     if (StringUtils.isNotEmpty(numberOfReadsElement.text())) {
                                         String value = numberOfReadsElement.text().replace(",", "");
                                         if (synchSet.contains("numberOfReads")) {
-                                            for (EntityAttribute attribute : attributeSet) {
+                                            for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("numberOfReads")) {
                                                     attribute.setValue(value);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new EntityAttribute("numberOfReads", value));
+                                            attributeSet.add(new Attribute("numberOfReads", value));
                                         }
                                     }
 
                                     if (StringUtils.isNotEmpty(rawClustersPerLaneElement.text())) {
                                         String value = rawClustersPerLaneElement.text();
                                         if (synchSet.contains("rawClustersPerLane")) {
-                                            for (EntityAttribute attribute : attributeSet) {
+                                            for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("rawClustersPerLane")) {
                                                     attribute.setValue(value);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new EntityAttribute("rawClustersPerLane", value));
+                                            attributeSet.add(new Attribute("rawClustersPerLane", value));
                                         }
                                     }
 
                                     if (StringUtils.isNotEmpty(perfectIndexReadsElement.text())) {
                                         String value = perfectIndexReadsElement.text();
                                         if (synchSet.contains("perfectIndexReads")) {
-                                            for (EntityAttribute attribute : attributeSet) {
+                                            for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("perfectIndexReads")) {
                                                     attribute.setValue(value);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new EntityAttribute("perfectIndexReads", value));
+                                            attributeSet.add(new Attribute("perfectIndexReads", value));
                                         }
                                     }
 
                                     if (StringUtils.isNotEmpty(oneMismatchReadsIndexElement.text())) {
                                         String value = oneMismatchReadsIndexElement.text();
                                         if (synchSet.contains("oneMismatchReadsIndex")) {
-                                            for (EntityAttribute attribute : attributeSet) {
+                                            for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("oneMismatchReadsIndex")) {
                                                     attribute.setValue(value);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new EntityAttribute("oneMismatchReadsIndex", value));
+                                            attributeSet.add(new Attribute("oneMismatchReadsIndex", value));
                                         }
                                     }
 
                                     if (StringUtils.isNotEmpty(q30YeildPassingFilteringElement.text())) {
                                         String value = q30YeildPassingFilteringElement.text();
                                         if (synchSet.contains("q30YieldPassingFiltering")) {
-                                            for (EntityAttribute attribute : attributeSet) {
+                                            for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("q30YieldPassingFiltering")) {
                                                     attribute.setValue(value);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new EntityAttribute("q30YieldPassingFiltering", value));
+                                            attributeSet.add(new Attribute("q30YieldPassingFiltering", value));
                                         }
                                     }
 
                                     if (StringUtils.isNotEmpty(meanQualityScorePassingFilteringElement.text())) {
                                         String value = meanQualityScorePassingFilteringElement.text();
                                         if (synchSet.contains("meanQualityScorePassingFiltering")) {
-                                            for (EntityAttribute attribute : attributeSet) {
+                                            for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("meanQualityScorePassingFiltering")) {
                                                     attribute.setValue(value);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new EntityAttribute("meanQualityScorePassingFiltering",
-                                                    value));
+                                            attributeSet.add(new Attribute("meanQualityScorePassingFiltering", value));
                                         }
                                     }
 
                                     sample.setAttributes(attributeSet);
-                                    mapseqDAOBean.getHTSFSampleDAO().save(sample);
+                                    mapseqDAOBean.getSampleDAO().save(sample);
                                     System.out.println(String.format("Successfully saved sample: %s", sample.getId()));
                                     logger.info(sample.toString());
                                 }
@@ -307,12 +307,12 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
         this.mapseqDAOBean = mapseqDAOBean;
     }
 
-    public List<Long> getSequencerRunIdList() {
-        return sequencerRunIdList;
+    public List<Long> getFlowcellIdList() {
+        return flowcellIdList;
     }
 
-    public void setSequencerRunIdList(List<Long> sequencerRunIdList) {
-        this.sequencerRunIdList = sequencerRunIdList;
+    public void setFlowcellIdList(List<Long> flowcellIdList) {
+        this.flowcellIdList = flowcellIdList;
     }
 
 }

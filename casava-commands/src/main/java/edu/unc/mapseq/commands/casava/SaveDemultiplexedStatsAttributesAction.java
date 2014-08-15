@@ -19,15 +19,15 @@ public class SaveDemultiplexedStatsAttributesAction extends AbstractAction {
 
     private MaPSeqDAOBean maPSeqDAOBean;
 
-    @Argument(index = 0, name = "sequencerRunId", description = "Sequencer Run Identifier", required = true, multiValued = true)
-    private List<Long> sequencerRunIdList;
+    @Argument(index = 0, name = "flowcellId", description = "Flowcell Identifier", required = true, multiValued = true)
+    private List<Long> flowcellIdList;
 
     @Override
     protected Object doExecute() throws Exception {
         logger.debug("ENTERING doExecute()");
         SaveDemultiplexedStatsAttributesRunnable runnable = new SaveDemultiplexedStatsAttributesRunnable();
         runnable.setMapseqDAOBean(maPSeqDAOBean);
-        runnable.setSequencerRunIdList(sequencerRunIdList);
+        runnable.setFlowcellIdList(flowcellIdList);
         Executors.newSingleThreadExecutor().execute(runnable);
         return null;
     }
@@ -40,12 +40,12 @@ public class SaveDemultiplexedStatsAttributesAction extends AbstractAction {
         this.maPSeqDAOBean = maPSeqDAOBean;
     }
 
-    public List<Long> getSequencerRunIdList() {
-        return sequencerRunIdList;
+    public List<Long> getFlowcellIdList() {
+        return flowcellIdList;
     }
 
-    public void setSequencerRunIdList(List<Long> sequencerRunIdList) {
-        this.sequencerRunIdList = sequencerRunIdList;
+    public void setFlowcellIdList(List<Long> flowcellIdList) {
+        this.flowcellIdList = flowcellIdList;
     }
 
 }

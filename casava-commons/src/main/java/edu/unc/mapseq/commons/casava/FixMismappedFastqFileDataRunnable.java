@@ -10,14 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.unc.mapseq.dao.FileDataDAO;
-import edu.unc.mapseq.dao.HTSFSampleDAO;
+import edu.unc.mapseq.dao.FlowcellDAO;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
-import edu.unc.mapseq.dao.SequencerRunDAO;
+import edu.unc.mapseq.dao.SampleDAO;
 import edu.unc.mapseq.dao.model.FileData;
-import edu.unc.mapseq.dao.model.HTSFSample;
+import edu.unc.mapseq.dao.model.Flowcell;
 import edu.unc.mapseq.dao.model.MimeType;
-import edu.unc.mapseq.dao.model.SequencerRun;
+import edu.unc.mapseq.dao.model.Sample;
 
 public class FixMismappedFastqFileDataRunnable implements Runnable {
 
@@ -25,7 +25,7 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
 
     private MaPSeqDAOBean mapseqDAOBean;
 
-    private List<Long> sequencerRunIdList;
+    private List<Long> flowcellIdList;
 
     public FixMismappedFastqFileDataRunnable() {
         super();
@@ -35,35 +35,35 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
     public void run() {
         logger.debug("ENTERING run()");
 
-        SequencerRunDAO sequencerRunDAO = mapseqDAOBean.getSequencerRunDAO();
-        HTSFSampleDAO htsfSampleDAO = mapseqDAOBean.getHTSFSampleDAO();
+        FlowcellDAO flowcellDAO = mapseqDAOBean.getFlowcellDAO();
+        SampleDAO sampleDAO = mapseqDAOBean.getSampleDAO();
         FileDataDAO fileDataDAO = mapseqDAOBean.getFileDataDAO();
 
-        List<SequencerRun> srList = new ArrayList<SequencerRun>();
+        List<Flowcell> fList = new ArrayList<Flowcell>();
 
         try {
 
-            for (Long sequencerRunId : sequencerRunIdList) {
-                SequencerRun sequencerRun = sequencerRunDAO.findById(sequencerRunId);
-                if (sequencerRun != null) {
-                    srList.add(sequencerRun);
+            for (Long flowcellId : getFlowcellIdList()) {
+                Flowcell flowcell = flowcellDAO.findById(flowcellId);
+                if (flowcell != null) {
+                    fList.add(flowcell);
                 }
             }
 
             String outputDir = System.getenv("MAPSEQ_OUTPUT_DIRECTORY");
 
-            if (srList.size() > 0) {
+            if (!fList.isEmpty()) {
 
-                for (SequencerRun sr : srList) {
+                for (Flowcell sr : fList) {
 
-                    List<HTSFSample> htsfSampleList = htsfSampleDAO.findBySequencerRunId(sr.getId());
+                    List<Sample> sampleList = sampleDAO.findByFlowcellId(sr.getId());
 
-                    if (htsfSampleList == null) {
-                        logger.warn("htsfSampleList was null");
+                    if (sampleList == null) {
+                        logger.warn("sampleList was null");
                         continue;
                     }
 
-                    for (HTSFSample sample : htsfSampleList) {
+                    for (Sample sample : sampleList) {
 
                         logger.debug("{}", sample.toString());
 
@@ -131,7 +131,7 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
                             }
                             // we now have the mismapped fastq file...attach to sample
                             sample.getFileDatas().add(tmpFileData);
-                            htsfSampleDAO.save(sample);
+                            sampleDAO.save(sample);
                         }
 
                     }
@@ -155,12 +155,12 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
         this.mapseqDAOBean = mapseqDAOBean;
     }
 
-    public List<Long> getSequencerRunIdList() {
-        return sequencerRunIdList;
+    public List<Long> getFlowcellIdList() {
+        return flowcellIdList;
     }
 
-    public void setSequencerRunIdList(List<Long> sequencerRunIdList) {
-        this.sequencerRunIdList = sequencerRunIdList;
+    public void setFlowcellIdList(List<Long> flowcellIdList) {
+        this.flowcellIdList = flowcellIdList;
     }
 
 }
