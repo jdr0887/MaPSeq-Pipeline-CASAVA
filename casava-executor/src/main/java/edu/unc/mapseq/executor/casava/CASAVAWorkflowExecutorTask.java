@@ -7,13 +7,12 @@ import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.WorkflowDAO;
-import edu.unc.mapseq.dao.WorkflowPlanDAO;
-import edu.unc.mapseq.dao.WorkflowRunDAO;
+import edu.unc.mapseq.dao.WorkflowRunAttemptDAO;
 import edu.unc.mapseq.dao.model.Workflow;
-import edu.unc.mapseq.dao.model.WorkflowPlan;
-import edu.unc.mapseq.dao.model.WorkflowRun;
+import edu.unc.mapseq.dao.model.WorkflowRunAttempt;
 import edu.unc.mapseq.workflow.WorkflowBeanService;
 import edu.unc.mapseq.workflow.WorkflowExecutor;
 import edu.unc.mapseq.workflow.WorkflowTPE;
@@ -42,33 +41,35 @@ public class CASAVAWorkflowExecutorTask extends TimerTask {
                 threadPoolExecutor.getActiveCount(), threadPoolExecutor.getTaskCount(),
                 threadPoolExecutor.getCompletedTaskCount()));
 
-        WorkflowDAO workflowDAO = this.workflowBeanService.getMaPSeqDAOBean().getWorkflowDAO();
-        WorkflowRunDAO workflowRunDAO = this.workflowBeanService.getMaPSeqDAOBean().getWorkflowRunDAO();
-        WorkflowPlanDAO workflowPlanDAO = this.workflowBeanService.getMaPSeqDAOBean().getWorkflowPlanDAO();
+        MaPSeqDAOBean mapseqDAOBean = this.workflowBeanService.getMaPSeqDAOBean();
+
+        WorkflowDAO workflowDAO = mapseqDAOBean.getWorkflowDAO();
+        WorkflowRunAttemptDAO workflowRunAttemptDAO = mapseqDAOBean.getWorkflowRunAttemptDAO();
 
         try {
             List<Workflow> workflowList = workflowDAO.findByName("CASAVA");
+
             if (workflowList == null || (workflowList != null && workflowList.isEmpty())) {
                 logger.error("No Workflow Found: {}", "CASAVA");
                 return;
             }
+
             Workflow workflow = workflowList.get(0);
-            List<WorkflowPlan> workflowPlanList = workflowPlanDAO.findEnqueued(workflow.getId());
 
-            if (workflowPlanList != null && workflowPlanList.size() > 0) {
+            List<WorkflowRunAttempt> attempts = workflowRunAttemptDAO.findEnqueued(workflow.getId());
 
-                logger.info("dequeuing {} WorkflowPlans", workflowPlanList.size());
-                for (WorkflowPlan workflowPlan : workflowPlanList) {
+            if (attempts != null && !attempts.isEmpty()) {
+
+                logger.info("dequeuing {} WorkflowRunAttempt", attempts.size());
+                for (WorkflowRunAttempt attempt : attempts) {
 
                     CASAVAWorkflow casavaWorkflow = new CASAVAWorkflow();
-
-                    WorkflowRun workflowRun = workflowPlan.getWorkflowRun();
-                    workflowRun.setVersion(workflow.getVersion());
-                    workflowRun.setDequeuedDate(new Date());
-                    workflowRunDAO.save(workflowRun);
+                    attempt.setVersion(casavaWorkflow.getVersion());
+                    attempt.setDequeued(new Date());
+                    workflowRunAttemptDAO.save(attempt);
 
                     casavaWorkflow.setWorkflowBeanService(workflowBeanService);
-                    casavaWorkflow.setWorkflowPlan(workflowPlan);
+                    casavaWorkflow.setWorkflowRunAttempt(attempt);
                     threadPoolExecutor.submit(new WorkflowExecutor(casavaWorkflow));
 
                 }
