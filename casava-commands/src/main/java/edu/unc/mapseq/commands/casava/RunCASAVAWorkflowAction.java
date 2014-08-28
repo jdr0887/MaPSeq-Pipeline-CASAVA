@@ -43,9 +43,8 @@ public class RunCASAVAWorkflowAction extends AbstractAction {
             Destination destination = session.createQueue("queue/casava");
             MessageProducer producer = session.createProducer(destination);
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-            String format = "{\"account_name\":\"%s\",\"entities\":[{\"entity_type\":\"WorkflowRun\",\"name\":\"%s\"}]}";
-            producer.send(session.createTextMessage(String.format(format, System.getProperty("user.name"),
-                    workflowRunName)));
+            String format = "{\"entities\":[{\"entityType\":\"WorkflowRun\",\"name\":\"%s\"}]}";
+            producer.send(session.createTextMessage(String.format(format, workflowRunName)));
         } catch (JMSException e) {
             e.printStackTrace();
         } finally {
