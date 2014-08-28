@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
@@ -20,7 +21,6 @@ import org.renci.jlrm.condor.CondorJobEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.unc.mapseq.commons.casava.FixMismappedFastqFileDataRunnable;
 import edu.unc.mapseq.commons.casava.SaveDemultiplexedStatsAttributesRunnable;
 import edu.unc.mapseq.commons.casava.SaveObservedClusterDensityAttributesRunnable;
 import edu.unc.mapseq.dao.FlowcellDAO;
@@ -189,7 +189,9 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
 
                                 for (Sample sample : laneMap.get(laneIndex)) {
 
-                                    File outputDirectory = new File(sample.getOutputDirectory());
+                                    File outputDirectory = new File(sample.getOutputDirectory(), getName());
+                                    File tmpDirectory = new File(outputDirectory, "tmp");
+                                    tmpDirectory.mkdirs();
 
                                     logger.info("outputDirectory.getAbsolutePath(): {}",
                                             outputDirectory.getAbsolutePath());
@@ -300,27 +302,31 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
             e.printStackTrace();
         }
 
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
         if (flowcellIdList != null && !flowcellIdList.isEmpty()) {
 
-            FixMismappedFastqFileDataRunnable fixMismappedFastqFileDataRunnable = new FixMismappedFastqFileDataRunnable();
-            fixMismappedFastqFileDataRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
-            fixMismappedFastqFileDataRunnable.setFlowcellIdList(flowcellIdList);
-            Executors.newSingleThreadExecutor().execute(fixMismappedFastqFileDataRunnable);
+            // FixMismappedFastqFileDataRunnable fixMismappedFastqFileDataRunnable = new
+            // FixMismappedFastqFileDataRunnable();
+            // fixMismappedFastqFileDataRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
+            // fixMismappedFastqFileDataRunnable.setFlowcellIdList(flowcellIdList);
+            // executorService.submit(fixMismappedFastqFileDataRunnable);
 
             SaveDemultiplexedStatsAttributesRunnable saveDemultiplexedStatsAttributesRunnable = new SaveDemultiplexedStatsAttributesRunnable();
             saveDemultiplexedStatsAttributesRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
             saveDemultiplexedStatsAttributesRunnable.setFlowcellIdList(flowcellIdList);
-            Executors.newSingleThreadExecutor().execute(saveDemultiplexedStatsAttributesRunnable);
+            executorService.submit(saveDemultiplexedStatsAttributesRunnable);
 
             SaveObservedClusterDensityAttributesRunnable saveObservedClusterDensityAttributesRunnable = new SaveObservedClusterDensityAttributesRunnable();
             saveObservedClusterDensityAttributesRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
             saveObservedClusterDensityAttributesRunnable.setMapseqConfigurationService(getWorkflowBeanService()
                     .getMaPSeqConfigurationService());
             saveObservedClusterDensityAttributesRunnable.setFlowcellIdList(flowcellIdList);
-            Executors.newSingleThreadExecutor().execute(saveObservedClusterDensityAttributesRunnable);
+            executorService.submit(saveObservedClusterDensityAttributesRunnable);
 
         }
 
+        executorService.shutdown();
     }
 
 }
