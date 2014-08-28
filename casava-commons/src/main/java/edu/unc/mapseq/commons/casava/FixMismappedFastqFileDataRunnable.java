@@ -50,8 +50,6 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
                 }
             }
 
-            String outputDir = System.getenv("MAPSEQ_OUTPUT_DIRECTORY");
-
             if (!fList.isEmpty()) {
 
                 for (Flowcell sr : fList) {
@@ -78,10 +76,9 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
 
                         for (FileData fileData : fileDataSet) {
                             logger.debug("fileData: {}", fileData);
-                            String path = String.format("%s/%s/CASAVA", outputDir, sr.getName());
-                            logger.debug("path: {}", path);
                             if (MimeType.FASTQ.equals(fileData.getMimeType())
-                                    && fileData.getName().endsWith("fastq.gz") && fileData.getPath().startsWith(path)) {
+                                    && fileData.getName().endsWith("fastq.gz")
+                                    && fileData.getPath().startsWith(sample.getOutputDirectory())) {
                                 fastqFileDataSet.add(fileData);
                             }
                         }
