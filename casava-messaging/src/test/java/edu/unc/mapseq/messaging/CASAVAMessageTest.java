@@ -56,11 +56,10 @@ public class CASAVAMessageTest {
             JsonGenerator generator = new JsonFactory().createGenerator(sw);
 
             generator.writeStartObject();
-            generator.writeStringField("accountName", System.getProperty("user.name"));
             generator.writeArrayFieldStart("entities");
 
             generator.writeStartObject();
-            generator.writeStringField("entityType", "HTSFSample");
+            generator.writeStringField("entityType", "Sample");
             generator.writeStringField("guid", "12345");
             generator.writeEndObject();
 
