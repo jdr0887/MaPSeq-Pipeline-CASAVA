@@ -3,8 +3,8 @@ package edu.unc.mapseq.commands.casava;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
