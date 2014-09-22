@@ -1,4 +1,4 @@
-<features name="mapseq-pipeline-casava-${project.version}">
+<features name="mapseq-pipeline-casava-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
 
   <feature name="mapseq-pipeline-casava" version="${project.version}" resolver="(obr)">
     <bundle>mvn:org.jsoup/com.springsource.org.jsoup/1.5.2</bundle>
