@@ -69,12 +69,12 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
 
                 for (Flowcell flowcell : fList) {
 
-                    File sequencerRunDir = new File(flowcell.getBaseDirectory(), flowcell.getName());
+                    File flowcellDir = new File(flowcell.getBaseDirectory(), flowcell.getName());
                     String flowcellProper = null;
 
                     try {
                         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                        File runInfoXmlFile = new File(sequencerRunDir, "RunInfo.xml");
+                        File runInfoXmlFile = new File(flowcellDir, "RunInfo.xml");
                         if (!runInfoXmlFile.exists()) {
                             logger.error("RunInfo.xml file does not exist: {}", runInfoXmlFile.getAbsolutePath());
                             return;
@@ -105,7 +105,7 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
 
                     for (Sample sample : sampleList) {
 
-                        File unalignedDir = new File(sequencerRunDir, String.format("Unaligned.%d",
+                        File unalignedDir = new File(flowcellDir, String.format("Unaligned.%d",
                                 sample.getLaneIndex()));
                         File baseCallStatsDir = new File(unalignedDir, String.format("Basecall_Stats_%s",
                                 flowcellProper));
