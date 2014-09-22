@@ -32,7 +32,7 @@ public class CreateFlowcellTest {
         Matcher matcher = pattern.matcher(good);
         assertTrue(matcher.matches());
 
-        String bad = "TestSequencerRun";
+        String bad = "TestFlowcell";
         matcher = pattern.matcher(bad);
         assertFalse(matcher.matches());
     }
@@ -58,8 +58,8 @@ public class CreateFlowcellTest {
             flowcell.setBaseDirectory("asdfasdf");
 
             try {
-                Long sequencerRunId = flowcellDAO.save(flowcell);
-                flowcell.setId(sequencerRunId);
+                Long flowcellId = flowcellDAO.save(flowcell);
+                flowcell.setId(flowcellId);
             } catch (MaPSeqDAOException e1) {
                 e1.printStackTrace();
             }
@@ -93,7 +93,7 @@ public class CreateFlowcellTest {
                 sample.setBarcode(index);
                 sample.setLaneIndex(Integer.valueOf(laneIndex));
                 sample.setName(sampleId);
-                // htsfSample.setSequencerRun(sequencerRun);
+                // sample.setFlowcell(flowcell);
                 sample.setStudy(study);
 
                 sampleDAO.save(sample);
