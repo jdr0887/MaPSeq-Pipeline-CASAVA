@@ -191,7 +191,7 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                 }
                             }
 
-                            // sequencerRun base directory is derived from study (aka sampleProject)
+                            // flowcell base directory is derived from study (aka sampleProject)
                             // assume studyMap is size 1
 
                             if (studyMap.size() > 1) {
