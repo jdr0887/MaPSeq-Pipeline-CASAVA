@@ -2,24 +2,24 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
   <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-    <command name="casava/save-demultiplexed-stats-attributes">
+    <command>
       <action class="edu.unc.mapseq.commands.casava.SaveDemultiplexedStatsAttributesAction">
         <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
       </action>
     </command>
-    <command name="casava/run-workflow">
+    <command>
       <action class="edu.unc.mapseq.commands.casava.RunCASAVAWorkflowAction">
         <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
         <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
       </action>
     </command>
-    <command name="casava/save-observed-cluster-density-attributes">
+    <command>
       <action class="edu.unc.mapseq.commands.casava.SaveObservedClusterDensityAttributesAction">
         <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
         <property name="maPSeqConfigurationService" ref="maPSeqConfigurationService" />
       </action>
     </command>
-    <command name="casava/fix-mismapped-fastq-file-data">
+    <command>
       <action class="edu.unc.mapseq.commands.casava.FixMisappedFastqFileDataAction">
         <property name="maPSeqDAOBean" ref="maPSeqDAOBean" />
       </action>
