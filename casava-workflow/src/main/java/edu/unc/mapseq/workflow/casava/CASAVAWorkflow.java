@@ -31,6 +31,7 @@ import edu.unc.mapseq.dao.model.Attribute;
 import edu.unc.mapseq.dao.model.Flowcell;
 import edu.unc.mapseq.dao.model.MimeType;
 import edu.unc.mapseq.dao.model.Sample;
+import edu.unc.mapseq.dao.model.WorkflowRunAttempt;
 import edu.unc.mapseq.module.casava.ConfigureBCLToFastqCLI;
 import edu.unc.mapseq.module.core.CopyCLI;
 import edu.unc.mapseq.module.core.MakeCLI;
@@ -72,10 +73,11 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
         FlowcellDAO flowcellDAO = mapseqDAOBean.getFlowcellDAO();
         SampleDAO sampleDAO = mapseqDAOBean.getSampleDAO();
 
+        WorkflowRunAttempt attempt = getWorkflowRunAttempt();
+
         try {
 
-            List<Flowcell> flowcellList = flowcellDAO.findByWorkflowRunId(getWorkflowRunAttempt().getWorkflowRun()
-                    .getId());
+            List<Flowcell> flowcellList = flowcellDAO.findByWorkflowRunId(attempt.getWorkflowRun().getId());
 
             if (flowcellList != null && !flowcellList.isEmpty()) {
                 for (Flowcell flowcell : flowcellList) {
@@ -150,7 +152,7 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
                                 }
 
                                 CondorJobBuilder builder = WorkflowJobFactory.createJob(++count,
-                                        ConfigureBCLToFastqCLI.class, getWorkflowRunAttempt()).siteName(siteName);
+                                        ConfigureBCLToFastqCLI.class, attempt).siteName(siteName);
                                 builder.addArgument(ConfigureBCLToFastqCLI.INPUTDIR, baseCallsDir.getAbsolutePath())
                                         .addArgument(ConfigureBCLToFastqCLI.MISMATCHES)
                                         .addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGBCL)
@@ -166,8 +168,8 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
                                 graph.addVertex(configureBCLToFastQJob);
 
                                 if (unalignedDir.exists()) {
-                                    builder = WorkflowJobFactory.createJob(++count, RemoveCLI.class,
-                                            getWorkflowRunAttempt()).siteName(siteName);
+                                    builder = WorkflowJobFactory.createJob(++count, RemoveCLI.class, attempt).siteName(
+                                            siteName);
                                     builder.addArgument(RemoveCLI.FILE, unalignedDir);
                                     CondorJob removeUnalignedDirectoryJob = builder.build();
                                     logger.info(removeUnalignedDirectoryJob.toString());
@@ -175,8 +177,7 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
                                     graph.addEdge(removeUnalignedDirectoryJob, configureBCLToFastQJob);
                                 }
 
-                                builder = WorkflowJobFactory
-                                        .createJob(++count, MakeCLI.class, getWorkflowRunAttempt(), null)
+                                builder = WorkflowJobFactory.createJob(++count, MakeCLI.class, attempt)
                                         .siteName(siteName).numberOfProcessors(2);
                                 builder.addArgument(MakeCLI.THREADS, "2").addArgument(MakeCLI.WORKDIR,
                                         unalignedDir.getAbsolutePath());
@@ -207,8 +208,8 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
 
                                     switch (readCount) {
                                         case 1:
-                                            builder = WorkflowJobFactory.createJob(++count, CopyCLI.class,
-                                                    getWorkflowRunAttempt(), sample).siteName(siteName);
+                                            builder = WorkflowJobFactory.createJob(++count, CopyCLI.class, attempt)
+                                                    .siteName(siteName);
                                             sourceFile = new File(sampleDirectory, String.format(
                                                     "%s_%s_L%03d_R%d_001.fastq.gz", sample.getName(),
                                                     sample.getBarcode(), laneIndex, 1));
@@ -228,8 +229,8 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
                                         default:
 
                                             // read 1
-                                            builder = WorkflowJobFactory.createJob(++count, CopyCLI.class,
-                                                    getWorkflowRunAttempt(), sample).siteName(siteName);
+                                            builder = WorkflowJobFactory.createJob(++count, CopyCLI.class, attempt)
+                                                    .siteName(siteName);
                                             sourceFile = new File(sampleDirectory, String.format(
                                                     "%s_%s_L%03d_R%d_001.fastq.gz", sample.getName(),
                                                     sample.getBarcode(), laneIndex, 1));
@@ -245,8 +246,8 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
                                             graph.addEdge(makeJob, copyJob);
 
                                             // read 2
-                                            builder = WorkflowJobFactory.createJob(++count, CopyCLI.class,
-                                                    getWorkflowRunAttempt(), sample).siteName(siteName);
+                                            builder = WorkflowJobFactory.createJob(++count, CopyCLI.class, attempt)
+                                                    .siteName(siteName);
                                             sourceFile = new File(sampleDirectory, String.format(
                                                     "%s_%s_L%03d_R%d_001.fastq.gz", sample.getName(),
                                                     sample.getBarcode(), laneIndex, 2));
@@ -289,9 +290,10 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
         FlowcellDAO flowcellDAO = mapseqDAOBean.getFlowcellDAO();
         List<Long> flowcellIdList = new ArrayList<Long>();
 
+        WorkflowRunAttempt attempt = getWorkflowRunAttempt();
+
         try {
-            List<Flowcell> flowcellList = flowcellDAO.findByWorkflowRunId(getWorkflowRunAttempt().getWorkflowRun()
-                    .getId());
+            List<Flowcell> flowcellList = flowcellDAO.findByWorkflowRunId(attempt.getWorkflowRun().getId());
 
             if (flowcellList != null && !flowcellList.isEmpty()) {
                 for (Flowcell flowcell : flowcellList) {
