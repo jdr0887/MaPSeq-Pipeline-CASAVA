@@ -105,8 +105,7 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
 
                     for (Sample sample : sampleList) {
 
-                        File unalignedDir = new File(flowcellDir, String.format("Unaligned.%d",
-                                sample.getLaneIndex()));
+                        File unalignedDir = new File(flowcellDir, String.format("Unaligned.%d", sample.getLaneIndex()));
                         File baseCallStatsDir = new File(unalignedDir, String.format("Basecall_Stats_%s",
                                 flowcellProper));
                         File statsFile = new File(baseCallStatsDir, "Demultiplex_Stats.htm");

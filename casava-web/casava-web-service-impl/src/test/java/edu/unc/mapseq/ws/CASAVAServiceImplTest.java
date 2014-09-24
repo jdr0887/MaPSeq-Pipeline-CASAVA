@@ -60,8 +60,7 @@ public class CASAVAServiceImplTest {
         System.out.println(casavaService.assertDirectoryExists("UC", "130201_UNC16-SN851_0210_BC1NN7ACXX"));
         System.out.println(casavaService.assertDirectoryExists("UC", "130220_UNC13-SN749_0232_AD1VEJACXX"));
         System.out.println(casavaService.assertDirectoryExists("UC", "130118_UNC16-SN851_0205_BC1HHAACXX"));
-        
+
     }
 
-    
 }
