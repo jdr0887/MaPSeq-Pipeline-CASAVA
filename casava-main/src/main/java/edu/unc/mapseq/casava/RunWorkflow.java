@@ -138,10 +138,12 @@ public class RunWorkflow implements Runnable {
         workflowRun.setName(this.workflowRunName);
         workflowRun.setWorkflow(workflow);
         if (flowcell != null) {
-            workflowRun.getFlowcells().add(flowcell);
+            Set<Flowcell> flowcellSet = workflowRun.getFlowcells();
+            flowcellSet.add(flowcell);
+            workflowRun.setFlowcells(flowcellSet);
         }
         if (!sampleSet.isEmpty()) {
-            workflowRun.getSamples().addAll(sampleSet);
+            workflowRun.setSamples(sampleSet);
         }
 
         try {
