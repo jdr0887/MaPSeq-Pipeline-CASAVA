@@ -139,6 +139,9 @@ public class RunWorkflow implements Runnable {
         workflowRun.setWorkflow(workflow);
         if (flowcell != null) {
             Set<Flowcell> flowcellSet = workflowRun.getFlowcells();
+            if (flowcellSet == null) {
+                flowcellSet = new HashSet<Flowcell>();
+            }
             flowcellSet.add(flowcell);
             workflowRun.setFlowcells(flowcellSet);
         }
