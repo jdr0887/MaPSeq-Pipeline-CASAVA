@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.unc.mapseq</groupId>
     <artifactId>pipeline</artifactId>
-    <version>0.5.18</version>
+    <version>0.5.19</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA</name>
   <modelVersion>4.0.0</modelVersion>
@@ -15,20 +15,6 @@
     <system>gForge</system>
     <url>https://code.renci.org/gf/project/casava/tracker/</url>
   </issueManagement>
-  <ciManagement>
-    <system>hudson</system>
-    <url>https://ci-dev.renci.org/hudson/mapseq-pipeline-casava</url>
-    <notifiers>
-      <notifier>
-	<type>mail</type>
-	<sendOnError>true</sendOnError>
-	<sendOnFailure>true</sendOnFailure>
-	<configuration>
-	  <address>jdr0887@renci.org</address>
-	</configuration>
-      </notifier>
-    </notifiers>
-  </ciManagement>
   <licenses>    
     <license>
       <name>UNC Open Source Public License</name>
