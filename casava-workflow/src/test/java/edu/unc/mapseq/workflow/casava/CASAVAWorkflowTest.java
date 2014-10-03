@@ -15,6 +15,7 @@ import org.renci.jlrm.condor.ext.CondorDOTExporter;
 import edu.unc.mapseq.module.casava.ConfigureBCLToFastqCLI;
 import edu.unc.mapseq.module.core.CopyCLI;
 import edu.unc.mapseq.module.core.MakeCLI;
+import edu.unc.mapseq.workflow.WorkflowException;
 import edu.unc.mapseq.workflow.impl.WorkflowJobFactory;
 
 public class CASAVAWorkflowTest {
@@ -26,21 +27,25 @@ public class CASAVAWorkflowTest {
 
         int count = 0;
 
-        CondorJob configureBCLToFastQJob = WorkflowJobFactory.createJob(++count, ConfigureBCLToFastqCLI.class, null)
-                .build();
-        graph.addVertex(configureBCLToFastQJob);
+        try {
+            CondorJob configureBCLToFastQJob = WorkflowJobFactory
+                    .createJob(++count, ConfigureBCLToFastqCLI.class, null).build();
+            graph.addVertex(configureBCLToFastQJob);
 
-        CondorJob makeJob = WorkflowJobFactory.createJob(++count, MakeCLI.class, null).build();
-        graph.addVertex(makeJob);
-        graph.addEdge(configureBCLToFastQJob, makeJob);
+            CondorJob makeJob = WorkflowJobFactory.createJob(++count, MakeCLI.class, null).build();
+            graph.addVertex(makeJob);
+            graph.addEdge(configureBCLToFastQJob, makeJob);
 
-        CondorJob copyRead1Job = WorkflowJobFactory.createJob(++count, CopyCLI.class, null).build();
-        graph.addVertex(copyRead1Job);
-        graph.addEdge(makeJob, copyRead1Job);
+            CondorJob copyRead1Job = WorkflowJobFactory.createJob(++count, CopyCLI.class, null).build();
+            graph.addVertex(copyRead1Job);
+            graph.addEdge(makeJob, copyRead1Job);
 
-        CondorJob copyRead2Job = WorkflowJobFactory.createJob(++count, CopyCLI.class, null).build();
-        graph.addVertex(copyRead2Job);
-        graph.addEdge(makeJob, copyRead2Job);
+            CondorJob copyRead2Job = WorkflowJobFactory.createJob(++count, CopyCLI.class, null).build();
+            graph.addVertex(copyRead2Job);
+            graph.addEdge(makeJob, copyRead2Job);
+        } catch (WorkflowException e1) {
+            e1.printStackTrace();
+        }
 
         VertexNameProvider<CondorJob> vnpId = new VertexNameProvider<CondorJob>() {
             @Override
