@@ -29,7 +29,6 @@ public class FixMisappedFastqFileDataAction extends AbstractAction {
         fixMisMappedSamplesRunnable.setMapseqDAOBean(maPSeqDAOBean);
         fixMisMappedSamplesRunnable.setFlowcellIdList(flowcellIdList);
         Executors.newSingleThreadExecutor().execute(fixMisMappedSamplesRunnable);
-
         return null;
     }
 
