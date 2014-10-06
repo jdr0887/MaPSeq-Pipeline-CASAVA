@@ -21,6 +21,7 @@ import org.renci.jlrm.condor.CondorJobEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.unc.mapseq.commons.casava.FixMismappedFastqFileDataRunnable;
 import edu.unc.mapseq.commons.casava.SaveDemultiplexedStatsAttributesRunnable;
 import edu.unc.mapseq.commons.casava.SaveObservedClusterDensityAttributesRunnable;
 import edu.unc.mapseq.dao.FlowcellDAO;
@@ -308,11 +309,10 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
 
         if (flowcellIdList != null && !flowcellIdList.isEmpty()) {
 
-            // FixMismappedFastqFileDataRunnable fixMismappedFastqFileDataRunnable = new
-            // FixMismappedFastqFileDataRunnable();
-            // fixMismappedFastqFileDataRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
-            // fixMismappedFastqFileDataRunnable.setFlowcellIdList(flowcellIdList);
-            // executorService.submit(fixMismappedFastqFileDataRunnable);
+            FixMismappedFastqFileDataRunnable fixMismappedFastqFileDataRunnable = new FixMismappedFastqFileDataRunnable();
+            fixMismappedFastqFileDataRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
+            fixMismappedFastqFileDataRunnable.setFlowcellIdList(flowcellIdList);
+            executorService.submit(fixMismappedFastqFileDataRunnable);
 
             SaveDemultiplexedStatsAttributesRunnable saveDemultiplexedStatsAttributesRunnable = new SaveDemultiplexedStatsAttributesRunnable();
             saveDemultiplexedStatsAttributesRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
