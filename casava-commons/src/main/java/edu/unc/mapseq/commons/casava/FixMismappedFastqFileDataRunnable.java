@@ -2,7 +2,6 @@ package edu.unc.mapseq.commons.casava;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -65,74 +64,60 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
 
                         logger.debug("{}", sample.toString());
 
-                        String read1FileName = String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(),
-                                sample.getBarcode(), sample.getLaneIndex(), 1);
+                        File read1File = new File(sample.getOutputDirectory(),
+                                String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(), sample.getBarcode(),
+                                        sample.getLaneIndex(), 1));
 
-                        String read2FileName = String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(),
-                                sample.getBarcode(), sample.getLaneIndex(), 2);
+                        List<FileData> potentialRead1FastqFiles = fileDataDAO.findByExample(new FileData(read1File
+                                .getName(), read1File.getParentFile().getAbsolutePath(), MimeType.FASTQ));
 
-                        Set<FileData> fileDataSet = sample.getFileDatas();
-                        Set<FileData> fastqFileDataSet = new HashSet<FileData>();
-
-                        for (FileData fileData : fileDataSet) {
-                            logger.debug("fileData: {}", fileData);
-                            if (MimeType.FASTQ.equals(fileData.getMimeType())
-                                    && fileData.getName().endsWith("fastq.gz")
-                                    && fileData.getPath().startsWith(sample.getOutputDirectory())) {
-                                fastqFileDataSet.add(fileData);
-                            }
+                        if (potentialRead1FastqFiles == null
+                                || (potentialRead1FastqFiles != null && potentialRead1FastqFiles.isEmpty())) {
+                            logger.warn("read1Fastq not found");
+                            logger.warn(sample.toString());
+                            break;
                         }
 
-                        logger.debug("fastqFileDataSet.size(): {}", fastqFileDataSet.size());
+                        File read2File = new File(sample.getOutputDirectory(),
+                                String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(), sample.getBarcode(),
+                                        sample.getLaneIndex(), 2));
 
-                        if (fastqFileDataSet.size() == 2) {
-                            continue;
+                        List<FileData> potentialRead2FastqFiles = fileDataDAO.findByExample(new FileData(read2File
+                                .getName(), read2File.getParentFile().getAbsolutePath(), MimeType.FASTQ));
+
+                        if (potentialRead2FastqFiles == null
+                                || (potentialRead2FastqFiles != null && potentialRead2FastqFiles.isEmpty())) {
+                            logger.warn("read1Fastq not found");
+                            logger.warn(sample.toString());
+                            break;
                         }
 
-                        if (fastqFileDataSet.size() == 1) {
-                            // mismapped
-                            FileData oneOfFastqPair = fastqFileDataSet.iterator().next();
-                            logger.debug("found mismapped: {}", oneOfFastqPair.toString());
-                            FileData tmpFastqFileData = new FileData();
-                            tmpFastqFileData.setMimeType(MimeType.FASTQ);
-                            tmpFastqFileData.setPath(oneOfFastqPair.getPath());
-                            List<FileData> results = fileDataDAO.findByExample(tmpFastqFileData);
-                            FileData tmpFileData = null;
-                            if (results.size() == 1) {
-                                FileData fd = results.get(0);
-                                File read1 = new File(fd.getPath(), read1FileName);
-                                File read2 = new File(fd.getPath(), read2FileName);
-                                if (fd.getName().equals(read1FileName) && read2.exists()) {
-                                    tmpFileData = tmpFastqFileData;
-                                    tmpFileData.setName(read2FileName);
-                                    Long id = fileDataDAO.save(tmpFileData);
-                                    tmpFileData.setId(id);
-                                }
-                                if (fd.getName().equals(read2FileName) && read1.exists()) {
-                                    tmpFileData = tmpFastqFileData;
-                                    tmpFileData.setName(read1FileName);
-                                    Long id = fileDataDAO.save(tmpFileData);
-                                    tmpFileData.setId(id);
-                                }
+                        if ((potentialRead1FastqFiles != null && !potentialRead1FastqFiles.isEmpty())
+                                && (potentialRead2FastqFiles != null && !potentialRead2FastqFiles.isEmpty())) {
+
+                            Set<FileData> fileDataSet = sample.getFileDatas();
+
+                            FileData read1FastqFileData = potentialRead1FastqFiles.get(0);
+                            FileData read2FastqFileData = potentialRead2FastqFiles.get(0);
+
+                            if (fileDataSet.contains(read1FastqFileData) && fileDataSet.contains(read2FastqFileData)) {
+                                continue;
                             }
-                            if (results.size() == 2) {
-                                // get the one not already mapped
-                                FileData first = results.get(0);
-                                FileData second = results.get(1);
-                                if (oneOfFastqPair.equals(first)) {
-                                    tmpFileData = second;
-                                }
-                                if (oneOfFastqPair.equals(second)) {
-                                    tmpFileData = first;
-                                }
+
+                            if (!fileDataSet.contains(read1FastqFileData) && fileDataSet.contains(read2FastqFileData)) {
+                                fileDataSet.add(read1FastqFileData);
                             }
-                            // we now have the mismapped fastq file...attach to sample
-                            sample.getFileDatas().add(tmpFileData);
+
+                            if (fileDataSet.contains(read1FastqFileData) && !fileDataSet.contains(read2FastqFileData)) {
+                                fileDataSet.add(read2FastqFileData);
+                            }
+
+                            sample.setFileDatas(fileDataSet);
                             sampleDAO.save(sample);
+
                         }
 
                     }
-
                 }
 
             }
