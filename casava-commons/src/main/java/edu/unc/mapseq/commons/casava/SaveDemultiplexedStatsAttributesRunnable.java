@@ -30,6 +30,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import edu.unc.mapseq.dao.AttributeDAO;
 import edu.unc.mapseq.dao.FlowcellDAO;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
@@ -53,11 +54,13 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
     public void run() {
         logger.debug("ENTERING run()");
 
+        FlowcellDAO flowcellDAO = mapseqDAOBean.getFlowcellDAO();
+        AttributeDAO attributeDAO = mapseqDAOBean.getAttributeDAO();
+
         List<Flowcell> fList = new ArrayList<Flowcell>();
 
         try {
 
-            FlowcellDAO flowcellDAO = mapseqDAOBean.getFlowcellDAO();
             for (Long flowcellId : getFlowcellIdList()) {
                 Flowcell flowcell = flowcellDAO.findById(flowcellId);
                 if (flowcell != null) {
@@ -166,11 +169,14 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                             for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("yield")) {
                                                     attribute.setValue(value);
+                                                    attributeDAO.save(attribute);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new Attribute("yield", value));
+                                            Attribute attribute = new Attribute("yield", value);
+                                            attribute.setId(attributeDAO.save(attribute));
+                                            attributeSet.add(attribute);
                                         }
                                     }
 
@@ -180,11 +186,14 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                             for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("passedFiltering")) {
                                                     attribute.setValue(value);
+                                                    attributeDAO.save(attribute);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new Attribute("passedFiltering", value));
+                                            Attribute attribute = new Attribute("passedFiltering", value);
+                                            attribute.setId(attributeDAO.save(attribute));
+                                            attributeSet.add(attribute);
                                         }
                                     }
 
@@ -194,11 +203,14 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                             for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("numberOfReads")) {
                                                     attribute.setValue(value);
+                                                    attributeDAO.save(attribute);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new Attribute("numberOfReads", value));
+                                            Attribute attribute = new Attribute("numberOfReads", value);
+                                            attribute.setId(attributeDAO.save(attribute));
+                                            attributeSet.add(attribute);
                                         }
                                     }
 
@@ -208,11 +220,14 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                             for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("rawClustersPerLane")) {
                                                     attribute.setValue(value);
+                                                    attributeDAO.save(attribute);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new Attribute("rawClustersPerLane", value));
+                                            Attribute attribute = new Attribute("rawClustersPerLane", value);
+                                            attribute.setId(attributeDAO.save(attribute));
+                                            attributeSet.add(attribute);
                                         }
                                     }
 
@@ -222,11 +237,14 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                             for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("perfectIndexReads")) {
                                                     attribute.setValue(value);
+                                                    attributeDAO.save(attribute);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new Attribute("perfectIndexReads", value));
+                                            Attribute attribute = new Attribute("perfectIndexReads", value);
+                                            attribute.setId(attributeDAO.save(attribute));
+                                            attributeSet.add(attribute);
                                         }
                                     }
 
@@ -236,11 +254,14 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                             for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("oneMismatchReadsIndex")) {
                                                     attribute.setValue(value);
+                                                    attributeDAO.save(attribute);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new Attribute("oneMismatchReadsIndex", value));
+                                            Attribute attribute = new Attribute("oneMismatchReadsIndex", value);
+                                            attribute.setId(attributeDAO.save(attribute));
+                                            attributeSet.add(attribute);
                                         }
                                     }
 
@@ -250,11 +271,14 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                             for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("q30YieldPassingFiltering")) {
                                                     attribute.setValue(value);
+                                                    attributeDAO.save(attribute);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new Attribute("q30YieldPassingFiltering", value));
+                                            Attribute attribute = new Attribute("q30YieldPassingFiltering", value);
+                                            attribute.setId(attributeDAO.save(attribute));
+                                            attributeSet.add(attribute);
                                         }
                                     }
 
@@ -264,11 +288,15 @@ public class SaveDemultiplexedStatsAttributesRunnable implements Runnable {
                                             for (Attribute attribute : attributeSet) {
                                                 if (attribute.getName().equals("meanQualityScorePassingFiltering")) {
                                                     attribute.setValue(value);
+                                                    attributeDAO.save(attribute);
                                                     break;
                                                 }
                                             }
                                         } else {
-                                            attributeSet.add(new Attribute("meanQualityScorePassingFiltering", value));
+                                            Attribute attribute = new Attribute("meanQualityScorePassingFiltering",
+                                                    value);
+                                            attribute.setId(attributeDAO.save(attribute));
+                                            attributeSet.add(attribute);
                                         }
                                     }
 

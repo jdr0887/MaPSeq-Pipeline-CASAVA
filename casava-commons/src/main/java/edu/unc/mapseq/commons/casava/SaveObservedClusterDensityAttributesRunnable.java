@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.unc.mapseq.config.MaPSeqConfigurationService;
+import edu.unc.mapseq.dao.AttributeDAO;
 import edu.unc.mapseq.dao.FlowcellDAO;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
@@ -43,9 +44,11 @@ public class SaveObservedClusterDensityAttributesRunnable implements Runnable {
     public void run() {
         logger.debug("ENTERING run()");
 
+        FlowcellDAO flowcellDAO = mapseqDAOBean.getFlowcellDAO();
+        AttributeDAO attributeDAO = mapseqDAOBean.getAttributeDAO();
+
         List<Flowcell> fList = new ArrayList<Flowcell>();
 
-        FlowcellDAO flowcellDAO = mapseqDAOBean.getFlowcellDAO();
         for (Long flowcellId : getFlowcellIdList()) {
             try {
                 Flowcell flowcell = flowcellDAO.findById(flowcellId);
@@ -124,11 +127,14 @@ public class SaveObservedClusterDensityAttributesRunnable implements Runnable {
                                 for (Attribute attribute : attributeSet) {
                                     if (attribute.getName().equals("observedClusterDensity")) {
                                         attribute.setValue(value);
+                                        attributeDAO.save(attribute);
                                         break;
                                     }
                                 }
                             } else {
-                                attributeSet.add(new Attribute("observedClusterDensity", value));
+                                Attribute attribute = new Attribute("observedClusterDensity", value);
+                                attribute.setId(attributeDAO.save(attribute));
+                                attributeSet.add(attribute);
                             }
                         }
                         sample.setAttributes(attributeSet);
