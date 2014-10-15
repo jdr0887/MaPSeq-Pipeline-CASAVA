@@ -15,6 +15,7 @@
   </cm:property-placeholder>
 
   <reference id="maPSeqConfigurationService" interface="edu.unc.mapseq.config.MaPSeqConfigurationService" />
+  <reference id="attributeDAO" interface="edu.unc.mapseq.dao.AttributeDAO" />
   <reference id="fileDataDAO" interface="edu.unc.mapseq.dao.FileDataDAO" />
   <reference id="sampleDAO" interface="edu.unc.mapseq.dao.SampleDAO" />
   <reference id="jobDAO" interface="edu.unc.mapseq.dao.JobDAO" />
@@ -25,6 +26,7 @@
   <reference id="workflowRunAttemptDAO" interface="edu.unc.mapseq.dao.WorkflowRunAttemptDAO" />
 
   <bean id="maPSeqDAOBean" class="edu.unc.mapseq.dao.MaPSeqDAOBean">
+    <property name="attributeDAO" ref="attributeDAO" />
     <property name="fileDataDAO" ref="fileDataDAO" />
     <property name="sampleDAO" ref="sampleDAO" />
     <property name="jobDAO" ref="jobDAO" />
