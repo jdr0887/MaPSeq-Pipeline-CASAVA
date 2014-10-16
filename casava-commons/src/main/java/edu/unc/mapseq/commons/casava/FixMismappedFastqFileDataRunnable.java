@@ -62,14 +62,13 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
 
                     for (Sample sample : sampleList) {
 
-                        logger.debug("{}", sample.toString());
-
-                        File read1File = new File(sample.getOutputDirectory(),
+                        File read1File = new File(String.format("%s/%s", sample.getOutputDirectory(), "CASAVA"),
                                 String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(), sample.getBarcode(),
                                         sample.getLaneIndex(), 1));
 
-                        List<FileData> potentialRead1FastqFiles = fileDataDAO.findByExample(new FileData(read1File
-                                .getName(), read1File.getParentFile().getAbsolutePath(), MimeType.FASTQ));
+                        FileData r1FileData = new FileData(read1File.getName(), read1File.getParentFile()
+                                .getAbsolutePath(), MimeType.FASTQ);
+                        List<FileData> potentialRead1FastqFiles = fileDataDAO.findByExample(r1FileData);
 
                         if (potentialRead1FastqFiles == null
                                 || (potentialRead1FastqFiles != null && potentialRead1FastqFiles.isEmpty())) {
@@ -78,7 +77,27 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
                             break;
                         }
 
-                        File read2File = new File(sample.getOutputDirectory(),
+                        if ((potentialRead1FastqFiles != null && !potentialRead1FastqFiles.isEmpty())) {
+
+                            Set<FileData> fileDataSet = sample.getFileDatas();
+
+                            FileData read1FastqFileData = potentialRead1FastqFiles.get(0);
+
+                            if (fileDataSet.contains(read1FastqFileData)) {
+                                continue;
+                            }
+
+                            fileDataSet.add(read1FastqFileData);
+                            sample.setFileDatas(fileDataSet);
+                            sampleDAO.save(sample);
+
+                        }
+
+                    }
+
+                    for (Sample sample : sampleList) {
+
+                        File read2File = new File(String.format("%s/%s", sample.getOutputDirectory(), "CASAVA"),
                                 String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(), sample.getBarcode(),
                                         sample.getLaneIndex(), 2));
 
@@ -92,26 +111,17 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
                             break;
                         }
 
-                        if ((potentialRead1FastqFiles != null && !potentialRead1FastqFiles.isEmpty())
-                                && (potentialRead2FastqFiles != null && !potentialRead2FastqFiles.isEmpty())) {
+                        if (potentialRead2FastqFiles != null && !potentialRead2FastqFiles.isEmpty()) {
 
                             Set<FileData> fileDataSet = sample.getFileDatas();
 
-                            FileData read1FastqFileData = potentialRead1FastqFiles.get(0);
                             FileData read2FastqFileData = potentialRead2FastqFiles.get(0);
 
-                            if (fileDataSet.contains(read1FastqFileData) && fileDataSet.contains(read2FastqFileData)) {
+                            if (fileDataSet.contains(read2FastqFileData)) {
                                 continue;
                             }
 
-                            if (!fileDataSet.contains(read1FastqFileData) && fileDataSet.contains(read2FastqFileData)) {
-                                fileDataSet.add(read1FastqFileData);
-                            }
-
-                            if (fileDataSet.contains(read1FastqFileData) && !fileDataSet.contains(read2FastqFileData)) {
-                                fileDataSet.add(read2FastqFileData);
-                            }
-
+                            fileDataSet.add(read2FastqFileData);
                             sample.setFileDatas(fileDataSet);
                             sampleDAO.save(sample);
 
