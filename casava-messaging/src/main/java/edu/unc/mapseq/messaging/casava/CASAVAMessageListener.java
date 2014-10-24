@@ -247,16 +247,24 @@ public class CASAVAMessageListener extends AbstractMessageListener {
 
                                                 List<WorkflowRunAttempt> attempts = workflowRunAttemptDAO
                                                         .findByWorkflowRunId(wr.getId());
+                                                
                                                 if (attempts != null && !attempts.isEmpty()) {
+                                                    
                                                     for (WorkflowRunAttempt attempt : attempts) {
+                                                        
                                                         logger.info(attempt.toString());
+                                                        
                                                         List<Job> jobs = jobDAO.findByWorkflowRunAttemptId(attempt
                                                                 .getId());
+                                                        
                                                         if (jobs != null && !jobs.isEmpty()) {
+                                                            
                                                             for (Job job : jobs) {
+                                                                
                                                                 logger.info(job.toString());
 
                                                                 Set<Attribute> attributeSet = job.getAttributes();
+                                                                
                                                                 if (attributeSet != null && !attributeSet.isEmpty()) {
                                                                     List<Attribute> attributes = Arrays
                                                                             .asList(attributeSet
@@ -272,11 +280,11 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                                                                             .size()]));
                                                                     fileDataDAO.delete(fileDatas);
                                                                 }
-                                                                jobDAO.delete(job);
                                                             }
+                                                            jobDAO.delete(jobs);
                                                         }
-                                                        workflowRunAttemptDAO.delete(attempt);
                                                     }
+                                                    workflowRunAttemptDAO.delete(attempts);
                                                 }
                                                 Set<Attribute> attributeSet = wr.getAttributes();
                                                 if (attributeSet != null && !attributeSet.isEmpty()) {
@@ -290,8 +298,8 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                                             .toArray(new FileData[fileDataSet.size()]));
                                                     fileDataDAO.delete(fileDatas);
                                                 }
-                                                workflowRunDAO.delete(wr);
                                             }
+                                            workflowRunDAO.delete(workflowRunList);
 
                                             Set<Attribute> attributeSet = sample.getAttributes();
                                             if (attributeSet != null && !attributeSet.isEmpty()) {
@@ -305,9 +313,9 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                                         .toArray(new FileData[fileDataSet.size()]));
                                                 fileDataDAO.delete(fileDatas);
                                             }
-                                            sampleDAO.delete(sample);
 
                                         }
+                                        sampleDAO.delete(samples);
 
                                     } else {
                                         Long flowcellId = flowcellDAO.save(flowcell);
