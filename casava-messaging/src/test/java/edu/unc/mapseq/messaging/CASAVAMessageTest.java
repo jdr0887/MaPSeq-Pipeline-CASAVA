@@ -21,7 +21,7 @@ public class CASAVAMessageTest {
     @Test
     public void testCAVASAQueue() {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(String.format("nio://%s:61616",
-                "biodev2.its.unc.edu"));
+                "152.19.198.146"));
         Connection connection = null;
         Session session = null;
         try {
@@ -30,9 +30,10 @@ public class CASAVAMessageTest {
             Destination destination = session.createQueue("queue/casava");
             MessageProducer producer = session.createProducer(destination);
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-
             String format = "{\"entities\":[{\"entityType\":\"FileData\",\"id\":\"%d\"},{\"entityType\":\"WorkflowRun\",\"name\":\"%s_CASAVA\"}]}";
-            producer.send(session.createTextMessage(String.format(format, 435964, "131022_UNC16-SN851_0288_AH7FALADXX")));
+            // String format =
+            // "{\"entities\":[{\"entityType\":\"FileData\",\"id\":\"%d\"},{\"entityType\":\"WorkflowRun\",\"name\":\"%s_CASAVA\"}]}";
+            producer.send(session.createTextMessage(String.format(format, 459863, "140519_UNC16-SN851_0359_AH9GE5ADXX")));
 
         } catch (JMSException e) {
             e.printStackTrace();
