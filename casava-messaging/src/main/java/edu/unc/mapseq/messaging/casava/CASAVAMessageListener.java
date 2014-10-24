@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.unc.mapseq.dao.AttributeDAO;
 import edu.unc.mapseq.dao.FileDataDAO;
 import edu.unc.mapseq.dao.FlowcellDAO;
 import edu.unc.mapseq.dao.JobDAO;
@@ -116,6 +118,7 @@ public class CASAVAMessageListener extends AbstractMessageListener {
         WorkflowRunAttemptDAO workflowRunAttemptDAO = daoBean.getWorkflowRunAttemptDAO();
         FileDataDAO fileDataDAO = daoBean.getFileDataDAO();
         StudyDAO studyDAO = daoBean.getStudyDAO();
+        AttributeDAO attributeDAO = daoBean.getAttributeDAO();
 
         Flowcell flowcell = null;
         WorkflowRun workflowRun = null;
@@ -223,13 +226,13 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                     if (foundFlowcells != null && !foundFlowcells.isEmpty()) {
 
                                         flowcell = foundFlowcells.get(0);
-                                        logger.debug("flowcell.toString(): {}", flowcell.toString());
+                                        logger.info(flowcell.toString());
 
                                         List<Sample> samples = sampleDAO.findByFlowcellId(flowcell.getId());
 
                                         for (Sample sample : samples) {
 
-                                            logger.debug("sample.toString(): {}", sample.toString());
+                                            logger.info(sample.toString());
 
                                             List<WorkflowRun> workflowRunList = workflowRunDAO.findBySampleId(sample
                                                     .getId());
@@ -240,32 +243,71 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                             }
 
                                             for (WorkflowRun wr : workflowRunList) {
+                                                logger.info(wr.toString());
 
                                                 List<WorkflowRunAttempt> attempts = workflowRunAttemptDAO
                                                         .findByWorkflowRunId(wr.getId());
-                                                for (WorkflowRunAttempt attempt : attempts) {
-                                                    List<Job> jobs = jobDAO.findByWorkflowRunAttemptId(attempt.getId());
-                                                    for (Job job : jobs) {
-                                                        job.setAttributes(null);
-                                                        job.setFileDatas(null);
-                                                        jobDAO.save(job);
-                                                    }
-                                                    jobDAO.delete(jobs);
-                                                }
-                                                workflowRunAttemptDAO.delete(attempts);
-                                                wr.setAttributes(null);
-                                                wr.setFileDatas(null);
-                                                workflowRunDAO.save(wr);
-                                            }
-                                            workflowRunDAO.delete(workflowRunList);
+                                                if (attempts != null && !attempts.isEmpty()) {
+                                                    for (WorkflowRunAttempt attempt : attempts) {
+                                                        logger.info(attempt.toString());
+                                                        List<Job> jobs = jobDAO.findByWorkflowRunAttemptId(attempt
+                                                                .getId());
+                                                        if (jobs != null && !jobs.isEmpty()) {
+                                                            for (Job job : jobs) {
+                                                                logger.info(job.toString());
 
-                                            sample.setAttributes(null);
-                                            sample.setFileDatas(null);
-                                            sampleDAO.save(sample);
+                                                                Set<Attribute> attributeSet = job.getAttributes();
+                                                                if (attributeSet != null && !attributeSet.isEmpty()) {
+                                                                    List<Attribute> attributes = Arrays
+                                                                            .asList(attributeSet
+                                                                                    .toArray(new Attribute[attributeSet
+                                                                                            .size()]));
+                                                                    attributeDAO.delete(attributes);
+                                                                }
+                                                                Set<FileData> fileDataSet = job.getFileDatas();
+                                                                if (fileDataSet != null && !fileDataSet.isEmpty()) {
+                                                                    List<FileData> fileDatas = Arrays
+                                                                            .asList(fileDataSet
+                                                                                    .toArray(new FileData[fileDataSet
+                                                                                            .size()]));
+                                                                    fileDataDAO.delete(fileDatas);
+                                                                }
+                                                                jobDAO.delete(job);
+                                                            }
+                                                        }
+                                                        workflowRunAttemptDAO.delete(attempt);
+                                                    }
+                                                }
+                                                Set<Attribute> attributeSet = wr.getAttributes();
+                                                if (attributeSet != null && !attributeSet.isEmpty()) {
+                                                    List<Attribute> attributes = Arrays.asList(attributeSet
+                                                            .toArray(new Attribute[attributeSet.size()]));
+                                                    attributeDAO.delete(attributes);
+                                                }
+                                                Set<FileData> fileDataSet = wr.getFileDatas();
+                                                if (fileDataSet != null && !fileDataSet.isEmpty()) {
+                                                    List<FileData> fileDatas = Arrays.asList(fileDataSet
+                                                            .toArray(new FileData[fileDataSet.size()]));
+                                                    fileDataDAO.delete(fileDatas);
+                                                }
+                                                workflowRunDAO.delete(wr);
+                                            }
+
+                                            Set<Attribute> attributeSet = sample.getAttributes();
+                                            if (attributeSet != null && !attributeSet.isEmpty()) {
+                                                List<Attribute> attributes = Arrays.asList(attributeSet
+                                                        .toArray(new Attribute[attributeSet.size()]));
+                                                attributeDAO.delete(attributes);
+                                            }
+                                            Set<FileData> fileDataSet = sample.getFileDatas();
+                                            if (fileDataSet != null && !fileDataSet.isEmpty()) {
+                                                List<FileData> fileDatas = Arrays.asList(fileDataSet
+                                                        .toArray(new FileData[fileDataSet.size()]));
+                                                fileDataDAO.delete(fileDatas);
+                                            }
+                                            sampleDAO.delete(sample);
 
                                         }
-
-                                        sampleDAO.delete(samples);
 
                                     } else {
                                         Long flowcellId = flowcellDAO.save(flowcell);
