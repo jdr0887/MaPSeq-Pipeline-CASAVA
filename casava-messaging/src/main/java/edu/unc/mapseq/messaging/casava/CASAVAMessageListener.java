@@ -402,7 +402,9 @@ public class CASAVAMessageListener extends AbstractMessageListener {
             flowcell.getAttributes().add(new Attribute("sampleSheet", sampleSheet.getAbsolutePath()));
             flowcellDAO.save(flowcell);
 
-            workflowRun.getFlowcells().add(flowcell);
+            Set<Flowcell> flowcellSet = new HashSet<Flowcell>();
+            flowcellSet.add(flowcell);
+            workflowRun.setFlowcells(flowcellSet);
 
             Long workflowRunId = workflowRunDAO.save(workflowRun);
             workflowRun.setId(workflowRunId);
