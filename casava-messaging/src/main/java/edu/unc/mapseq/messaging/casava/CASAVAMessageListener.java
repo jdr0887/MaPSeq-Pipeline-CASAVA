@@ -259,8 +259,8 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                                         if (jobs != null && !jobs.isEmpty()) {
                                                             jobDAO.delete(jobs);
                                                         }
-                                                        workflowRunAttemptDAO.delete(attempts);
                                                     }
+                                                    workflowRunAttemptDAO.delete(attempts);
 
                                                 }
 
