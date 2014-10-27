@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines</groupId>
   <artifactId>casava</artifactId>
-  <version>0.5.27</version>
+  <version>0.5.28-SNAPSHOT</version>
   <packaging>pom</packaging>
   <issueManagement>
     <system>gForge</system>
@@ -25,24 +25,24 @@
   <scm>
     <developerConnection>scm:git:ssh://${user.name}@code.renci.org/gitroot/casava</developerConnection>
     <connection>scm:git:ssh://developername@code.renci.org/gitroot/casava</connection>
-    <tag>casava-0.5.27</tag>
+    <tag>HEAD</tag>
   </scm>
   <dependencyManagement>
     <dependencies>
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-commons</artifactId>
-      	<version>0.5.27</version>
+      	<version>0.5.28-SNAPSHOT</version>
       </dependency>
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava.casava-web</groupId>
       	<artifactId>casava-web-service-api</artifactId>
-      	<version>0.5.27</version>
+      	<version>0.5.28-SNAPSHOT</version>
       </dependency>
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-workflow</artifactId>
-      	<version>0.5.27</version>
+      	<version>0.5.28-SNAPSHOT</version>
       </dependency>
       <dependency>
       	<groupId>org.jsoup</groupId>
