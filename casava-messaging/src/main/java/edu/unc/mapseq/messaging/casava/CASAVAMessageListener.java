@@ -237,35 +237,37 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                             List<WorkflowRun> workflowRuns = workflowRunDAO.findBySampleId(sample
                                                     .getId());
 
-                                            if (workflowRuns == null) {
-                                                logger.warn("no WorkflowRun instances found");
-                                                continue;
-                                            }
+                                            if (workflowRuns != null && !workflowRuns.isEmpty()) {
 
-                                            for (WorkflowRun wr : workflowRuns) {
+                                                for (WorkflowRun wr : workflowRuns) {
 
-                                                logger.info(wr.toString());
+                                                    logger.info(wr.toString());
 
-                                                List<WorkflowRunAttempt> attempts = workflowRunAttemptDAO
-                                                        .findByWorkflowRunId(wr.getId());
+                                                    List<WorkflowRunAttempt> attempts = workflowRunAttemptDAO
+                                                            .findByWorkflowRunId(wr.getId());
 
-                                                if (attempts != null && !attempts.isEmpty()) {
+                                                    if (attempts != null && !attempts.isEmpty()) {
 
-                                                    for (WorkflowRunAttempt attempt : attempts) {
-                                                        logger.info(attempt.toString());
-                                                        List<Job> jobs = jobDAO.findByWorkflowRunAttemptId(attempt
-                                                                .getId());
+                                                        for (WorkflowRunAttempt attempt : attempts) {
+                                                            logger.info(attempt.toString());
+                                                            List<Job> jobs = jobDAO.findByWorkflowRunAttemptId(attempt
+                                                                    .getId());
 
-                                                        if (jobs != null && !jobs.isEmpty()) {
-                                                            jobDAO.delete(jobs);
+                                                            if (jobs != null && !jobs.isEmpty()) {
+                                                                for (Job job : jobs) {
+                                                                    logger.info(job.toString());
+                                                                }
+                                                                jobDAO.delete(jobs);
+                                                            }
                                                         }
+                                                        workflowRunAttemptDAO.delete(attempts);
+
                                                     }
-                                                    workflowRunAttemptDAO.delete(attempts);
 
                                                 }
+                                                workflowRunDAO.delete(workflowRuns);
 
                                             }
-                                            workflowRunDAO.delete(workflowRuns);
 
                                         }
                                         sampleDAO.delete(samples);
