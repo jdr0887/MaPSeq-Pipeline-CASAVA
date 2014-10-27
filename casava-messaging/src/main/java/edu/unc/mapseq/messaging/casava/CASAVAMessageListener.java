@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -256,6 +255,9 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                                             if (jobs != null && !jobs.isEmpty()) {
                                                                 for (Job job : jobs) {
                                                                     logger.info(job.toString());
+                                                                    job.setAttributes(null);
+                                                                    job.setFileDatas(null);
+                                                                    jobDAO.save(job);
                                                                 }
                                                                 jobDAO.delete(jobs);
                                                             }
@@ -268,6 +270,10 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                                 workflowRunDAO.delete(workflowRuns);
 
                                             }
+
+                                            sample.setAttributes(null);
+                                            sample.setFileDatas(null);
+                                            sampleDAO.save(sample);
 
                                         }
                                         sampleDAO.delete(samples);
