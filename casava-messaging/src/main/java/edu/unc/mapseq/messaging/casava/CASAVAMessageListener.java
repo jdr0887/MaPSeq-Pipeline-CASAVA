@@ -234,54 +234,17 @@ public class CASAVAMessageListener extends AbstractMessageListener {
 
                                             logger.info(sample.toString());
 
-                                            Set<Attribute> attributeSet = sample.getAttributes();
-                                            if (attributeSet != null && !attributeSet.isEmpty()) {
-                                                for (Attribute attribute : attributeSet) {
-                                                    attributeDAO.delete(attribute);
-                                                }
-                                                // List<Attribute> attributes = Arrays.asList(attributeSet
-                                                // .toArray(new Attribute[attributeSet.size()]));
-                                                // attributeDAO.delete(attributes);
-                                            }
-                                            Set<FileData> fileDataSet = sample.getFileDatas();
-                                            if (fileDataSet != null && !fileDataSet.isEmpty()) {
-                                                for (FileData fd : fileDataSet) {
-                                                    fileDataDAO.delete(fd);
-                                                }
-                                                // List<FileData> fileDatas = Arrays.asList(fileDataSet
-                                                // .toArray(new FileData[fileDataSet.size()]));
-                                                // fileDataDAO.delete(fileDatas);
-                                            }
-
-                                            List<WorkflowRun> workflowRunList = workflowRunDAO.findBySampleId(sample
+                                            List<WorkflowRun> workflowRuns = workflowRunDAO.findBySampleId(sample
                                                     .getId());
 
-                                            if (workflowRunList == null) {
+                                            if (workflowRuns == null) {
                                                 logger.warn("no WorkflowRun instances found");
                                                 continue;
                                             }
 
-                                            for (WorkflowRun wr : workflowRunList) {
-                                                logger.info(wr.toString());
+                                            for (WorkflowRun wr : workflowRuns) {
 
-                                                attributeSet = wr.getAttributes();
-                                                if (attributeSet != null && !attributeSet.isEmpty()) {
-                                                    for (Attribute attribute : attributeSet) {
-                                                        attributeDAO.delete(attribute);
-                                                    }
-                                                    // List<Attribute> attributes = Arrays.asList(attributeSet
-                                                    // .toArray(new Attribute[attributeSet.size()]));
-                                                    // attributeDAO.delete(attributes);
-                                                }
-                                                fileDataSet = wr.getFileDatas();
-                                                if (fileDataSet != null && !fileDataSet.isEmpty()) {
-                                                    for (FileData fd : fileDataSet) {
-                                                        fileDataDAO.delete(fd);
-                                                    }
-                                                    // List<FileData> fileDatas = Arrays.asList(fileDataSet
-                                                    // .toArray(new FileData[fileDataSet.size()]));
-                                                    // fileDataDAO.delete(fileDatas);
-                                                }
+                                                logger.info(wr.toString());
 
                                                 List<WorkflowRunAttempt> attempts = workflowRunAttemptDAO
                                                         .findByWorkflowRunId(wr.getId());
@@ -289,47 +252,20 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                                                 if (attempts != null && !attempts.isEmpty()) {
 
                                                     for (WorkflowRunAttempt attempt : attempts) {
-
                                                         logger.info(attempt.toString());
-
                                                         List<Job> jobs = jobDAO.findByWorkflowRunAttemptId(attempt
                                                                 .getId());
 
                                                         if (jobs != null && !jobs.isEmpty()) {
-
-                                                            for (Job job : jobs) {
-
-                                                                logger.info(job.toString());
-
-                                                                attributeSet = job.getAttributes();
-                                                                if (attributeSet != null && !attributeSet.isEmpty()) {
-                                                                    for (Attribute attribute : attributeSet) {
-                                                                        attributeDAO.delete(attribute);
-                                                                    }
-                                                                    // List<Attribute> attributes =
-                                                                    // Arrays.asList(attributeSet
-                                                                    // .toArray(new Attribute[attributeSet.size()]));
-                                                                    // attributeDAO.delete(attributes);
-                                                                }
-
-                                                                fileDataSet = job.getFileDatas();
-                                                                if (fileDataSet != null && !fileDataSet.isEmpty()) {
-                                                                    for (FileData fd : fileDataSet) {
-                                                                        fileDataDAO.delete(fd);
-                                                                    }
-                                                                    // List<FileData> fileDatas =
-                                                                    // Arrays.asList(fileDataSet
-                                                                    // .toArray(new FileData[fileDataSet.size()]));
-                                                                    // fileDataDAO.delete(fileDatas);
-                                                                }
-                                                            }
                                                             jobDAO.delete(jobs);
                                                         }
                                                         workflowRunAttemptDAO.delete(attempts);
                                                     }
+
                                                 }
+
                                             }
-                                            workflowRunDAO.delete(workflowRunList);
+                                            workflowRunDAO.delete(workflowRuns);
 
                                         }
                                         sampleDAO.delete(samples);
