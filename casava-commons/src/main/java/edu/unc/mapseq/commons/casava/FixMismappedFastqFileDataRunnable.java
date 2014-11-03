@@ -2,6 +2,9 @@ package edu.unc.mapseq.commons.casava;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -62,72 +65,149 @@ public class FixMismappedFastqFileDataRunnable implements Runnable {
 
                     for (Sample sample : sampleList) {
 
-                        File read1File = new File(String.format("%s/%s", sample.getOutputDirectory(), "CASAVA"),
+                        Set<FileData> sampleFiles = sample.getFileDatas();
+
+                        File casavaDirectory = new File(sample.getOutputDirectory(), "CASAVA");
+
+                        File expectedRead1FastqFile = new File(casavaDirectory.getAbsolutePath(),
                                 String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(), sample.getBarcode(),
                                         sample.getLaneIndex(), 1));
 
-                        FileData r1FileData = new FileData(read1File.getName(), read1File.getParentFile()
-                                .getAbsolutePath(), MimeType.FASTQ);
-                        List<FileData> potentialRead1FastqFiles = fileDataDAO.findByExample(r1FileData);
-
-                        if (potentialRead1FastqFiles == null
-                                || (potentialRead1FastqFiles != null && potentialRead1FastqFiles.isEmpty())) {
-                            logger.warn("read1Fastq not found");
-                            logger.warn(sample.toString());
-                            break;
-                        }
-
-                        if ((potentialRead1FastqFiles != null && !potentialRead1FastqFiles.isEmpty())) {
-
-                            Set<FileData> fileDataSet = sample.getFileDatas();
-
-                            FileData read1FastqFileData = potentialRead1FastqFiles.get(0);
-
-                            if (fileDataSet.contains(read1FastqFileData)) {
-                                continue;
-                            }
-
-                            fileDataSet.add(read1FastqFileData);
-                            sample.setFileDatas(fileDataSet);
-                            sampleDAO.save(sample);
-
-                        }
-
-                    }
-
-                    for (Sample sample : sampleList) {
-
-                        File read2File = new File(String.format("%s/%s", sample.getOutputDirectory(), "CASAVA"),
+                        File expectedRead2FastqFile = new File(casavaDirectory.getAbsolutePath(),
                                 String.format("%s_%s_L%03d_R%d.fastq.gz", sr.getName(), sample.getBarcode(),
                                         sample.getLaneIndex(), 2));
 
-                        List<FileData> potentialRead2FastqFiles = fileDataDAO.findByExample(new FileData(read2File
-                                .getName(), read2File.getParentFile().getAbsolutePath(), MimeType.FASTQ));
-
-                        if (potentialRead2FastqFiles == null
-                                || (potentialRead2FastqFiles != null && potentialRead2FastqFiles.isEmpty())) {
-                            logger.warn("read1Fastq not found");
-                            logger.warn(sample.toString());
-                            break;
+                        int foundR1FastqCount = 0;
+                        int foundR2FastqCount = 0;
+                        for (FileData fd : sampleFiles) {
+                            if (fd.getPath().equals(casavaDirectory.getAbsolutePath())) {
+                                if (fd.getName().equals(expectedRead1FastqFile.getName())) {
+                                    ++foundR1FastqCount;
+                                }
+                                if (fd.getName().equals(expectedRead2FastqFile.getName())) {
+                                    ++foundR2FastqCount;
+                                }
+                            }
                         }
 
-                        if (potentialRead2FastqFiles != null && !potentialRead2FastqFiles.isEmpty()) {
+                        if (foundR1FastqCount == 1 && foundR2FastqCount == 1) {
+                            continue;
+                        }
 
-                            Set<FileData> fileDataSet = sample.getFileDatas();
+                        // read1fastq not found...need to find/create & add to sample
+                        if (foundR1FastqCount == 0) {
 
-                            FileData read2FastqFileData = potentialRead2FastqFiles.get(0);
+                            FileData fileData = new FileData(expectedRead1FastqFile.getName(),
+                                    casavaDirectory.getAbsolutePath(), MimeType.FASTQ);
+                            List<FileData> potentialFastqFiles = fileDataDAO.findByExample(fileData);
 
-                            if (fileDataSet.contains(read2FastqFileData)) {
-                                continue;
+                            // found, but not mapped
+                            if ((potentialFastqFiles != null && !potentialFastqFiles.isEmpty())) {
+                                FileData fastqFileData = potentialFastqFiles.get(0);
+                                if (!sampleFiles.contains(fastqFileData)) {
+                                    sampleFiles.add(fastqFileData);
+                                }
                             }
 
-                            fileDataSet.add(read2FastqFileData);
-                            sample.setFileDatas(fileDataSet);
-                            sampleDAO.save(sample);
+                            // not found
+                            if (potentialFastqFiles == null
+                                    || (potentialFastqFiles != null && potentialFastqFiles.isEmpty())) {
+                                fileData.setId(fileDataDAO.save(fileData));
+                                sampleFiles.add(fileData);
+                            }
 
                         }
 
+                        // read2fastq not found...need to find/create & add to sample
+                        if (foundR2FastqCount == 0) {
+
+                            FileData fileData = new FileData(expectedRead2FastqFile.getName(),
+                                    casavaDirectory.getAbsolutePath(), MimeType.FASTQ);
+                            List<FileData> potentialFastqFiles = fileDataDAO.findByExample(fileData);
+
+                            // found, but not mapped
+                            if ((potentialFastqFiles != null && !potentialFastqFiles.isEmpty())) {
+                                FileData fastqFileData = potentialFastqFiles.get(0);
+                                if (!sampleFiles.contains(fastqFileData)) {
+                                    sampleFiles.add(fastqFileData);
+                                }
+                            }
+
+                            // not found
+                            if (potentialFastqFiles == null
+                                    || (potentialFastqFiles != null && potentialFastqFiles.isEmpty())) {
+                                fileData.setId(fileDataDAO.save(fileData));
+                                sampleFiles.add(fileData);
+                            }
+
+                        }
+
+                        // found duplicate
+                        if (foundR1FastqCount > 1) {
+
+                            List<FileData> fastqFiles = new ArrayList<FileData>();
+                            for (FileData fd : sampleFiles) {
+                                if (!fd.getName().equals(expectedRead1FastqFile.getName())
+                                        && !fd.getPath().equals(casavaDirectory.getAbsolutePath())) {
+                                    continue;
+                                }
+                                fastqFiles.add(fd);
+                            }
+
+                            List<FileData> sorted = new ArrayList<FileData>(fastqFiles);
+                            Collections.sort(sorted, new Comparator<FileData>() {
+                                @Override
+                                public int compare(FileData one, FileData two) {
+                                    return one.getId().compareTo(two.getId());
+                                }
+                            });
+
+                            FileData toKeep = sorted.get(0);
+                            Iterator<FileData> iter = sampleFiles.iterator();
+                            while (iter.hasNext()) {
+                                FileData next = iter.next();
+                                if (next.getName().equals(toKeep.getName()) && next.getPath().equals(toKeep.getPath())
+                                        && next.getId() > toKeep.getId()) {
+                                    iter.remove();
+                                }
+                            }
+                        }
+
+                        // found duplicate
+                        if (foundR2FastqCount > 1) {
+                            List<FileData> fastqFiles = new ArrayList<FileData>();
+                            for (FileData fd : sampleFiles) {
+                                if (!fd.getName().equals(expectedRead2FastqFile.getName())
+                                        && !fd.getPath().equals(casavaDirectory.getAbsolutePath())) {
+                                    continue;
+                                }
+                                fastqFiles.add(fd);
+                            }
+
+                            List<FileData> sorted = new ArrayList<FileData>(fastqFiles);
+                            Collections.sort(sorted, new Comparator<FileData>() {
+                                @Override
+                                public int compare(FileData one, FileData two) {
+                                    return one.getId().compareTo(two.getId());
+                                }
+                            });
+
+                            FileData toKeep = sorted.get(0);
+                            Iterator<FileData> iter = sampleFiles.iterator();
+                            while (iter.hasNext()) {
+                                FileData next = iter.next();
+                                if (next.getName().equals(toKeep.getName()) && next.getPath().equals(toKeep.getPath())
+                                        && next.getId() > toKeep.getId()) {
+                                    iter.remove();
+                                }
+                            }
+                        }
+
+                        sample.setFileDatas(sampleFiles);
+                        sampleDAO.save(sample);
+
                     }
+
                 }
 
             }
