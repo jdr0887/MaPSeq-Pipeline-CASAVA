@@ -21,7 +21,6 @@ import org.renci.jlrm.condor.CondorJobEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.unc.mapseq.commons.casava.FixMismappedFastqFileDataRunnable;
 import edu.unc.mapseq.commons.casava.SaveDemultiplexedStatsAttributesRunnable;
 import edu.unc.mapseq.commons.casava.SaveObservedClusterDensityAttributesRunnable;
 import edu.unc.mapseq.dao.FlowcellDAO;
