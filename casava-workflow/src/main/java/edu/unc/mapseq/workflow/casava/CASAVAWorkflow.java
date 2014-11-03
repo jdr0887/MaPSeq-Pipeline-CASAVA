@@ -309,10 +309,11 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
 
         if (flowcellIdList != null && !flowcellIdList.isEmpty()) {
 
-            FixMismappedFastqFileDataRunnable fixMismappedFastqFileDataRunnable = new FixMismappedFastqFileDataRunnable();
-            fixMismappedFastqFileDataRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
-            fixMismappedFastqFileDataRunnable.setFlowcellIdList(flowcellIdList);
-            executorService.submit(fixMismappedFastqFileDataRunnable);
+            // FixMismappedFastqFileDataRunnable fixMismappedFastqFileDataRunnable = new
+            // FixMismappedFastqFileDataRunnable();
+            // fixMismappedFastqFileDataRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
+            // fixMismappedFastqFileDataRunnable.setFlowcellIdList(flowcellIdList);
+            // executorService.submit(fixMismappedFastqFileDataRunnable);
 
             SaveDemultiplexedStatsAttributesRunnable saveDemultiplexedStatsAttributesRunnable = new SaveDemultiplexedStatsAttributesRunnable();
             saveDemultiplexedStatsAttributesRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
