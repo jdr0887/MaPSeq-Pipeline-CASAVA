@@ -5,6 +5,8 @@ import java.net.MalformedURLException;
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
+import javax.xml.ws.Binding;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 
@@ -24,20 +26,20 @@ public class CASAVAServiceImplTest {
         Service service = Service.create(serviceQName);
         QName portQName = new QName("http://casava.ws.mapseq.unc.edu", "CASAVAPort");
         service.addPort(portQName, SOAPBinding.SOAP11HTTP_BINDING,
-                String.format("http://%s:%d/cxf/CASAVAService", "localhost", 8181));
+                String.format("http://%s:%d/cxf/CASAVAService", "152.19.198.146", 8181));
         CASAVAService casavaService = service.getPort(CASAVAService.class);
 
-        Client cl = ClientProxy.getClient(casavaService);
-        HTTPConduit httpConduit = (HTTPConduit) cl.getConduit();
-        httpConduit.getClient().setReceiveTimeout(5 * 60 * 1000L);
+//        Client cl = ClientProxy.getClient(casavaService);
+//        HTTPConduit httpConduit = (HTTPConduit) cl.getConduit();
+//        httpConduit.getClient().setReceiveTimeout(5 * 60 * 1000L);
 
-        // Binding binding = ((BindingProvider) service.getPort(portQName, FileDataService.class)).getBinding();
-        // ((SOAPBinding) binding).setMTOMEnabled(true);
+        Binding binding = ((BindingProvider) service.getPort(portQName, CASAVAService.class)).getBinding();
+        ((SOAPBinding) binding).setMTOMEnabled(true);
 
         try {
-            File f = new File("/tmp", "130221_UNC16-SN851_0219_AD1VLCACXX.csv");
+            File f = new File("/tmp", "140912_UNC17-D00216_0247_BC4G46ANXX.csv");
             DataHandler handler = new DataHandler(f.toURI().toURL());
-            casavaService.uploadSampleSheet(handler, "130221_UNC16-SN851_0219_AD1VLCACXX");
+            casavaService.uploadSampleSheet(handler, "140912_UNC17-D00216_0247_BC4G46ANXX");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
