@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.soap.MTOM;
 
@@ -30,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public interface CASAVAService {
 
     @WebMethod
-    public Long uploadSampleSheet(@WebParam(name = "data") DataHandler data,
+    public Long uploadSampleSheet(@XmlMimeType("application/octet-stream") @WebParam(name = "data") DataHandler data,
             @WebParam(name = "flowcellName") String flowcellName);
 
     @GET
