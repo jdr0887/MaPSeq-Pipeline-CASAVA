@@ -29,9 +29,9 @@ public class CASAVAServiceImplTest {
                 String.format("http://%s:%d/cxf/CASAVAService", "152.19.198.146", 8181));
         CASAVAService casavaService = service.getPort(CASAVAService.class);
 
-//        Client cl = ClientProxy.getClient(casavaService);
-//        HTTPConduit httpConduit = (HTTPConduit) cl.getConduit();
-//        httpConduit.getClient().setReceiveTimeout(5 * 60 * 1000L);
+        Client cl = ClientProxy.getClient(casavaService);
+        HTTPConduit httpConduit = (HTTPConduit) cl.getConduit();
+        httpConduit.getClient().setReceiveTimeout(5 * 60 * 1000L);
 
         Binding binding = ((BindingProvider) service.getPort(portQName, CASAVAService.class)).getBinding();
         ((SOAPBinding) binding).setMTOMEnabled(true);
