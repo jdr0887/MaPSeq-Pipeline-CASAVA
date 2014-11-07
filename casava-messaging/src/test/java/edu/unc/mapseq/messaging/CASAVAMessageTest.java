@@ -32,9 +32,11 @@ public class CASAVAMessageTest {
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
             // String format =
             // "{\"entities\":[{\"entityType\":\"FileData\",\"id\":\"%d\"},{\"entityType\":\"WorkflowRun\",\"name\":\"%s_CASAVA\"}]}";
-            //producer.send(session.createTextMessage(String.format(format, 459863, "140519_UNC16-SN851_0359_AH9GE5ADXX")));
-            String format = "{\"entities\":[{\"entityType\":\"FileData\",\"id\":\"%d\"},{\"entityType\":\"WorkflowRun\",\"name\":\"%s_CASAVA\"}]}";
-            producer.send(session.createTextMessage(String.format(format, 466021, "140521_UNC10-SN254_0551_BH9GEGADXX")));
+            // producer.send(session.createTextMessage(String.format(format, 459863,
+            // "140519_UNC16-SN851_0359_AH9GE5ADXX")));
+            String format = "{\"entities\":[{\"entityType\":\"FileData\",\"id\":\"%d\"},{\"entityType\":\"WorkflowRun\",\"name\":\"%s\"}]}";
+            producer.send(session.createTextMessage(String.format(format, 660896,
+                    "NCG.140912_UNC17-D00216_0247_BC4G46ANXX.CASAVA")));
         } catch (JMSException e) {
             e.printStackTrace();
         } finally {
