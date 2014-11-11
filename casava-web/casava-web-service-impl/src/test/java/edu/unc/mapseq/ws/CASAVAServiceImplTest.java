@@ -37,9 +37,11 @@ public class CASAVAServiceImplTest {
         ((SOAPBinding) binding).setMTOMEnabled(true);
 
         try {
-            File f = new File("/tmp", "140912_UNC17-D00216_0247_BC4G46ANXX.csv");
+            //File f = new File("/home/jdr0887", "140912_UNC17-D00216_0247_BC4G46ANXX.csv");
+            File f = new File("/home/jdr0887", "141006_UNC17-D00216_0249_BC4G45ANXX.csv");
             DataHandler handler = new DataHandler(f.toURI().toURL());
-            casavaService.uploadSampleSheet(handler, "140912_UNC17-D00216_0247_BC4G46ANXX");
+            Long id = casavaService.uploadSampleSheet(handler, "141006_UNC17-D00216_0249_BC4G45ANXX");
+            System.out.println(id);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
