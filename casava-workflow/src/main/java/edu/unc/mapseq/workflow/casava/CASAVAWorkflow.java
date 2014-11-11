@@ -151,8 +151,8 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
                                     throw new WorkflowException("Invalid SampleSheet: ");
                                 }
 
-                                CondorJobBuilder builder = WorkflowJobFactory.createJob(++count,
-                                        ConfigureBCLToFastqCLI.class, attempt.getId()).siteName(siteName);
+                                CondorJobBuilder builder = WorkflowJobFactory.createJob(++count, ConfigureBCLToFastqCLI.class, attempt.getId())
+                                        .siteName(siteName).numberOfProcessors(2);
                                 builder.addArgument(ConfigureBCLToFastqCLI.INPUTDIR, baseCallsDir.getAbsolutePath())
                                         .addArgument(ConfigureBCLToFastqCLI.MISMATCHES)
                                         .addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGBCL)
