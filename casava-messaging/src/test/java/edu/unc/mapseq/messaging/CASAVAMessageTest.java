@@ -35,8 +35,11 @@ public class CASAVAMessageTest {
             // producer.send(session.createTextMessage(String.format(format, 459863,
             // "140519_UNC16-SN851_0359_AH9GE5ADXX")));
             String format = "{\"entities\":[{\"entityType\":\"FileData\",\"id\":\"%d\"},{\"entityType\":\"WorkflowRun\",\"name\":\"%s\"}]}";
-            producer.send(session.createTextMessage(String.format(format, 660896,
-                    "NCG.140912_UNC17-D00216_0247_BC4G46ANXX.CASAVA")));
+            // producer.send(session.createTextMessage(String.format(format, 660896,
+            // "NCG.140912_UNC17-D00216_0247_BC4G46ANXX.CASAVA")));
+            producer.send(session.createTextMessage(String.format(format, 664025,
+                    "NCG.141006_UNC17-D00216_0249_BC4G45ANXX.CASAVA")));
+
         } catch (JMSException e) {
             e.printStackTrace();
         } finally {
