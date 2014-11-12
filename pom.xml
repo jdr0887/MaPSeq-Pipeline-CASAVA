@@ -12,8 +12,8 @@
   <version>0.5.44-SNAPSHOT</version>
   <packaging>pom</packaging>
   <issueManagement>
-    <system>gForge</system>
-    <url>https://code.renci.org/gf/project/casava/tracker/</url>
+    <system>GitHub Issues</system>
+    <url>https://github.com/jdr0887/MaPSeq-Pipeline-CASAVA/issues</url>
   </issueManagement>
   <licenses>    
     <license>
@@ -23,9 +23,9 @@
     </license>
   </licenses>
   <scm>
-    <developerConnection>scm:git:ssh://${user.name}@code.renci.org/gitroot/casava</developerConnection>
-    <connection>scm:git:ssh://developername@code.renci.org/gitroot/casava</connection>
-    <tag>HEAD</tag>
+    <url>https://github.com/jdr0887/MaPSeq-Pipeline-CASAVA</url>
+    <developerConnection>scm:git:git@github.com:jdr0887/MaPSeq-Pipeline-CASAVA.git</developerConnection>
+    <connection>scm:git:git@github.com:jdr0887/MaPSeq-Pipeline-CASAVA.git</connection>
   </scm>
   <dependencyManagement>
     <dependencies>
