@@ -152,7 +152,7 @@ public class CASAVAWorkflow extends AbstractSampleWorkflow {
                                 }
 
                                 CondorJobBuilder builder = WorkflowJobFactory.createJob(++count, ConfigureBCLToFastqCLI.class, attempt.getId())
-                                        .siteName(siteName).numberOfProcessors(2);
+                                        .siteName(siteName);
                                 builder.addArgument(ConfigureBCLToFastqCLI.INPUTDIR, baseCallsDir.getAbsolutePath())
                                         .addArgument(ConfigureBCLToFastqCLI.MISMATCHES)
                                         .addArgument(ConfigureBCLToFastqCLI.IGNOREMISSINGBCL)
