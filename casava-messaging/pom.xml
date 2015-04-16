@@ -2,13 +2,13 @@
   <parent>
     <groupId>edu.unc.mapseq.pipelines</groupId>
     <artifactId>casava</artifactId>
-    <version>0.5.53-SNAPSHOT</version>
+    <version>0.5.53</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA :: Messaging</name>
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines.casava</groupId>
   <artifactId>casava-messaging</artifactId>
-  <version>0.5.53-SNAPSHOT</version>
+  <version>0.5.53</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
