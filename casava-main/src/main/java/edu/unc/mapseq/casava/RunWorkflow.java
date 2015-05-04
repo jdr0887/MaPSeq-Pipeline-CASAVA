@@ -42,6 +42,7 @@ import org.xml.sax.SAXException;
 
 import edu.unc.mapseq.config.MaPSeqConfigurationService;
 import edu.unc.mapseq.config.MaPSeqConfigurationServiceImpl;
+import edu.unc.mapseq.dao.AttributeDAO;
 import edu.unc.mapseq.dao.FlowcellDAO;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
@@ -89,6 +90,7 @@ public class RunWorkflow implements Runnable {
         WSDAOManager daoMgr = WSDAOManager.getInstance();
         MaPSeqDAOBean maPSeqDAOBean = daoMgr.getMaPSeqDAOBean();
 
+        AttributeDAO attributeDAO = maPSeqDAOBean.getAttributeDAO();
         FlowcellDAO flowcellDAO = maPSeqDAOBean.getFlowcellDAO();
         SampleDAO sampleDAO = maPSeqDAOBean.getSampleDAO();
         WorkflowDAO workflowDAO = maPSeqDAOBean.getWorkflowDAO();
@@ -219,30 +221,50 @@ public class RunWorkflow implements Runnable {
                     }
                 }
                 logger.debug("readCount = {}", readCount);
-                flowcell.getAttributes().add(new Attribute("readCount", readCount + ""));
+
+                Set<String> attributeNameSet = new HashSet<String>();
+
+                Set<Attribute> attributes = flowcell.getAttributes();
+
+                if (attributes != null && attributes.isEmpty()) {
+                    for (Attribute attribute : attributes) {
+                        attributeNameSet.add(attribute.getName());
+                    }
+                    Set<String> synchSet = Collections.synchronizedSet(attributeNameSet);
+                    if (synchSet.contains("readCount")) {
+                        for (Attribute attribute : attributes) {
+                            if (attribute.getName().equals("readCount")) {
+                                attribute.setValue(readCount + "");
+                                attributeDAO.save(attribute);
+                                break;
+                            }
+                        }
+                    } else {
+                        attributes.add(new Attribute("readCount", readCount + ""));
+                    }
+                }
+
+                flowcell.setAttributes(attributes);
+
             } catch (XPathExpressionException | DOMException | ParserConfigurationException | SAXException
                     | IOException e1) {
                 e1.printStackTrace();
             }
 
             Vector<Vector<String>> data = new Vector<Vector<String>>();
-            try {
-                List<Sample> sampleList = sampleDAO.findByFlowcellId(flowcell.getId());
+            List<Sample> sampleList = sampleDAO.findByFlowcellId(flowcell.getId());
 
-                if (sampleList != null && !sampleList.isEmpty()) {
-                    logger.debug("sampleList.size() = {}", sampleList.size());
-                    for (Sample sample : sampleList) {
-                        Study study = sample.getStudy();
-                        Vector<String> childVector = new Vector<String>();
-                        childVector.add(sample.getLaneIndex().toString());
-                        childVector.add(sample.getName());
-                        childVector.add(sample.getBarcode());
-                        childVector.add(study.getName());
-                        data.add(childVector);
-                    }
+            if (sampleList != null && !sampleList.isEmpty()) {
+                logger.debug("sampleList.size() = {}", sampleList.size());
+                for (Sample sample : sampleList) {
+                    Study study = sample.getStudy();
+                    Vector<String> childVector = new Vector<String>();
+                    childVector.add(sample.getLaneIndex().toString());
+                    childVector.add(sample.getName());
+                    childVector.add(sample.getBarcode());
+                    childVector.add(study.getName());
+                    data.add(childVector);
                 }
-            } catch (MaPSeqDAOException e) {
-                e.printStackTrace();
             }
 
             StringBuilder sb = new StringBuilder(
@@ -268,7 +290,29 @@ public class RunWorkflow implements Runnable {
                 e.printStackTrace();
             }
 
-            flowcell.getAttributes().add(new Attribute("sampleSheet", sampleSheetFile.getAbsolutePath()));
+            Set<String> attributeNameSet = new HashSet<String>();
+
+            Set<Attribute> attributes = flowcell.getAttributes();
+
+            if (attributes != null && attributes.isEmpty()) {
+                for (Attribute attribute : attributes) {
+                    attributeNameSet.add(attribute.getName());
+                }
+                Set<String> synchSet = Collections.synchronizedSet(attributeNameSet);
+                if (synchSet.contains("readCount")) {
+                    for (Attribute attribute : attributes) {
+                        if (attribute.getName().equals("sampleSheet")) {
+                            attribute.setValue(sampleSheetFile.getAbsolutePath());
+                            attributeDAO.save(attribute);
+                            break;
+                        }
+                    }
+                } else {
+                    attributes.add(new Attribute("sampleSheet", sampleSheetFile.getAbsolutePath()));
+                }
+            }
+            flowcell.setAttributes(attributes);
+
             flowcellDAO.save(flowcell);
 
             casavaWorkflow.setWorkflowBeanService(workflowBeanService);
