@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public class CASAVAWorkflowExecutorService {
 
-    private final Logger logger = LoggerFactory.getLogger(CASAVAWorkflowExecutorService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CASAVAWorkflowExecutorService.class);
 
     private final Timer mainTimer = new Timer();
 
