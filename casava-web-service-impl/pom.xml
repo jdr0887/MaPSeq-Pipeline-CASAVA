@@ -2,13 +2,13 @@
   <parent>
     <groupId>edu.unc.mapseq.pipelines</groupId>
     <artifactId>casava</artifactId>
-    <version>0.5.59</version>
+    <version>0.5.60-SNAPSHOT</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA :: Web Service Impl</name>
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines.casava</groupId>
   <artifactId>casava-web-service-impl</artifactId>
-  <version>0.5.59</version>
+  <version>0.5.60-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
