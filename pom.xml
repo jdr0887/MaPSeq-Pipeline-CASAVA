@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.unc.mapseq</groupId>
     <artifactId>pipeline</artifactId>
-    <version>0.5.62</version>
+    <version>0.5.63</version>
   </parent>
   <name>MaPSeq :: Pipelines :: CASAVA</name>
   <modelVersion>4.0.0</modelVersion>
@@ -36,7 +36,7 @@
       	<version>0.5.58-SNAPSHOT</version>
       </dependency>
       <dependency>
-      	<groupId>edu.unc.mapseq.pipelines.casava.casava-web</groupId>
+      	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-web-service-api</artifactId>
       	<version>0.5.58-SNAPSHOT</version>
       </dependency>
@@ -60,6 +60,7 @@
     <module>casava-main</module>
     <module>casava-features</module>
     <module>casava-messaging</module>
-    <module>casava-web</module>
+    <module>casava-web-service-api</module>
+    <module>casava-web-service-impl</module>
   </modules>
 </project>
