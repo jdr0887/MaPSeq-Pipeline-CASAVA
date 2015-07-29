@@ -20,9 +20,11 @@ import edu.unc.mapseq.workflow.casava.CASAVAWorkflow;
 
 public class CASAVAWorkflowExecutorTask extends TimerTask {
 
-    private final Logger logger = LoggerFactory.getLogger(CASAVAWorkflowExecutorTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(CASAVAWorkflowExecutorTask.class);
 
     private final WorkflowTPE threadPoolExecutor = new WorkflowTPE();
+
+    private String workflowName;
 
     private WorkflowBeanService workflowBeanService;
 
@@ -88,6 +90,14 @@ public class CASAVAWorkflowExecutorTask extends TimerTask {
 
     public void setWorkflowBeanService(WorkflowBeanService workflowBeanService) {
         this.workflowBeanService = workflowBeanService;
+    }
+
+    public String getWorkflowName() {
+        return workflowName;
+    }
+
+    public void setWorkflowName(String workflowName) {
+        this.workflowName = workflowName;
     }
 
 }

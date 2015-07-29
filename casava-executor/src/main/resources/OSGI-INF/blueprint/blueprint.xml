@@ -13,6 +13,7 @@
 
   <bean id="task" class="edu.unc.mapseq.executor.casava.CASAVAWorkflowExecutorTask">
     <property name="workflowBeanService" ref="CASAVAWorkflowBeanService" />
+    <property name="workflowName" value="CASAVA" />
   </bean>
 
   <bean id="CASAVAWorkflowExecutorService" class="edu.unc.mapseq.executor.casava.CASAVAWorkflowExecutorService"
