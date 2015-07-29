@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines</groupId>
   <artifactId>casava</artifactId>
-  <version>0.5.58-SNAPSHOT</version>
+  <version>0.5.58</version>
   <packaging>pom</packaging>
   <issueManagement>
     <system>GitHub Issues</system>
@@ -26,24 +26,24 @@
     <url>https://github.com/jdr0887/MaPSeq-Pipeline-CASAVA</url>
     <developerConnection>scm:git:git@github.com:jdr0887/MaPSeq-Pipeline-CASAVA.git</developerConnection>
     <connection>scm:git:git@github.com:jdr0887/MaPSeq-Pipeline-CASAVA.git</connection>
-    <tag>HEAD</tag>
+    <tag>casava-0.5.58</tag>
   </scm>
   <dependencyManagement>
     <dependencies>
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-commons</artifactId>
-      	<version>0.5.58-SNAPSHOT</version>
+      	<version>0.5.58</version>
       </dependency>
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-web-service-api</artifactId>
-      	<version>0.5.58-SNAPSHOT</version>
+      	<version>0.5.58</version>
       </dependency>
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.casava</groupId>
       	<artifactId>casava-workflow</artifactId>
-      	<version>0.5.58-SNAPSHOT</version>
+      	<version>0.5.58</version>
       </dependency>
       <dependency>
       	<groupId>org.jsoup</groupId>
