@@ -4,15 +4,15 @@
 
   <reference id="connectionFactory" interface="javax.jms.ConnectionFactory" />
 
-  <reference id="CASAVAWorkflowBeanService" interface="edu.unc.mapseq.workflow.WorkflowBeanService"
-    component-name="CASAVAWorkflowBeanService" />
+  <reference id="CASAVAWorkflowBeanService" interface="edu.unc.mapseq.workflow.WorkflowBeanService" component-name="CASAVAWorkflowBeanService" />
 
   <bean id="CASAVAMessageListener" class="edu.unc.mapseq.messaging.casava.CASAVAMessageListener">
     <property name="workflowBeanService" ref="CASAVAWorkflowBeanService" />
+    <property name="workflowName" value="CASAVA" />
   </bean>
 
-  <bean id="CASAVAMessagingService" class="edu.unc.mapseq.messaging.casava.CASAVAMessageService"
-    init-method="start" destroy-method="stop" activation="eager">
+  <bean id="CASAVAMessagingService" class="edu.unc.mapseq.messaging.casava.CASAVAMessageService" init-method="start" destroy-method="stop"
+    activation="eager">
     <property name="connectionFactory" ref="connectionFactory" />
     <property name="messageListener" ref="CASAVAMessageListener" />
     <property name="destinationName" value="queue/casava" />
