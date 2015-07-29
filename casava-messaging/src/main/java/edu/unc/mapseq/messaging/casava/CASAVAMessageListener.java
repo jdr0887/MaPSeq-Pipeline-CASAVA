@@ -126,9 +126,9 @@ public class CASAVAMessageListener extends AbstractMessageListener {
 
         Workflow workflow = null;
         try {
-            List<Workflow> workflowList = workflowDAO.findByName("CASAVA");
+            List<Workflow> workflowList = workflowDAO.findByName(getWorkflowName());
             if (workflowList == null || (workflowList != null && workflowList.isEmpty())) {
-                logger.error("No Workflow Found: {}", "CASAVA");
+                logger.error("No Workflow Found: {}", getWorkflowName());
                 return;
             }
             workflow = workflowList.get(0);
@@ -211,81 +211,82 @@ public class CASAVAMessageListener extends AbstractMessageListener {
                             Set<Integer> laneIndexSet = new HashSet<Integer>();
 
                             logger.debug("flowcellDirectory.exists(): {}", flowcellDirectory.exists());
+                            if (!flowcellDirectory.exists()) {
+                                logger.warn("expected flowcell directory does not exist: {}",
+                                        flowcellDirectory.getAbsolutePath());
+                                return;
+                            }
 
-                            if (flowcellDirectory.exists()) {
+                            flowcell = new Flowcell();
+                            flowcell.setBaseDirectory(baseDirectory.getAbsolutePath());
+                            flowcell.setName(flowcellName);
 
-                                flowcell = new Flowcell();
-                                flowcell.setBaseDirectory(baseDirectory.getAbsolutePath());
-                                flowcell.setName(flowcellName);
+                            try {
 
-                                try {
+                                List<Flowcell> foundFlowcells = flowcellDAO.findByExample(flowcell);
 
-                                    List<Flowcell> foundFlowcells = flowcellDAO.findByExample(flowcell);
+                                if (foundFlowcells != null && !foundFlowcells.isEmpty()) {
 
-                                    if (foundFlowcells != null && !foundFlowcells.isEmpty()) {
+                                    flowcell = foundFlowcells.get(0);
+                                    logger.info(flowcell.toString());
 
-                                        flowcell = foundFlowcells.get(0);
-                                        logger.info(flowcell.toString());
+                                    List<Sample> samples = sampleDAO.findByFlowcellId(flowcell.getId());
 
-                                        List<Sample> samples = sampleDAO.findByFlowcellId(flowcell.getId());
+                                    for (Sample sample : samples) {
 
-                                        for (Sample sample : samples) {
+                                        logger.info(sample.toString());
 
-                                            logger.info(sample.toString());
+                                        List<WorkflowRun> workflowRuns = workflowRunDAO.findBySampleId(sample.getId());
 
-                                            List<WorkflowRun> workflowRuns = workflowRunDAO.findBySampleId(sample
-                                                    .getId());
+                                        if (workflowRuns != null && !workflowRuns.isEmpty()) {
 
-                                            if (workflowRuns != null && !workflowRuns.isEmpty()) {
+                                            for (WorkflowRun wr : workflowRuns) {
 
-                                                for (WorkflowRun wr : workflowRuns) {
+                                                logger.info(wr.toString());
 
-                                                    logger.info(wr.toString());
+                                                List<WorkflowRunAttempt> attempts = workflowRunAttemptDAO
+                                                        .findByWorkflowRunId(wr.getId());
 
-                                                    List<WorkflowRunAttempt> attempts = workflowRunAttemptDAO
-                                                            .findByWorkflowRunId(wr.getId());
+                                                if (attempts != null && !attempts.isEmpty()) {
 
-                                                    if (attempts != null && !attempts.isEmpty()) {
+                                                    for (WorkflowRunAttempt attempt : attempts) {
+                                                        logger.info(attempt.toString());
+                                                        List<Job> jobs = jobDAO.findByWorkflowRunAttemptId(attempt
+                                                                .getId());
 
-                                                        for (WorkflowRunAttempt attempt : attempts) {
-                                                            logger.info(attempt.toString());
-                                                            List<Job> jobs = jobDAO.findByWorkflowRunAttemptId(attempt
-                                                                    .getId());
-
-                                                            if (jobs != null && !jobs.isEmpty()) {
-                                                                for (Job job : jobs) {
-                                                                    logger.info(job.toString());
-                                                                    job.setAttributes(null);
-                                                                    job.setFileDatas(null);
-                                                                    jobDAO.save(job);
-                                                                }
-                                                                jobDAO.delete(jobs);
+                                                        if (jobs != null && !jobs.isEmpty()) {
+                                                            for (Job job : jobs) {
+                                                                logger.info(job.toString());
+                                                                job.setAttributes(null);
+                                                                job.setFileDatas(null);
+                                                                jobDAO.save(job);
                                                             }
+                                                            jobDAO.delete(jobs);
                                                         }
-                                                        workflowRunAttemptDAO.delete(attempts);
-
                                                     }
+                                                    workflowRunAttemptDAO.delete(attempts);
 
                                                 }
-                                                workflowRunDAO.delete(workflowRuns);
 
                                             }
-
-                                            sample.setAttributes(null);
-                                            sample.setFileDatas(null);
-                                            sampleDAO.save(sample);
+                                            workflowRunDAO.delete(workflowRuns);
 
                                         }
-                                        sampleDAO.delete(samples);
 
-                                    } else {
-                                        Long flowcellId = flowcellDAO.save(flowcell);
-                                        flowcell.setId(flowcellId);
-                                        logger.debug(flowcell.toString());
+                                        sample.setAttributes(null);
+                                        sample.setFileDatas(null);
+                                        sampleDAO.save(sample);
+
                                     }
-                                } catch (MaPSeqDAOException e) {
-                                    logger.error("Error", e);
+                                    sampleDAO.delete(samples);
+
+                                } else {
+                                    Long flowcellId = flowcellDAO.save(flowcell);
+                                    flowcell.setId(flowcellId);
+                                    logger.debug(flowcell.toString());
                                 }
+                            } catch (MaPSeqDAOException e) {
+                                logger.error("Error", e);
                             }
 
                             if (flowcell == null) {
