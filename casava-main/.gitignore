@@ -1,6 +1,0 @@
-.classpath
-.project
-.settings
-target
-src/main/distribution/bin/mapseq-*.sh
-src/main/resources/META-INF/persistence.xml
