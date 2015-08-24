@@ -1,0 +1,9 @@
+digraph G {
+  ConfigureBCLToFastqCLI_1 [ label="ConfigureBCLToFastqCLI_1" ];
+  MakeCLI_2 [ label="MakeCLI_2" ];
+  CopyCLI_3 [ label="CopyCLI_3" ];
+  CopyCLI_4 [ label="CopyCLI_4" ];
+  ConfigureBCLToFastqCLI_1 -> MakeCLI_2;
+  MakeCLI_2 -> CopyCLI_3;
+  MakeCLI_2 -> CopyCLI_4;
+}
