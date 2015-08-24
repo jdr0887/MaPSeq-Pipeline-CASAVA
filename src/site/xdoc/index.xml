@@ -1,9 +1,0 @@
-<document>
-  <body>
-    <section name="About">
-      <subsection name="Graph">
-        <p><img src="images/workflow.dag.png" /></p>
-      </subsection>      
-    </section>    
-  </body>
-</document>
